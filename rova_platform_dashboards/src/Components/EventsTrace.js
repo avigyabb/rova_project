@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Timeline} from 'flowbite-react';
 import { FaAngleRight, FaAngleLeft} from 'react-icons/fa';
 
-const UserProfile = () => {
+const EventsTrace = () => {
   // Placeholder data - replace with your actual data fetching logic
   const userData = {
     name: 'Bo 31',
@@ -84,4 +84,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default EventsTrace;
