@@ -110,11 +110,11 @@ def get_paths(request):
 # client-server comm for finding trace sessions for all users
 @api_view(['GET'])
 def get_sessions(request):
-    sessions = events_to_traces('/Users/samkadaba/Desktop/Rova/rova_project/content/synthetic_user_journeys.json')
+    sessions = events_to_traces('content/synthetic_user_journeys.json')
     return Response({'sessions': sessions})
 
 # client-server comm for finding trace sessions for specific user
 @api_view(['GET'])
 def get_user(request):
-    data = events_to_traces('/Users/samkadaba/Desktop/Rova/rova_project/content/synthetic_user_journeys.json')[request.GET.get('userId')]
+    data = events_to_traces('content/synthetic_user_journeys.json')[request.GET.get('userId')]
     return Response({'info':data})
