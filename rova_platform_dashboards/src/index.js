@@ -6,11 +6,12 @@ import reportWebVitals from './reportWebVitals';
 import EventsTrace from './Components/EventsTrace';
 import HelloWorld from './HelloWorld';
 import Sessions from './Components/Sessions';
+import Charts from './Components/Charts';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Charts />
   </React.StrictMode>
 );
 
