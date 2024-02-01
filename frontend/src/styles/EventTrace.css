@@ -1,0 +1,42 @@
+/* EventList.css */
+.event-list-container {
+    display: flex;
+    flex-direction: row;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  
+  .event-list {
+    flex: 1; /* Adjust the flex value as needed */
+    overflow-y: auto;
+    margin-right: 1rem; /* Add some space between the list and metadata */
+  }
+  
+  .event-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .event-card:hover, .event-card.selected {
+    background-color: #f3f4f6; /* light gray background */
+  }
+  
+  .event-metadata {
+    flex: 1; /* This will allow the metadata to take up more space */
+    padding: 1rem;
+    border-left: 1px solid #e5e7eb;
+    overflow-y: auto;
+  }
+  
+  .user-info-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f9fafb;
+  }
+  

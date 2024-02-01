@@ -1,0 +1,20 @@
+.navbarWrapper {
+    width: 100%;
+    background-color: #F0F0EB;
+    height: 60px;
+    justify-content: center;
+    align-items: center;
+}
+
+p {
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+p:hover {
+    background-color: rgba(255, 161, 137, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    transition-duration: 1s;
+}
