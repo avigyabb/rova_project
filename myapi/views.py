@@ -82,9 +82,9 @@ def find_paths(rova_data, start_event_name, end_event_name):
         elif(tracking):
           current_path.append(event)
         
-        if len(current_path) > 0:
-          current_path.append({"userId": user, "timestamp":np.NaN, 'type': "Product", "eventName" : "dropoff", "meta":{}})
-          users_paths.append(current_path)
+      if len(current_path) > 0:
+        current_path.append({"userId": user, "timestamp":np.NaN, 'type': "Product", "eventName" : "dropoff", "meta":{}})
+        users_paths.append(current_path)
 
       paths[user] = users_paths
 
