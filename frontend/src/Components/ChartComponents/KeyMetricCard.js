@@ -4,10 +4,9 @@ import { Card } from 'flowbite-react';
 {/* Key Metric  Card */}
 const KeyMetricCard = ({ title }) => {
   return (
-    <Card>
+    <Card className="border rounded border-gray-300">
       <div className="flex justify-between items-center p-4">
           <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
-          <i className="fas fa-ellipsis-v" aria-hidden="true"></i> {/* You can replace with Flowbite Dropdown */}
       </div>
       <hr style={{marginTop: '-1.0rem', marginBottom: '-1.0rem'}} />
       <div className="p-4 text-center">
