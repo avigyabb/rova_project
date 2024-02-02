@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from  'axios';
 import EventCard from './EventCard';
-import Navbar from './Navbar';
 import "../styles/EventTrace.css"
-import { createTheme, ThemeProvider, Chip } from '@mui/material';
 
 //  HERE user.name is really the userId of the user 
 
@@ -51,15 +49,7 @@ const EventsTrace = () => {
 
     if (!user) return <div>No user data</div>;
 
-    const customTheme = createTheme({
-      typography: {
-        fontFamily: 'PoppinsFont, sans-serif',
-      },
-    });
-
     return (
-      <ThemeProvider theme={customTheme}>
-      <Navbar/>
       <div className="event-list-container">
         <div className="event-list">
           <div className="user-info-card">
@@ -85,7 +75,6 @@ const EventsTrace = () => {
           </div>
         )}
       </div>
-      </ThemeProvider>
     );
   };
 
