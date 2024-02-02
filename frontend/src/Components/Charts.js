@@ -24,6 +24,27 @@ const line_data = {
       backgroundColor: 'rgb(180, 30, 250)',
       borderColor: 'rgb(180, 30, 250)',
     },
+    {
+      label: 'Latency Prompt 1',
+      data: [400000, 420000, 580000, 500000],
+      fill: false,
+      backgroundColor: 'rgb(180, 30, 250)',
+      borderColor: 'rgb(180, 30, 250)',
+    },
+    {
+      label: 'Latency Prompt 2',
+      data: [400000, 420000, 580000, 500000],
+      fill: false,
+      backgroundColor: 'rgb(180, 30, 250)',
+      borderColor: 'rgb(180, 30, 250)',
+    },
+    {
+      label: 'Latency Prompt 3',
+      data: [400000, 420000, 580000, 500000],
+      fill: false,
+      backgroundColor: 'rgb(180, 30, 250)',
+      borderColor: 'rgb(180, 30, 250)',
+    },
   ],
 };
 
@@ -63,16 +84,6 @@ const Charts = () => {
         data={line_data}
         options={line_options}
       />
-
-    <BarChartCard
-        title="Bar Chart Title"
-        data={bar_data}
-        options={bar_options}
-      />
-    
-    <KeyMetricCard
-        title="Messages"
-    />
     </div>
   );
 };
