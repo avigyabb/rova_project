@@ -215,7 +215,7 @@ def num_active_users(path_to_journeys, events, time_interval):
   df_result = df_filtered.groupby(['rounded_timestamp', 'userId']).first().reset_index()
 
   # Count the number of unique 'userId' at each 'rounded_timestamp'
-  rounded_timestamp_counts = df_result['rounded_timestamp'].value_counts().to_dict()
+  rounded_timestamp_counts = df_result['rounded_timestamp'].value_counts(sort=False).to_dict()
   return rounded_timestamp_counts
 
 # client-server comm for finding filtered paths
