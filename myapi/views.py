@@ -95,9 +95,21 @@ def filter_paths(paths, step, event_name):
   filtered_paths = defaultdict(list);
   for user in paths.keys():
     for path in paths[user]:
-      if((step < len(path) - 1) and (path[step]['eventName'] == 'event_name')):
+      if((int(step) < len(path) - 1) and (path[step]['eventName'] == 'event_name')):
         filtered_paths[user].append(path)
   return filtered_paths
+
+# client-server comm for finding filtered paths
+@api_view(['GET'])
+def get_fpaths(request):
+    startEvent = request.GET.get('startEvent')
+    endEvent = request.GET.get('endEvent')
+    rova_data = events_to_traces('content/synthetic_user_journeys.json')
+    paths = find_paths(rova_data, startEvent, endEvent)
+    step_num = request.GET.get('step_num')
+    event_name = request.GET.get('type')
+    filtered = filter_paths(paths, step_num, event_name)
+    return Response({'filtered_paths': filtered})
 
 # client-server comm for finding paths
 @api_view(['GET'])
@@ -110,11 +122,11 @@ def get_paths(request):
 # client-server comm for finding trace sessions for all users
 @api_view(['GET'])
 def get_sessions(request):
-    sessions = events_to_traces('/Users/samkadaba/Desktop/Rova/rova_project/content/synthetic_user_journeys.json')
+    sessions = events_to_traces('content/synthetic_user_journeys.json')
     return Response({'sessions': sessions})
 
 # client-server comm for finding trace sessions for specific user
 @api_view(['GET'])
 def get_user(request):
-    data = events_to_traces('/Users/samkadaba/Desktop/Rova/rova_project/content/synthetic_user_journeys.json')[request.GET.get('userId')]
+    data = events_to_traces('content/synthetic_user_journeys.json')[request.GET.get('userId')]
     return Response({'info':data})
