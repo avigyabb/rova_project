@@ -6,6 +6,7 @@ import json
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 import sklearn.cluster
 
 import os
