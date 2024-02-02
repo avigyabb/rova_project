@@ -1,21 +1,29 @@
-import React from 'react';
+import React, { useState, useHistory } from 'react';
 import { Card } from 'flowbite-react';
 import { Bar } from 'react-chartjs-2';
 
 const BarChartCard = ({ title, data }) => {
+
   const options = {
+    onClick: (event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        window.location.href = '/sessions';
+      }
+    },
     scales: {
-      x: { // For Chart.js version 3.x and react-chartjs-2 v4.x, it's `x` instead of `xAxes`
+      x: {
         ticks: {
-          display: false // This will hide the x-axis labels
+          display: false,
         },
         grid: {
-          display: false, // Optionally, you can also hide the grid lines for the x-axis
+          display: false,
         },
       },
     },
-    maintainAspectRatio: false // This is useful if you're setting specific dimensions
+    maintainAspectRatio: false,
   };
+  
 
   return (
       <Card className="border rounded border-gray-300">
@@ -24,7 +32,7 @@ const BarChartCard = ({ title, data }) => {
         </div>
         <hr style={{marginTop: '-1.0rem', marginBottom: '-1.0rem'}} />
         <div className="p-4">
-          <Bar data={data} options={options} style={{ width: '500px', height: '400px' }} />
+        <Bar data={data} options={options} style={{ width: '500px', height: '400px' }} />
         </div>
       </Card>
   );
