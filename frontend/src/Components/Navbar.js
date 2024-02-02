@@ -7,6 +7,7 @@ function Navbar() {
             <p className="mr-auto ml-5 font-bold text-2xl"> rova </p>
             <Link to="/" className="mr-5">Flows</Link> 
             <Link to="/sessions" className="mr-5">Users</Link> 
+            <Link to="/charts" className="mr-5">Charts</Link> 
         </div>
     )
 }

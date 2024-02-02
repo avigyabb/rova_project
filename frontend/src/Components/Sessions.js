@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import UserCard from "./UserCard";
-import Navbar from './Navbar';
 import axios from 'axios';
-import { createTheme, ThemeProvider, Chip } from '@mui/material';
+import { createTheme } from '@mui/material';
 
 const Sessions = () => {
   // Placeholder data - replace with your actual data fetching logic
@@ -44,8 +43,6 @@ const Sessions = () => {
   });
 
   return (
-    <ThemeProvider theme={customTheme}>
-    <Navbar/>
     <div className="container mx-auto p-4">
       {Object.entries(rsesh).map(([userId, userSessions]) => (
         <UserCard 
@@ -62,7 +59,6 @@ const Sessions = () => {
         />
       ))}
     </div>
-    </ThemeProvider>
   );
 };
 

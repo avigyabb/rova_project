@@ -3,11 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import { CgAddR } from "react-icons/cg";
 import axios from 'axios';
 import Xarrow from 'react-xarrows';
-import { createTheme, ThemeProvider, Chip } from '@mui/material';
+import { Chip } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import Navbar from './Navbar';
 import { Link } from 'react-router-dom'; // Import Link
 
 function Flows() {
@@ -117,16 +116,7 @@ function Flows() {
     setEndState(event.target.value);
   };
 
-  const customTheme = createTheme({
-    typography: {
-      fontFamily: 'PoppinsFont, sans-serif',
-    },
-  });
-
-
   return (
-    <ThemeProvider theme={customTheme}>
-      <Navbar/>
       <div class="h-screen">
           <div class="header flex flex-row">
             <div class="beginState">
@@ -153,7 +143,6 @@ function Flows() {
           </div>
           {flowBoxesRendered && arrows}
       </div>
-    </ThemeProvider>
   );
 }
 
