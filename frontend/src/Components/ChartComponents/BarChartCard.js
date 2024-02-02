@@ -2,8 +2,21 @@ import React from 'react';
 import { Card } from 'flowbite-react';
 import { Bar } from 'react-chartjs-2';
 
-{/* Bar Chart Card */}
-const BarChartCard = ({ title, data, options }) => {
+const BarChartCard = ({ title, data }) => {
+  const options = {
+    scales: {
+      x: { // For Chart.js version 3.x and react-chartjs-2 v4.x, it's `x` instead of `xAxes`
+        ticks: {
+          display: false // This will hide the x-axis labels
+        },
+        grid: {
+          display: false, // Optionally, you can also hide the grid lines for the x-axis
+        },
+      },
+    },
+    maintainAspectRatio: false // This is useful if you're setting specific dimensions
+  };
+
   return (
       <Card className="border rounded border-gray-300">
         <div className="flex justify-between items-center p-4">

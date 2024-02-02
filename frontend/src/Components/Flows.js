@@ -73,7 +73,7 @@ function Flows() {
         color={'#FFD0C4'}
         showHead={false}
         strokeWidth={50}
-        animateDrawing={true}
+        //animateDrawing={true}
       />
     );
   }

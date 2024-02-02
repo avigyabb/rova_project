@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend} from 'chart.js';
 import LineChartCard from './ChartComponents/LineChartCard';
 import BarChartCard from './ChartComponents/BarChartCard';
 import KeyMetricCard from './ChartComponents/KeyMetricCard';
+import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -56,33 +57,61 @@ const line_options = {
   },
 };
 
-{/* Sample Bar Chart Data */}
-const bar_data = {
-    labels: ['upload video', 'create playlist', 'new video editor'],
-    datasets: [
-      {
-        label: 'Overall - 12.73%',
-        data: [100, 27.17, 46.86], // Replace these data points with your actual data
-        backgroundColor: [
-          'rgba(230, 30, 30)',
-          'rgba(230, 30, 30)',
-          'rgba(230, 30, 30)'
-        ],
-      },
-    ],
-  };
-  
 const bar_options = {
     indexAxis: 'x',
   };
 
 const Charts = () => {
+
+  const [barDataBackend, setBarData] = useState([]);
+
+  useEffect(() => {
+
+    const fetchData = async () =>  {
+      try {
+        const response = await axios.get('http://localhost:8000/get-histogram/');
+        setBarData(response.data.histogram);
+      } catch (error) {
+        console.error(error);
+      } finally {
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Function to transform backend data to chart format
+  function transformDataForChart(data) {
+    const labels = Object.keys(data);
+    const counts = Object.values(data);
+
+    const bar_data = {
+      labels: labels,
+      datasets: [
+        {
+          label: '', // Adjust this label as needed
+          data: counts,
+          backgroundColor: labels.map(() => 'rgba(230, 30, 30)'), // Assuming same color for all bars, adjust as needed
+        },
+      ],
+    };
+
+    return bar_data;
+  }
+
+  // Transform and assign to variable
+  const bar_data = transformDataForChart(barDataBackend);
+  console.log(bar_data)
   return (
     <div className="flex flex-wrap gap-4 p-8">
     <LineChartCard
         title="Line Data"
         data={line_data}
         options={line_options}
+      />
+    <BarChartCard
+        title="Bar Data"
+        data={bar_data}
+        options={bar_options}
       />
     </div>
   );

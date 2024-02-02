@@ -7,6 +7,17 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from InstructorEmbedding import INSTRUCTOR
+import sklearn.cluster
+
+import os
+from openai import OpenAI
+from langchain_openai import OpenAIEmbeddings
+
+embeddings_model = OpenAIEmbeddings(openai_api_key="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")
+os.environ["OPENAI_API_KEY"] = "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"
+client = OpenAI()
+
 
 
 # Simple function to test CS communication
@@ -14,9 +25,84 @@ from rest_framework.response import Response
 def hello_world(request):
     return Response({'message': 'Hello, world!'})
 
-# Return tree of edges and event data for visualiaztion in frontend
-def foo1(start, end):
-    return 0
+def foo1(stard, end):
+   pass
+
+# Asks ChatGPT to identify topics
+def query_gpt(msg_arr, model="gpt-4-turbo-preview", temperature=0.0, max_tokens=512):
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=msg_arr,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        response_format={"type": "json_object"},
+        n=1,
+        stop=None
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+# Builds system and user prompts for chatGPT calling
+def build_prompt(samples):
+    system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
+                     You want to create a holstic description of the cluster given it's samples. \n \
+                     Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
+                     that accurately summariezes the intent of the user in this platform. \n \
+                     Return your result as a JSON object with the key being the provided Category number and \
+                     the value being the summary description you create for that category \n \
+                     For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
+
+    user_prompt = ""
+    for category in samples.keys():
+      sample = samples[category]
+      user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
+    messages = [{'role':'system', 'content':system_prompt}, {'role':'user', 'content':user_prompt}]
+    return messages
+
+# Grab all questions from file
+def questions_from_file(path):
+   # Open your file
+    with open(path, 'r') as file:
+        # Iterate over each line
+        questions = json.load(file)
+    df = pd.DataFrame(questions)
+    sentences = list(df['query'])
+    return sentences
+
+# Get cluster assignments using OpenAI's embedding model
+def get_assignments(sentences, n_clusters=5):
+    embeddings = np.array(embeddings_model.embed_documents(sentences))
+    clustering_model = sklearn.cluster.MiniBatchKMeans(n_clusters=n_clusters)
+    clustering_model.fit(embeddings)
+    cluster_assignment = clustering_model.labels_
+    return np.array(cluster_assignment)
+
+# Sort sentences by cluster
+def cluster_samples(assignments, sentences, n_clusters):
+    queries_by_label = defaultdict(list)
+    samples_by_label = defaultdict(list)
+    counts_by_label = dict()
+    sent_arr = np.array(sentences)
+    for label in range(n_clusters):
+        indexes = np.where(assignments == label)[0].reshape((1, -1)).T
+        all_queries = sent_arr[indexes].flatten()
+        queries_by_label[label] = all_queries
+        counts_by_label[label] = len(all_queries)
+        samples_by_label[label] = np.random.choice(all_queries[:-1], 5, replace=False)
+    return counts_by_label, samples_by_label
+
+# Aggregate code to get top 10 questions
+def generate_histogram(n_clusters):
+    data = {}
+    sentences = questions_from_file('content/user_questions.json')
+    counts_by_label, samples_by_label = cluster_samples(get_assignments(sentences, n_clusters), sentences, n_clusters)
+    response_obj = query_gpt(build_prompt(samples_by_label))
+    histogram = dict()
+    for key in response_obj.keys():
+        print(key, type(key))
+        histogram[response_obj[key]] = counts_by_label[int(key)]
+    return histogram
 
 # Returns all users and their sessions as nested objects 
 def events_to_traces(path_to_journeys):
@@ -130,3 +216,9 @@ def get_sessions(request):
 def get_user(request):
     data = events_to_traces('content/synthetic_user_journeys.json')[request.GET.get('userId')]
     return Response({'info':data})
+
+# client-server comm for finding histogram
+@api_view(['GET'])
+def get_histogram(request):
+    histogram = generate_histogram(5)
+    return Response({'histogram': histogram})
