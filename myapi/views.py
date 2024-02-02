@@ -6,8 +6,6 @@ import json
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-from InstructorEmbedding import INSTRUCTOR
 import sklearn.cluster
 
 import os
@@ -17,8 +15,6 @@ from langchain_openai import OpenAIEmbeddings
 embeddings_model = OpenAIEmbeddings(openai_api_key="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")
 os.environ["OPENAI_API_KEY"] = "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"
 client = OpenAI()
-
-
 
 # Simple function to test CS communication
 @api_view(['GET'])
@@ -100,13 +96,27 @@ def generate_histogram(n_clusters):
     response_obj = query_gpt(build_prompt(samples_by_label))
     histogram = dict()
     for key in response_obj.keys():
-        print(key, type(key))
         histogram[response_obj[key]] = counts_by_label[int(key)]
     return histogram
 
+# Return the df corresponding to a JSON file
+def get_df_from_json(path):
+    dictionaries = []
+
+    # Open your file
+    with open(path, 'r') as file:
+        # Iterate over each line
+        dictionaries = json.load(file)
+
+    # Now 'dictionaries' is a list of dictionaries, each representing a line in your file
+    df = pd.DataFrame(dictionaries)
+
+    # Convert 'timestamp' to datetime if not already
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    return df
+
 # Returns all users and their sessions as nested objects 
 def events_to_traces(path_to_journeys):
-
     dictionaries = []
 
     # Open your file
@@ -116,8 +126,8 @@ def events_to_traces(path_to_journeys):
 
     # Now 'dictionaries' is a list of dictionaries, each representing a line in your file
     df = pd.DataFrame(dictionaries)
-  
-      # Convert 'timestamp' to datetime if not already
+
+    # Convert 'timestamp' to datetime if not already
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 
     # Sort by 'userId' first, then by 'timestamp'
@@ -185,6 +195,29 @@ def filter_paths(paths, step, event_name):
         filtered_paths[user].append(path)
   return filtered_paths
 
+'''
+Returns the number of active users (defined as
+users who have performed an event from the given 
+events list) at each time interval 
+'''
+def num_active_users(path_to_journeys, events, time_interval):
+  df = get_df_from_json(path_to_journeys)
+
+  # Filter for rows where 'eventName' is in 'events'
+  events = events.split(",")
+  df_filtered = df[df['eventName'].isin(events)]
+
+  # Round 'timestamp' to 'time_interval'
+  df_filtered['rounded_timestamp'] = df_filtered['timestamp'].dt.round(time_interval)
+  df_filtered['rounded_timestamp'] = df_filtered['rounded_timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+  # Group by 'rounded_timestamp' and 'userId'
+  df_result = df_filtered.groupby(['rounded_timestamp', 'userId']).first().reset_index()
+
+  # Count the number of unique 'userId' at each 'rounded_timestamp'
+  rounded_timestamp_counts = df_result['rounded_timestamp'].value_counts().to_dict()
+  return rounded_timestamp_counts
+
 # client-server comm for finding filtered paths
 @api_view(['GET'])
 def get_fpaths(request):
@@ -222,3 +255,11 @@ def get_user(request):
 def get_histogram(request):
     histogram = generate_histogram(5)
     return Response({'histogram': histogram})
+
+# client-server comm for finding num active users
+@api_view(['GET'])
+def get_num_active_users(request):
+    events = request.GET.get('events')
+    time_interval = request.GET.get('time_interval')
+    data = num_active_users('content/synthetic_user_journeys.json', events, time_interval)
+    return Response({'info':data})

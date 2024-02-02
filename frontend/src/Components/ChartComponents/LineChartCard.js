@@ -13,9 +13,10 @@ const LineChartCard = ({ title, data, options }) => {
 
   return (
     <Card>
-      <div className="p-4">
-        <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
-        <hr style={{marginTop: '0.5rem', marginBottom: '0.0rem', width: '100%'}} />
+        <div className="flex justify-between items-center p-4">
+          <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
+        </div>
+        <hr style={{marginTop: '-1.0rem', marginBottom: '-1.0rem'}} />
         <div className="flex flex-col items-center">
           <div className="p-4">
             <Line data={{
@@ -43,7 +44,6 @@ const LineChartCard = ({ title, data, options }) => {
           }}
         />
         </div>
-      </div>
     </Card>
   );
 };

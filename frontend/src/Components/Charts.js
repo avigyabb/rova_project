@@ -7,47 +7,6 @@ import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
-{/* Sample Line Data */}
-const line_data = {
-  labels: ['Jan 24', 'Jan 25', 'Jan 26', 'Jan 27'],
-  datasets: [
-    {
-      label: 'Daily Active Users',
-      data: [500000, 520000, 480000, 400000],
-      fill: false,
-      backgroundColor: 'rgb(230, 30, 30)',
-      borderColor: 'rgb(230, 30, 30)',
-    },
-    {
-      label: 'Number of Chats',
-      data: [400000, 420000, 580000, 500000],
-      fill: false,
-      backgroundColor: 'rgb(180, 30, 250)',
-      borderColor: 'rgb(180, 30, 250)',
-    },
-    {
-      label: 'Latency Prompt 1',
-      data: [400000, 420000, 580000, 500000],
-      fill: false,
-      backgroundColor: 'rgb(180, 30, 250)',
-      borderColor: 'rgb(180, 30, 250)',
-    },
-    {
-      label: 'Latency Prompt 2',
-      data: [400000, 420000, 580000, 500000],
-      fill: false,
-      backgroundColor: 'rgb(180, 30, 250)',
-      borderColor: 'rgb(180, 30, 250)',
-    },
-    {
-      label: 'Latency Prompt 3',
-      data: [400000, 420000, 580000, 500000],
-      fill: false,
-      backgroundColor: 'rgb(180, 30, 250)',
-      borderColor: 'rgb(180, 30, 250)',
-    },
-  ],
-};
 
 const line_options = {
   scales: {
@@ -64,9 +23,9 @@ const bar_options = {
 const Charts = () => {
 
   const [barDataBackend, setBarData] = useState([]);
+  const [lineDataBackend, setLineData] = useState([]);
 
   useEffect(() => {
-
     const fetchData = async () =>  {
       try {
         const response = await axios.get('http://localhost:8000/get-histogram/');
@@ -79,8 +38,25 @@ const Charts = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () =>  {
+      try {
+        const params = {
+          events: "pin_dashboard,save_dashboard",
+          time_interval: "5S", // 5 seconds
+        };
+        const response = await axios.get('http://localhost:8000/get-num-active-users/', { params });
+        setLineData(response.data.info);
+      } catch (error) {
+        console.error(error);
+      } finally {
+      }
+    };
+    fetchData();
+  }, []);
+
   // Function to transform backend data to chart format
-  function transformDataForChart(data) {
+  function transformDataForBarChart(data) {
     const labels = Object.keys(data);
     const counts = Object.values(data);
 
@@ -98,8 +74,30 @@ const Charts = () => {
     return bar_data;
   }
 
+  // Function to transform backend data to line format
+  function transformDataForLineChart(data) {
+    const labels = Object.keys(data);
+    const counts = Object.values(data);
+
+    const line_data = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Daily Active Users',
+          data: counts,
+          fill: false,
+          backgroundColor: 'rgb(230, 30, 30)',
+          borderColor: 'rgb(230, 30, 30)',
+        },
+      ],
+    };
+
+    return line_data;
+  }
+
   // Transform and assign to variable
-  const bar_data = transformDataForChart(barDataBackend);
+  const bar_data = transformDataForBarChart(barDataBackend);
+  const line_data = transformDataForLineChart(lineDataBackend);
   console.log(bar_data)
   return (
     <div className="flex flex-wrap gap-4 p-8">
