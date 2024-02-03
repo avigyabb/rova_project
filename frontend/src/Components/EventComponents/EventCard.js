@@ -1,6 +1,5 @@
 // EventCard.js
 import React from 'react';
-import '../styles/EventCard.css'; // Assume you have this CSS file for styling
 
 const EventCard = ({ event, onSelect, isSelected }) => {
   return (

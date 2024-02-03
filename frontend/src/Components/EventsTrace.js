@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from  'axios';
-import EventCard from './EventCard';
+import EventCard from './EventComponents/EventCard';
 import "../styles/EventTrace.css"
+import TraceCard from './EventComponents/TraceCard';
 
 //  HERE user.name is really the userId of the user 
 
@@ -68,12 +69,10 @@ const EventsTrace = () => {
             />
           ))}
         </div>
-        {selectedEvent && (
-          <div className="event-metadata">
-            <h3>Metadata for {selectedEvent.eventName}</h3>
-            <pre>{JSON.stringify(selectedEvent.metadata || {}, null, 2)}</pre>
-          </div>
-        )}
+        {selectedEvent && <TraceCard
+              name={selectedEvent.eventName}
+              metadata={selectedEvent.metadata}
+            />}
       </div>
     );
   };
