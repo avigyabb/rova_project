@@ -11,13 +11,11 @@ import '../../styles/SessionSearch.css';
 
 const SessionSearch = ( ) => {
 
-  const [queryResponse, setQueryResponse] = useState("");
-  const [queryLoading, setQueryLoading] = useState(false);
+  const [queryResponse, setQueryResponse] = useState("SELECT * FROM sessions;");
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {
     if (event.key === 'Enter') {
-      setQueryLoading(true);
       setQueryResponse("");
       const fetchQueryResponse = async () => {
         try {
@@ -26,15 +24,36 @@ const SessionSearch = ( ) => {
           };
           const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
           setQueryResponse(response.data.processed_query);
-          setQueryLoading(false);
         } catch (error) {
           console.error(error);
         }
       };
       fetchQueryResponse();
-      console.log(event.target.value);
-      console.log(queryResponse);
     }
+  };
+
+  // const handleSQL = (event) => {
+  //   if (event.key === 'Enter') {
+  //     setQueryResponse("");
+  //     const fetchQueryResponse = async () => {
+  //       try {
+  //         const params = {
+  //           query: event.target.value
+  //         };
+  //         const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
+  //         setQueryResponse(response.data.processed_query);
+  //         setQueryLoading(false);
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     };
+  //     fetchQueryResponse();
+  //   }
+  // };
+
+  const handleSqlChange = (event) => {
+    // Update the sqlQuery state with the new value from the textarea
+    setQueryResponse(event.target.value);
   };
 
   // Display the entered query below the search bar
@@ -69,18 +88,12 @@ const SessionSearch = ( ) => {
           value={queryResponse}
           placeholder="Write your SQL query here..."
           spellCheck="false"
+          onChange={handleSqlChange}
         />
-        ) : queryLoading ? (
+        ) : (
           <div className="sql-response flex justify-center items-center">
            <CircularProgress style={{ color: '#FFA189' }}/>
           </div>
-        ) : (
-          <textarea
-            className="sql-response"
-            value="SELECT * FROM sessions;"
-            placeholder="Write your SQL query here..."
-            spellCheck="false"
-          />
         )}
     </div>
   );
