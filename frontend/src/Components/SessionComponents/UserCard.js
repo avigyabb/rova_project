@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/UserCard.css'; // Make sure to create this CSS file
+import '../../styles/UserCard.css'; // Make sure to create this CSS file
 import { useNavigate } from 'react-router';
 
 const UserCard = ({ user, sessionCount }) => {

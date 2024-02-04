@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import UserCard from "./UserCard";
+import UserCard from "./SessionComponents/UserCard";
 import axios from 'axios';
-import { createTheme } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
-import IconButton from '@mui/material/IconButton';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import SessionSearch from './SessionComponents/SessionSearch';
+
 const Sessions = () => {
   // Placeholder data - replace with your actual data fetching logic
   const [rsesh, setSesh] = useState([]);
@@ -35,47 +31,14 @@ const Sessions = () => {
     }
   }, [rsesh]);
 
-    // Add the search handler here (optional)
-    const handleSearch = (event) => {
-      // Implement search functionality
-      console.log(event.target.value);
-    };
-
    // Conditional rendering based on isLoading
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  const customTheme = createTheme({
-    typography: {
-      fontFamily: 'PoppinsFont, sans-serif',
-    },
-  });
-
   return (
     <div className="container mx-auto p-4">
-      <div className="search-and-filter mb-4">
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search sessions..."
-          onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton>
-                  <FilterListIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </div>
+      <SessionSearch />
       {Object.entries(rsesh).map(([userId, userSessions]) => (
         <UserCard 
           key={userId} 
