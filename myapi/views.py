@@ -219,6 +219,11 @@ def num_active_users(path_to_journeys, events, time_interval):
   rounded_timestamp_counts = df_result['rounded_timestamp'].value_counts(sort=False).to_dict()
   return rounded_timestamp_counts
 
+
+# Processes a given user session query
+def process_session_query(query):
+   return query
+
 # client-server comm for finding filtered paths
 @api_view(['GET'])
 def get_fpaths(request):
@@ -264,3 +269,9 @@ def get_num_active_users(request):
     time_interval = request.GET.get('time_interval')
     data = num_active_users('content/synthetic_user_journeys.json', events, time_interval)
     return Response({'info':data})
+
+# client-server comm for finding processed query
+@api_view(['GET'])
+def get_processed_query(request):
+    query = request.GET.get('query')
+    return Response({'processed_query': process_session_query(query)})
