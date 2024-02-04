@@ -1,42 +1,86 @@
 /* EventList.css */
 .event-list-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100vh;
-    overflow: hidden;
-  }
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+  width: 100%;
+}
+
+.left-column {
+  margin-right: 1rem;
+  flex: 1;
+}
+
+.event-list {
+  overflow-y: auto;
+  height: 80%;
+}
   
-  .event-list {
-    flex: 1; /* Adjust the flex value as needed */
-    overflow-y: auto;
-    margin-right: 1rem; /* Add some space between the list and metadata */
-  }
+.event-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
   
-  .event-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+.right-column {
+  padding: 1rem;
+  border-left: 1px solid #e5e7eb;
+  width: 50%;
+}
   
-  .event-card:hover, .event-card.selected {
-    background-color: #f3f4f6; /* light gray background */
-  }
-  
-  .event-metadata {
-    flex: 1; /* This will allow the metadata to take up more space */
-    padding: 1rem;
-    border-left: 1px solid #e5e7eb;
-    overflow-y: auto;
-  }
-  
-  .user-info-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background-color: #f9fafb;
-  }
+.user-info-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f9fafb;
+}
+
+.event-metadata-navbar {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 3%;
+  padding-bottom: 1%;
+}
+
+.event-metadata-content {
+  height: 100%;
+  display: flex;
+}
+
+.sidebar {
+  border-right: 1px solid #e5e7eb;
+  padding-right: 1%;
+  margin-right: 2%;
+  height: 90%;
+  min-width: 30%;
+}
+
+.traceBox {
+  padding: 5%;
+  min-width: 100%;
+}
+
+.traceBox:hover {
+  background-color: rgba(255, 161, 137, 0.3);
+  padding-left: 7%;
+  cursor: pointer;
+  transition-duration: 0.5s;
+}
+
+.trace-content {
+  width: 60%;
+}
+
+.back-icon {
+  color: lightgray;
+}
+
+.back-icon:hover {
+  color: gray;
+  cursor: pointer;
+}
   

@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import UserCard from "./SessionComponents/UserCard";
 import axios from 'axios';
 import SessionSearch from './SessionComponents/SessionSearch';
+import { createTheme } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import IconButton from '@mui/material/IconButton';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Sessions = () => {
   // Placeholder data - replace with your actual data fetching logic
@@ -33,7 +40,11 @@ const Sessions = () => {
 
    // Conditional rendering based on isLoading
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <CircularProgress style={{ color: '#FFA189' }}/>
+      </div>
+    );
   }
 
   return (

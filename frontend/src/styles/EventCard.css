@@ -1,34 +1,44 @@
 /* EventList.css */
-.event-list-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100vh;
-    overflow: auto;
-  }
-  
-  .event-list {
-    flex-grow: 1;
-  }
-  
-  .event-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .event-card:hover, .event-card.selected {
-    background-color: #f3f4f6; /* light gray background */
-  }
-  
-  .event-metadata {
-    flex-basis: 300px;
-    padding: 1rem;
-    border-left: 1px solid #e5e7eb;
-    overflow-y: auto;
-  }
-  
-  /* Additional styling */
-  
+.time-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem; /* Adjust the padding as needed */
+}
+
+.time-container p {
+  font-size: small;
+  color: gray;
+  font-style: italic;
+}
+
+.event-list {
+  flex-grow: 1;
+}
+
+.event-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative;
+}
+
+.event-card:hover, .event-card.selected {
+  background-color: #f3f4f6; /* light gray background */
+}
+
+.event-card.selected {
+  background-color: rgba(255, 161, 137, 0.3);
+}
+
+.event-metadata {
+  flex-basis: 300px;
+  padding: 1rem;
+  border-left: 1px solid #e5e7eb;
+  overflow-y: auto;
+}
+
+/* Additional styling */
