@@ -27,7 +27,7 @@
 }
 
 .event-card:hover, .event-card.selected {
-  background-color: #f3f4f6; /* light gray background */
+  background-color: #f3f4f6;
 }
 
 .event-card.selected {

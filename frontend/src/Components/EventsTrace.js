@@ -82,7 +82,14 @@ const EventsTrace = () => {
             {/* Render other user details */}
             <p className='mt-2'>Sessions: {sessionCount}</p>
           </div>
-          <h1 className='ml-5 mb-1 text-xl' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>Events Feed</h1>
+          <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
+            <h1 className='ml-5 mb-1 text-xl'>
+              Events Feed
+            </h1>
+            <button className='ml-auto mr-5'> Select </button>
+            <button className='mr-5'> Filter </button>
+            <button> Export </button>
+          </div>
           <div className="event-list">
             {userData.map((event, index) => (
               <EventCard

@@ -86,10 +86,7 @@ def build_sessions_sql_prompt(user_query):
                      Wrap each column name in double quotes (") to denote them as delimited identifiers. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
                      not to query for columns that do not exist. Also, pay attention to which column is in which table. \n\n \
-                     Rows with the same session_id belong to the same session. \
-                     Use the following format: \n\n \
-                     Question: Question here \n \
-                     SQLQuery: SQL Query to run \n\n'
+                     Rows with the same session_id belong to the same session. Only output SQL code without backticks, not any text. \n\n'
 
     tables = 'Only use the following tables: \n\n \
               CREATE TABLE "llm" ( \n \

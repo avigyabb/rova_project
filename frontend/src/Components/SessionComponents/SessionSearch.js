@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
+import '../../styles/SessionSearch.css';
 
 const SessionSearch = ( ) => {
 
@@ -40,6 +41,7 @@ const SessionSearch = ( ) => {
   return (
     <div className="search-and-filter mb-4">
         <TextField
+          style={{ borderRadius: '0px', zIndex: 100 }}
           fullWidth
           variant="outlined"
           placeholder="Show me sessions where ..."
@@ -60,14 +62,25 @@ const SessionSearch = ( ) => {
           }}
         />
 
+        <div className='sql-header'> sql </div>
         {queryResponse ? (
-          <p>{queryResponse}</p>
+          <textarea
+          className="sql-response"
+          value={queryResponse}
+          placeholder="Write your SQL query here..."
+          spellCheck="false"
+        />
         ) : queryLoading ? (
-          <div className="flex justify-center items-center mt-5">
+          <div className="sql-response flex justify-center items-center">
            <CircularProgress style={{ color: '#FFA189' }}/>
           </div>
         ) : (
-          <p>SELECT *</p>
+          <textarea
+            className="sql-response"
+            value="SELECT * FROM sessions;"
+            placeholder="Write your SQL query here..."
+            spellCheck="false"
+          />
         )}
     </div>
   );

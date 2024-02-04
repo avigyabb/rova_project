@@ -1,0 +1,23 @@
+.sql-response {
+    border-radius: 0 0 0.5rem 0.5rem;
+    border: 1px solid lightgray;
+    border-top: none;
+    z-index: -1;
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    width: 100%;
+    /* background-color: #3e3e42; */
+    /* color: #FFA189; */
+    padding: 10px;
+}
+
+.sql-header {
+    background-color: gray;
+    padding: 5px;
+    font-size: small;
+    color: white;
+    border: 1px solid lightgray;
+    border-top: none;
+    border-bottom: none;
+    z-index: -1000;
+    margin-top: -3px;
+}
