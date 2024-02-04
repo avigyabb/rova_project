@@ -55,7 +55,7 @@ const SessionSearch = ( ) => {
             ),
           }}
         />
-        {queryResponse && <p>Query Response: {queryResponse}</p>}
+        {queryResponse && <p>{queryResponse}</p>}
     </div>
   );
 };

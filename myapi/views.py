@@ -26,26 +26,30 @@ def foo1(stard, end):
    pass
 
 # Asks ChatGPT to identify topics
-def query_gpt(msg_arr, model="gpt-4-turbo-preview", temperature=0.0, max_tokens=512):
-
+def query_gpt(msg_arr, model="gpt-4-turbo-preview", temperature=0.0, max_tokens=512, json_output=False):
+    response_format = {"type": "json_object"} if json_output else {"type": "text"}
+    
     response = client.chat.completions.create(
         model=model,
         messages=msg_arr,
         temperature=temperature,
         max_tokens=max_tokens,
-        response_format={"type": "json_object"},
+        response_format=response_format,
         n=1,
         stop=None
     )
 
-    return json.loads(response.choices[0].message.content)
+    if json_output:
+        return json.loads(response.choices[0].message.content)
+    else:
+        return response.choices[0].message.content
 
-# Builds system and user prompts for chatGPT calling
-def build_prompt(samples):
+# Builds prompt to categorize questions
+def build_topics_prompt(samples):
     system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
                      You want to create a holstic description of the cluster given it's samples. \n \
                      Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
-                     that accurately summariezes the intent of the user in this platform. \n \
+                     that accurately summarizes the intent of the user in this platform. \n \
                      Return your result as a JSON object with the key being the provided Category number and \
                      the value being the summary description you create for that category \n \
                      For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
@@ -55,6 +59,38 @@ def build_prompt(samples):
       sample = samples[category]
       user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
     messages = [{'role':'system', 'content':system_prompt}, {'role':'user', 'content':user_prompt}]
+    return messages
+
+# Builds prompt to generate sql query for sessions
+def build_sessions_sql_prompt(user_query):
+    system_prompt = "You are a SQLite expert. Given an input question, create a syntactically \
+                     correct SQLite query which returns the rows specified by the question. \n \
+                     Unless the user specifies in the question a specific number of examples to obtain, \
+                     query for at most 50 results using the LIMIT clause as per SQLite. \n \
+                     Wrap each column name in double quotes (\") to denote them as delimited identifiers. \n \
+                     Pay attention to use only the column names you can see in the tables below. Be careful \
+                     not to query for columns that do not exist. Also, pay attention to which column is in which table. \n\n \
+                     Use the following format: \n\n \
+                     Question: Question here \n \
+                     SQLQuery: SQL Query to run \n\n"
+    
+    tables = "Only use the following tables: \n\n \
+              CREATE TABLE \"llm\" ( \n \
+              \"timestamp\" DATETIME, \n \
+              \"event_name\" STRING, \n \
+              \"user_id\" UInt32, \n \
+              \"output_content\" String, \n\n \
+              /* \n \
+              3 rows from table \"llm\" \n \
+              timestamp event_name user_id output_content \n \
+              2022-06-16 16:00:00 LLM 1 \"Hello\" \n \
+              2022-06-15 16:00:01 LLM 2 \"Hi\" \n \
+              2022-02-16 16:00:02 LLM 6 \"Hey\" \n \
+              */\n\n"
+    
+    user_prompt = "Question: " + user_query + "\nSQLQuery: "
+
+    messages = [{'role':'system', 'content':system_prompt + tables}, {'role':'user', 'content':user_prompt}]
     return messages
 
 # Grab all questions from file
@@ -94,7 +130,7 @@ def generate_histogram(n_clusters):
     data = {}
     sentences = questions_from_file('content/user_questions.json')
     counts_by_label, samples_by_label = cluster_samples(get_assignments(sentences, n_clusters), sentences, n_clusters)
-    response_obj = query_gpt(build_prompt(samples_by_label))
+    response_obj = query_gpt(build_topics_prompt(samples_by_label), json_output=True)
     histogram = dict()
     for key in response_obj.keys():
         histogram[response_obj[key]] = counts_by_label[int(key)]
@@ -222,7 +258,8 @@ def num_active_users(path_to_journeys, events, time_interval):
 
 # Processes a given user session query
 def process_session_query(query):
-   return query
+   response = query_gpt(build_sessions_sql_prompt(query))
+   return response
 
 # client-server comm for finding filtered paths
 @api_view(['GET'])
