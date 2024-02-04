@@ -50,20 +50,22 @@ const Sessions = () => {
   return (
     <div className="container mx-auto p-4">
       <SessionSearch />
-      {Object.entries(rsesh).map(([userId, userSessions]) => (
-        <UserCard 
-          key={userId} 
-          user={{
-            name: userId, // assuming userId is the name you want to display
-            email: `${userId}@example.com`, // replace with real email
-            updatedAt: 'Mar 31, 2020', // replace with real updated date
-            country: 'Country', // replace with real country
-            region: 'Region', // replace with real region
-            // Add other user details here
-          }}
-          sessionCount={userSessions.length} // Pass the session count here
-        />
-      ))}
+      <div className='overflow-auto' style={{ height: 'calc(100vh - 180px)' }}>
+        {Object.entries(rsesh).map(([userId, userSessions]) => (
+          <UserCard 
+            key={userId} 
+            user={{
+              name: userId, // assuming userId is the name you want to display
+              email: `${userId}@example.com`, // replace with real email
+              updatedAt: 'Mar 31, 2020', // replace with real updated date
+              country: 'Country', // replace with real country
+              region: 'Region', // replace with real region
+              // Add other user details here
+            }}
+            sessionCount={userSessions.length} // Pass the session count here
+          />
+        ))}
+      </div>
     </div>
   );
 };
