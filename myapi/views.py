@@ -169,7 +169,7 @@ def build_sessions_sql_prompt(user_query):
                      Only output SQL code without backticks, and do not include the semicolon. \n\n'
 
     tables = 'Only use the following tables: \n\n \
-              CREATE TABLE "llm" ( \n \
+              CREATE TABLE "buster_dev.llm" ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
@@ -187,7 +187,7 @@ def build_sessions_sql_prompt(user_query):
               "chat_id" UInt32, \n\n \
               /* \n \
               */\n\n \
-              CREATE TABLE "product" ( \n \
+              CREATE TABLE "buster_dev.product" ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
