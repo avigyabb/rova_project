@@ -565,7 +565,6 @@ def get_sessions(request):
         sessions = clickhouse_client.query(sql_query).result_rows
     sessions = [session[0] for session in sessions]
     sessions_data = get_session_data_from_ids(sessions)
-    print(sessions_data)
     return Response({"sessions": sessions_data})
 
 
@@ -594,7 +593,6 @@ def get_num_active_users(request):
         "content/synthetic_user_journeys.json", events, time_interval
     )
     return Response({"info": data})
-
 
 # client-server comm for finding processed query
 @api_view(["GET"])
