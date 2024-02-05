@@ -16,7 +16,7 @@ const EventsTrace = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const location = useLocation();
-    const { user, sessionCount } = location.state || {}; // Get the passed state
+    const { sessionData, sessionId } = location.state || {}; // Get the passed state
 
     useEffect(() => {
 
@@ -24,7 +24,7 @@ const EventsTrace = () => {
         setIsLoading(true);
         try {
           const params = {
-            userId:user.name,
+            userId:sessionData.user_id,
           };
           const response = await axios.get('http://localhost:8000/get-user/', { params });
           setData(response.data.info);
@@ -56,7 +56,7 @@ const EventsTrace = () => {
       );
     }
 
-    if (!user) return <div>No user data</div>;
+    if (!sessionData) return <div>No user data</div>;
 
     return (
       <div className="event-list-container">
@@ -75,12 +75,12 @@ const EventsTrace = () => {
                 }}
               />
               <div className='flex flex-col mt-4 ml-4'>
-                <p>User ID: {user.name}</p>
-                <p>Email: {user.email}</p>
+                <p>User ID: {sessionData.user_id}</p>
+                {/* <p>Email: {sessionData.email}</p> */}
               </div>
             </div>
             {/* Render other user details */}
-            <p className='mt-2'>Sessions: {sessionCount}</p>
+            <p className='mt-2'>Session ID: {sessionId}</p>
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
             <h1 className='ml-5 mb-1 text-xl'>

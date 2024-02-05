@@ -33,7 +33,7 @@ const SessionCard = ({ sessionId }) => {
     }
 
     const handleClick = () => {
-      // navigate(`/trace/${sessionData.user_id}`, { state: { sessionId } });
+       navigate(`/trace/${sessionData.user_id}`, { state: { sessionData, sessionId } });
     };
     return (
       <div className="user-card" onClick={handleClick}>

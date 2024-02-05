@@ -90,7 +90,7 @@ const SessionSearch = ({ setSessionIds, setIsLoading }) => {
           }}
         />
 
-        <div className='sql-header'> sql </div>
+        <div className='sql-header'> sql (cmd + enter to run) </div>
         {queryResponse ? (
           <textarea
             className="sql-response"

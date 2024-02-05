@@ -560,7 +560,7 @@ def get_sessions(request):
 @api_view(["GET"])
 def get_user(request):
     data = events_to_traces("content/synthetic_user_journeys.json")[
-        request.GET.get("userId")
+        "user" + request.GET.get("userId")
     ]
     return Response({"info": data})
 
