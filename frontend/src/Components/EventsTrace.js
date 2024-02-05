@@ -24,9 +24,10 @@ const EventsTrace = () => {
         setIsLoading(true);
         try {
           const params = {
-            userId:userId,
+            userId: userId,
           };
           const response = await axios.get('http://localhost:8000/get-user/', { params });
+          console.log(response)
           setData(response.data.info);
         } catch (error) {
           console.error(error);
@@ -79,7 +80,7 @@ const EventsTrace = () => {
                 {/* <p>Email: {sessionData.email}</p> */}
               </div>
             </div>
-            {/* Render other user details */}
+            {/* need to get rid of this */}
             <p className='mt-2'>Session ID: {sessionId}</p>
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
@@ -105,9 +106,9 @@ const EventsTrace = () => {
           <div className="right-column">
             <div className='event-metadata-navbar flex items-center'>
               <KeyboardDoubleArrowRightIcon className="back-icon mr-2" fontSize="large" onClick={() => setSelectedEvent(null)}/>
-              <h1 className='text-xl'> Execution of {JSON.stringify(selectedEvent.type)} </h1>
+              <h1 className='text-xl'> Execution of {JSON.stringify(selectedEvent.event_name)} </h1>
             </div>
-              {selectedEvent.type == "Trace" && (
+              {selectedEvent.table_source == "llm" && (
                 <div className="event-metadata-content">
                   {/* <pre>{JSON.stringify(selectedEvent || {}, null, 2)}</pre> */}
                   <div className="sidebar flex flex-col">
@@ -118,7 +119,7 @@ const EventsTrace = () => {
                     {selectedEvent.events.map((trace, index) => (
                       <div className="traceBox flex flex-row" onClick={() => setSelectedTrace(trace)}> 
                         <BorderClearIcon className="ml-2 mr-2"/>
-                        {JSON.stringify(trace.eventName)} 
+                        {JSON.stringify(trace.event_name)} 
                       </div>
                     ))}
                   </div>
@@ -127,18 +128,20 @@ const EventsTrace = () => {
                       <div>
                         <p> System Prompt </p>
                         {JSON.stringify(selectedTrace.systemPrompt)}
+                        <p> Time: </p>
+                        {new Date(selectedTrace.timestamp).toLocaleString()}
                       </div>
                     ) : (
                       <div>
                         <h1 className='text-xl'> Trace Info </h1>
-                        Time: {new Date(selectedEvent.timestamp).toLocaleString()}
+                        Start Time: {new Date(selectedEvent.timestamp).toLocaleString()}
                       </div>
                     )
                     }
                   </div>
                 </div>
               )}
-              {selectedEvent.type == "Product" && (
+              {selectedEvent.table_source == "product" && (
                 <div className="event-metadata-content">
                   <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre>
                 </div>

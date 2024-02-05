@@ -1,1 +1,3 @@
 node_modules
+myapi/__pycache__/urls.cpython-312.pyc
+myapi/__pycache__/views.cpython-312.pyc

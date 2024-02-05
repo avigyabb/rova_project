@@ -5,16 +5,18 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const EventCard = ({ event, onSelect, isSelected }) => {
+  console.log("event");
+  console.log(event);
   return (
     <div className={`event-card ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(event)}>
       <div className='flex'>
-        {event.type === "Trace" && (
+        {event.table_source === "llm" && (
           < ViewTimelineIcon />
         )}
-        {event.type === "Product" && (
+        {event.table_source === "product" && (
           < DashboardIcon />
         )}
-        <p className='ml-6'>{event.eventName}</p>
+        <p className='ml-6'>{event.event_name}</p>
       </div>
       <div className='time-container'>
         <p>{new Date(event.timestamp).toLocaleString()}</p>
