@@ -9,9 +9,17 @@ import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import '../../styles/SessionSearch.css';
 
-const SessionSearch = ( ) => {
+const SessionSearch = ({ setSesh, setIsLoading }) => {
 
-  const [queryResponse, setQueryResponse] = useState("SELECT * FROM sessions;");
+  const [queryResponse, setQueryResponse] = useState(`
+    SELECT *
+    FROM (
+        SELECT session_id FROM buster_dev.llm
+        UNION DISTINCT
+        SELECT session_id FROM buster_dev.product
+    )
+    LIMIT 50
+  `);
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {
@@ -23,7 +31,7 @@ const SessionSearch = ( ) => {
             query: event.target.value
           };
           const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
-          setQueryResponse(response.data.processed_query);
+          setQueryResponse(response.data.sessions);
         } catch (error) {
           console.error(error);
         }
@@ -32,29 +40,30 @@ const SessionSearch = ( ) => {
     }
   };
 
-  // const handleSQL = (event) => {
-  //   if (event.key === 'Enter') {
-  //     setQueryResponse("");
-  //     const fetchQueryResponse = async () => {
-  //       try {
-  //         const params = {
-  //           query: event.target.value
-  //         };
-  //         const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
-  //         setQueryResponse(response.data.processed_query);
-  //         setQueryLoading(false);
-  //       } catch (error) {
-  //         console.error(error);
-  //       }
-  //     };
-  //     fetchQueryResponse();
-  //   }
-  // };
-
   const handleSqlChange = (event) => {
     // Update the sqlQuery state with the new value from the textarea
     setQueryResponse(event.target.value);
   };
+  
+  const handleSqlQuery = (event) => {
+    if (event.key === 'Enter') {
+      setIsLoading(true);
+      const fetchSqlResponse = async () => {
+        try {
+          const params = {
+            sql: queryResponse
+          };
+          const response = await axios.get('http://localhost:8000/get-sessions/', { params });
+          console.log(response);
+          setSesh(response.data.sessions);
+          setIsLoading(false);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchSqlResponse();
+    }
+  }
 
   // Display the entered query below the search bar
   return (
@@ -84,15 +93,16 @@ const SessionSearch = ( ) => {
         <div className='sql-header'> sql </div>
         {queryResponse ? (
           <textarea
-          className="sql-response"
-          value={queryResponse}
-          placeholder="Write your SQL query here..."
-          spellCheck="false"
-          onChange={handleSqlChange}
-        />
+            className="sql-response"
+            value={queryResponse}
+            placeholder="Write your SQL query here..."
+            spellCheck="false"
+            onChange={handleSqlChange}
+            onKeyPress={handleSqlQuery}
+          />
         ) : (
           <div className="sql-response flex justify-center items-center">
-           <CircularProgress style={{ color: '#FFA189' }}/>
+            <CircularProgress style={{ color: '#FFA189' }}/>
           </div>
         )}
     </div>

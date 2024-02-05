@@ -13,11 +13,21 @@ import os
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 
+import clickhouse_connect
+
 embeddings_model = OpenAIEmbeddings(
     openai_api_key="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"
 )
 os.environ["OPENAI_API_KEY"] = "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"
 client = OpenAI()
+
+# setup clickhouse client
+clickhouse_client = clickhouse_connect.get_client(
+    host="tbbhwu2ql2.us-east-2.aws.clickhouse.cloud",
+    port=8443,
+    username="default",
+    password="V8fBb2R_ZmW4i",
+)
 
 
 # Simple function to test CS communication
@@ -342,7 +352,12 @@ def get_paths(request):
 # client-server comm for finding trace sessions for all users
 @api_view(["GET"])
 def get_sessions(request):
-    sessions = events_to_traces("content/synthetic_user_journeys.json")
+    sessions = []
+    sql_query = request.GET.get("sql")
+    if sql_query:
+        sessions = clickhouse_client.query(sql_query).result_rows
+    print("hello")
+    print(sessions)
     return Response({"sessions": sessions})
 
 
