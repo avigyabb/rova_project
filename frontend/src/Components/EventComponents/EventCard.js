@@ -5,8 +5,6 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const EventCard = ({ event, onSelect, isSelected }) => {
-  console.log("event");
-  console.log(event);
   return (
     <div className={`event-card ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(event)}>
       <div className='flex'>

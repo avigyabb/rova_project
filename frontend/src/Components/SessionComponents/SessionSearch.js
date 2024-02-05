@@ -57,8 +57,8 @@ const SessionSearch = ({ setSessions, setIsLoading }) => {
           const params = {
             sql: queryResponse
           };
+          console.log("queryResponse: " + queryResponse);
           const response = await axios.get('http://localhost:8000/get-sessions/', { params });
-          console.log(response);
           setSessions(response.data.sessions);
           setIsLoading(false);
         } catch (error) {

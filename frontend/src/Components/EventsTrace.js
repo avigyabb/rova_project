@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from  'axios';
+import "../styles/EventTrace.css";
+
 import EventCard from './EventComponents/EventCard';
-import "../styles/EventTrace.css"
-import BorderClearIcon from '@mui/icons-material/BorderClear';
-import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
-import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import TraceCard from './EventComponents/TraceCard';
+
 import { CircularProgress } from '@mui/material';
 
-//  HERE user.name is really the userId of the user 
 
 const EventsTrace = () => {
 
@@ -27,7 +26,6 @@ const EventsTrace = () => {
             userId: userId,
           };
           const response = await axios.get('http://localhost:8000/get-user/', { params });
-          console.log(response)
           setData(response.data.info);
         } catch (error) {
           console.error(error);
@@ -40,13 +38,6 @@ const EventsTrace = () => {
 
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
-    
-    // Effect to log `sesh` on updates
-    useEffect(() => {
-      if (userData !== undefined) {
-        console.log(userData);
-      }
-    }, [userData]);
 
     // Conditional rendering based on isLoading
     if (isLoading) {
@@ -103,50 +94,12 @@ const EventsTrace = () => {
           </div>
         </div>
         {selectedEvent && (
-          <div className="right-column">
-            <div className='event-metadata-navbar flex items-center'>
-              <KeyboardDoubleArrowRightIcon className="back-icon mr-2" fontSize="large" onClick={() => setSelectedEvent(null)}/>
-              <h1 className='text-xl'> Execution of {JSON.stringify(selectedEvent.event_name)} </h1>
-            </div>
-              {selectedEvent.table_source == "llm" && (
-                <div className="event-metadata-content">
-                  {/* <pre>{JSON.stringify(selectedEvent || {}, null, 2)}</pre> */}
-                  <div className="sidebar flex flex-col">
-                    <div className="traceBox mb-1 flex" onClick={() => setSelectedTrace(null)}>
-                      <ViewTimelineIcon className="mr-2"/>
-                      Trace
-                    </div>
-                    {selectedEvent.events.map((trace, index) => (
-                      <div className="traceBox flex flex-row" onClick={() => setSelectedTrace(trace)}> 
-                        <BorderClearIcon className="ml-2 mr-2"/>
-                        {JSON.stringify(trace.event_name)} 
-                      </div>
-                    ))}
-                  </div>
-                  <div className="trace-content">
-                    {selectedTrace ? (
-                      <div>
-                        <p> System Prompt </p>
-                        {JSON.stringify(selectedTrace.systemPrompt)}
-                        <p> Time: </p>
-                        {new Date(selectedTrace.timestamp).toLocaleString()}
-                      </div>
-                    ) : (
-                      <div>
-                        <h1 className='text-xl'> Trace Info </h1>
-                        Start Time: {new Date(selectedEvent.timestamp).toLocaleString()}
-                      </div>
-                    )
-                    }
-                  </div>
-                </div>
-              )}
-              {selectedEvent.table_source == "product" && (
-                <div className="event-metadata-content">
-                  <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre>
-                </div>
-              )}
-          </div>
+          <TraceCard 
+            selectedEvent={selectedEvent} 
+            selectedTrace={selectedTrace} 
+            setSelectedEvent={setSelectedEvent} 
+            setSelectedTrace={setSelectedTrace}
+          />
         )}
       </div>
     );

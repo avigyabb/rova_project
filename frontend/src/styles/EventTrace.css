@@ -51,14 +51,6 @@
   display: flex;
 }
 
-.sidebar {
-  border-right: 1px solid #e5e7eb;
-  padding-right: 1%;
-  margin-right: 2%;
-  height: 90%;
-  min-width: 30%;
-}
-
 .traceBox {
   padding: 5%;
   min-width: 100%;
@@ -69,10 +61,6 @@
   padding-left: 7%;
   cursor: pointer;
   transition-duration: 0.5s;
-}
-
-.trace-content {
-  width: 60%;
 }
 
 .back-icon {

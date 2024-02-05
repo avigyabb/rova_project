@@ -685,7 +685,7 @@ def get_user(request):
                 }
                 buffer_dict["events"].append(event_dict)
             user_events.append(buffer_dict)
-        else:
+        elif row["table_source"] == "product":
             # Convert row Series to dict and replace NaN with None for single rows as well
             user_events.append(
                 {k: None if pd.isna(v) else v for k, v in row.to_dict().items()}

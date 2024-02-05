@@ -23,13 +23,6 @@ const Sessions = () => {
     };
     fetchData();
   }, []);
-  
-  // Effect to log `sesh` on updates CAN DELETE WHEN DONE - what is this?
-  useEffect(() => {
-    if (sessions !== undefined) {
-      console.log(sessions);
-    }
-  }, [sessions]);
 
   return (
     <div className="container mx-auto p-4">
