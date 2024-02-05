@@ -15,7 +15,7 @@ const SessionCard = ({ sessionId }) => {
         setIsLoading(true);
         try {
           const params = {
-            sessionId:sessionId,
+            session_id:sessionId,
           };
           const response = await axios.get('http://localhost:8000/get-session-data/', { params });
           setSessionData(response.data.session_data);

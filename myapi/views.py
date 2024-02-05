@@ -30,58 +30,65 @@ clickhouse_client = clickhouse_connect.get_client(
     password="V8fBb2R_ZmW4i",
 )
 
+combined_table_sql = """
+    WITH CombinedData AS (
+        SELECT
+            'product' AS table_source,
+            event_name,
+            user_id,
+            data_source_id,
+            timestamp,
+            session_id,
+            trace_id,
+            NULL AS input_content, -- Placeholder columns for llm table
+            NULL AS output_content,
+            NULL AS llm_in_use,
+            NULL AS input_token_count,
+            NULL AS output_token_count,
+            NULL AS cost,
+            NULL AS time_to_first_token,
+            NULL AS latency,
+            NULL AS error_status,
+            NULL AS chat_id
+        FROM
+            buster_dev.product
+
+        UNION ALL
+
+        SELECT
+            'llm' AS table_source,
+            event_name,
+            user_id,
+            data_source_id,
+            timestamp,
+            session_id,
+            trace_id,
+            input_content,
+            output_content,
+            llm_in_use,
+            input_token_count,
+            output_token_count,
+            cost,
+            time_to_first_token,
+            latency,
+            error_status,
+            chat_id
+        FROM
+            buster_dev.llm
+        
+        ORDER BY
+            timestamp
+        )
+    """
+
 def load_df_once():
     sql = """
-    -- Query for buster_dev.product events
-    SELECT
-        'product' AS table_source,
-        event_name,
-        user_id,
-        data_source_id,
-        timestamp,
-        session_id,
-        trace_id,
-        NULL AS input_content, -- Placeholder columns for llm table
-        NULL AS output_content,
-        NULL AS llm_in_use,
-        NULL AS input_token_count,
-        NULL AS output_token_count,
-        NULL AS cost,
-        NULL AS time_to_first_token,
-        NULL AS latency,
-        NULL AS error_status,
-        NULL AS chat_id
-    FROM
-        buster_dev.product
-
-    UNION ALL
-
-    -- Query for buster_dev.llm events
-    SELECT
-        'llm' AS table_source,
-        event_name,
-        user_id,
-        data_source_id,
-        timestamp,
-        session_id,
-        trace_id,
-        input_content,
-        output_content,
-        llm_in_use,
-        input_token_count,
-        output_token_count,
-        cost,
-        time_to_first_token,
-        latency,
-        error_status,
-        chat_id
-    FROM
-        buster_dev.llm
-
-    ORDER BY
-        timestamp
-    """
-    result = clickhouse_client.query(sql)
+        SELECT
+            *
+        FROM
+            CombinedData
+        """
+    result = clickhouse_client.query(combined_table_sql + sql)
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(by=['timestamp'])
     return df
 df = load_df_once()
@@ -390,10 +397,16 @@ def process_session_query(query):
 
 # Returns the session data for the given session ids
 def get_session_data_from_id(session_id):
-    data = {"timestamp": 5, "user_id": 5}
+    sql = f"""
+        SELECT *
+        FROM CombinedData
+        WHERE session_id = {session_id}
+        LIMIT 1
+        """
+    result = clickhouse_client.query(combined_table_sql + sql)
+    df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(by=['timestamp'])
+    data = {"timestamp": df['timestamp'][0], "user_id": df['user_id'][0]}
     return data
-
-
 
 def prune_paths (paths):
   return
@@ -550,9 +563,7 @@ def get_sessions(request):
     sql_query = request.GET.get("sql")
     if sql_query:
         sessions = clickhouse_client.query(sql_query).result_rows
-    print("hello")
     sessions = [session[0] for session in sessions]
-    print(sessions)
     return Response({"sessions": sessions})
 
 
