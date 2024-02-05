@@ -46,8 +46,12 @@ const SessionSearch = ({ setSessions, setIsLoading }) => {
   };
   
   const handleSqlQuery = (event) => {
-    if (event.key === 'Enter') {
+    // Listen for command + enter key press
+    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      
       setIsLoading(true);
+  
       const fetchSqlResponse = async () => {
         try {
           const params = {
@@ -61,9 +65,14 @@ const SessionSearch = ({ setSessions, setIsLoading }) => {
           console.error(error);
         }
       };
+  
       fetchSqlResponse();
     }
-  }
+  };
+  
+  // Attach the event listener
+  document.addEventListener('keydown', handleSqlQuery);
+  
 
   // Display the entered query below the search bar
   return (
