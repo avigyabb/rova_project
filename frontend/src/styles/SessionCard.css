@@ -14,7 +14,7 @@
   transition-duration: 0.5s;
 }
 
-.user-info, .user-meta {
+.user-info, .user-meta, .session-info {
   display: flex;
   flex-direction: column;
   justify-content: space-around;

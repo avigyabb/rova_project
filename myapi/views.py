@@ -388,6 +388,10 @@ def process_session_query(query):
     response = query_gpt(build_sessions_sql_prompt(query))
     return response
 
+# Returns the session data for the given session ids
+def get_session_data_from_id(session_id):
+    data = {"timestamp": 5, "user_id": 5}
+    return data
 
 
 
@@ -547,6 +551,7 @@ def get_sessions(request):
     if sql_query:
         sessions = clickhouse_client.query(sql_query).result_rows
     print("hello")
+    sessions = [session[0] for session in sessions]
     print(sessions)
     return Response({"sessions": sessions})
 
@@ -598,3 +603,9 @@ def get_percentages(request):
 @api_view(["GET"])
 def get_options(request):
   return Response({"options": ["chat_send", "pin_dashboard", "trace"]})
+
+# client-server comm for finding session data
+@api_view(["GET"])
+def get_session_data(request):
+    session_id = request.GET.get("session_id")
+    return Response({"session_data": get_session_data_from_id(session_id)})
