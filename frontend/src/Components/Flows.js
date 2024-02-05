@@ -40,7 +40,7 @@ function Flows() {
       // label is what is shown on the box
       return (
         <Link to={"/paths"}
-          state={{start : startState, end : endState, step : stepNum, type : eventName}}>
+          state={{start : startState, end : endState, step : stepNum, event : eventName}}>
         <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
         <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
         </div>
@@ -72,7 +72,7 @@ function Flows() {
         endAnchor={'left'}
         color={'#FFD0C4'}
         showHead={false}
-        strokeWidth={3}
+        strokeWidth={1}
         //animateDrawing={true}
       />
     );
@@ -111,7 +111,13 @@ function Flows() {
         console.error(error);
       }
     };
-    getPercentages();
+    if (startState != "" && endState != "") {
+      getPercentages();
+    } else {
+      setFlowBoxesData([]);
+      setArrowsData([]);
+      setColumnsCount(0);
+    }
   }, [columnsCount, startState, endState]);  
   
   if (flowBoxesData.length == (columnsCount + 2)) {

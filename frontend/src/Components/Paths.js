@@ -1,13 +1,14 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import SessionCard from "./SessionComponents/SessionCard";
 function Paths() {
   const location = useLocation();
 
-  const [filteredSessions, setFilteredSessions] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { start, end, step, type } = location.state || {}; // Fallback to empty object if state is undefined
+  const { start, end, step, event } = location.state || {}; // Fallback to empty object if state is undefined
 
   useEffect(() => {
 
@@ -15,13 +16,14 @@ function Paths() {
       setIsLoading(true);
       try {
         const params = {
-          startEvent:start,
-          endEvent: end, 
+          start_event:start,
+          end_event: end, 
           step_num: step, 
-          type: type,
+          event_name: event,
         };
         const response = await axios.get('http://localhost:8000/get-sessions-at-step/', { params });
-        setFilteredSessions(response.data.session_ids);
+        setSessions(response.data.sessions);
+        console.log(sessions);
       } catch (error) {
         console.error(error);
       } finally {
@@ -33,10 +35,10 @@ function Paths() {
 
   // Effect to log `sesh` on updates CAN DELETE WHEN DONE
   useEffect(() => {
-    if (filteredSessions !== undefined) {
-      console.log(filteredSessions);
+    if (sessions !== undefined) {
+      console.log(sessions);
     }
-  }, [filteredSessions]);
+  }, [sessions]);
 
    // Conditional rendering based on isLoading
   if (isLoading) {
@@ -44,7 +46,19 @@ function Paths() {
   }
 
 
-  return <div>Start: {start}, End: {end}, Step#: {step}, Type: {type}, Sessions: {filteredSessions}</div>;
+  return <div>
+         <div>Start: {start}, End: {end}, Step: {step}, Event: {event}, Sessions: </div>
+         <div className = 'overflow-auto' style={{height: 'calc(100vh - 180px)'}}>
+           {sessions.map(({session_id, user_id, earliest_timestamp}) => (
+             <SessionCard
+             key = {session_id}
+             sessionId = {session_id}
+             userId = {user_id}
+             timestamp = {earliest_timestamp}
+             />
+           ))}
+         </div>;
+         </div>
 };
 
 export default Paths;
