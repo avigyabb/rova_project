@@ -241,3 +241,9 @@ def compute_percentages(paths, num_steps, end_event_name):
             cur_step += 1
 
     return arrow_percentages, box_percentages
+
+def get_all_paths(paths):
+    all_paths = []
+    for user in paths.keys():
+        all_paths += paths[user]
+    return all_paths
