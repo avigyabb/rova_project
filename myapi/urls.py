@@ -10,4 +10,7 @@ urlpatterns = [
     path('get-histogram/', views.get_histogram, name='get_histogram'),
     path('get-num-active-users/', views.get_num_active_users, name='get_num_active_users'),
     path('get-processed-query/', views.get_processed_query, name='get_processed_query'),
+    path('get-sessions-at-step/', views.get_sessions_at_step, name='get_sessions_at_step'),
+    path("get-percentages/", views.get_percentages, name = "get_percentages"),
+    path("get-options/", views.get_options, name = "get_options"),
 ]

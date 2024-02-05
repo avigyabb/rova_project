@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 import json
+import math
 
 from django.shortcuts import render
 from rest_framework.decorators import api_view
@@ -308,7 +309,7 @@ def find_paths(rova_data, start_event_name, end_event_name):
       current_path = []
 
       for event in events_per_user:
-        if(event['event_name'] == start_event_name):
+        if(not tracking and event['event_name'] == start_event_name):
           tracking = True
           tracking_id = event['session_id']
           current_path.append(event)
@@ -388,6 +389,123 @@ def process_session_query(query):
     return response
 
 
+
+
+def prune_paths (paths):
+  return
+
+def get_all_paths(paths):
+  all_paths = []
+  for user in paths.keys():
+    all_paths += paths[user]
+  return all_paths
+
+# num_steps includes start event and end event
+def compute_percentages(paths, num_steps, end_event_name):
+  paths = sorted(paths, key = len)
+
+  start_path_index = 0
+
+  # arrow_counts[i][key] is dictionary with src_event_name, dest_event_name, and percentage for arrow key with source at step i
+  arrow_counts = dict()
+  # arrow_percentages is a list of form [srcEventName + srcStep, destEventName + destStep, percentage]
+  arrow_percentages = []
+
+  # box_counts[i][key] is count of eventName key at step i
+  box_counts = dict()
+  # box percentages[i] is a list of [key, percentage] pairs: percentages for each eventName at ith step
+  box_percentages = []
+
+  num_steps = int(num_steps)
+
+  for i in range (num_steps):
+    box_counts[i] = defaultdict(int)
+
+  for cur_step in range(num_steps):
+    count = 0
+    arrow_counts[cur_step] = dict()
+
+    for path_index in range(start_path_index, len(paths)):
+      path = paths[path_index]
+
+      # check if all path's events have already been fully explored, if so, that path should not be considered in the future
+      if cur_step > (len(path) - 1):
+        start_path_index += 1
+      else:
+        src_event_name = path[cur_step]["event_name"]
+        count += 1
+        
+        # boxes calculations
+        # last step, skip to last event of this path
+        if cur_step == (num_steps - 1):
+          box_counts[cur_step][path[len(path) - 1]["event_name"]] += 1
+        # if not at first step and end event has been reached, skip to last step
+        elif cur_step != 0 and src_event_name == end_event_name:
+          box_counts[num_steps - 1][src_event_name] += 1
+        else:
+          box_counts[cur_step][src_event_name] += 1
+
+        # arrows calculations
+        # make sure there are at least two events left in the path to draw an arrow between
+        if cur_step <= (len(path) - 2):
+          # check if cur_step is the last step which is visible before end step
+          if cur_step == (num_steps - 2):
+            # make dest event be the last event in the path
+            dest_event_name = path[len(path) - 1]["event_name"]
+            key = "src:" + src_event_name + "->dest:" + dest_event_name
+            if key in arrow_counts[cur_step].keys():
+              arrow_counts[cur_step][key]["percentage"] += 1
+            else:
+              # make dest step be the last step
+              arrow_counts[cur_step][key] = {"src" : src_event_name + str(cur_step),
+                                            "dest" : dest_event_name + str(num_steps - 1),
+                                            "percentage" : 1}
+          elif cur_step < (num_steps - 2):
+            dest_event_name = path[cur_step + 1]["event_name"]
+            key = "src:" + src_event_name + "->dest:" + dest_event_name
+
+            if key in arrow_counts[cur_step].keys():
+              arrow_counts[cur_step][key]["percentage"] += 1
+            # check if dest event is not end event
+            elif dest_event_name != end_event_name:
+              arrow_counts[cur_step][key] = {"src" : src_event_name + str(cur_step),
+                                            "dest" : dest_event_name + str(cur_step + 1),
+                                            "percentage" : 1}
+            # dest event is end event, so make dest step be the last step
+            else:
+              arrow_counts[cur_step][key] = {"src" : src_event_name + str(cur_step),
+                                      "dest" : dest_event_name + str(num_steps - 1),
+                                      "percentage" : 1}
+
+    for key in arrow_counts[cur_step].keys():
+      percentage = math.ceil(100 * arrow_counts[cur_step][key]["percentage"] / count)
+      if percentage > 0:
+        arrow_percentages.append([arrow_counts[cur_step][key]["src"], arrow_counts[cur_step][key]["dest"], str(percentage) + "%"])
+
+    num_boxes = len(box_counts[cur_step].keys())
+    total_space = 78 - 3 - 6 * (num_boxes - 1)
+    box_percentages.append([])
+    box_counts_sum = sum(box_counts[cur_step].values())
+    for key in box_counts[cur_step].keys():
+      percentage = math.ceil(total_space * box_counts[cur_step][key] / box_counts_sum)
+      if percentage > 0:
+        box_percentages[cur_step].append([key, percentage])
+    
+    # sort largest percentage to smallest
+    box_percentages[cur_step] = sorted(box_percentages[cur_step], key=lambda box : box[1], reverse = True)
+
+  return arrow_percentages, box_percentages
+      
+
+# Finds all traces per user with specific event occuring at given step and beginning and ending with provided event names
+def get_sessions_given_step(paths, step, event_name):
+  session_ids = []
+  for user in paths.keys():
+    for path in paths[user]:
+      if(step < len(path) and path[step]['event_name'] == event_name):
+        session_ids.append(path[step]['session_id'])
+  return session_ids
+
 # client-server comm for finding filtered paths
 @api_view(["GET"])
 def get_fpaths(request):
@@ -400,6 +518,17 @@ def get_fpaths(request):
     filtered = filter_paths(paths, step_num, event_name)
     return Response({"filtered_paths": filtered})
 
+# client-server comm for finding filtered paths
+@api_view(['GET'])
+def get_sessions_at_step(request):
+    startEvent = request.GET.get('startEvent')
+    endEvent = request.GET.get('endEvent')
+    rova_data = events_to_traces()
+    paths = find_paths(rova_data, startEvent, endEvent)
+    step_num = request.GET.get('step_num')
+    event_name = request.GET.get('type')
+    session_ids = get_sessions_given_step(paths, int(step_num), event_name)
+    return Response({'session_ids': session_ids})
 
 # client-server comm for finding paths
 @api_view(["GET"])
@@ -454,3 +583,18 @@ def get_num_active_users(request):
 def get_processed_query(request):
     query = request.GET.get("query")
     return Response({"processed_query": process_session_query(query)})
+
+@api_view(["GET"])
+def get_percentages(request):
+  events = events_to_traces() 
+
+  start_event_name = request.GET.get("start_event_name")
+  end_event_name = request.GET.get("end_event_name")
+
+  paths = find_paths(events, start_event_name, end_event_name)
+  arrow_percentages, box_percentages = compute_percentages(get_all_paths(paths), request.GET.get("num_steps"), end_event_name)
+  return Response({"arrow_percentages" : arrow_percentages, "box_percentages" : box_percentages})
+
+@api_view(["GET"])
+def get_options(request):
+  return Response({"options": ["chat_send", "pin_dashboard", "trace"]})

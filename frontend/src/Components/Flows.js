@@ -18,46 +18,46 @@ function Flows() {
   const renderedFlowBoxesCount = useRef(0);
   const [flowBoxesRendered, setFlowBoxesRendered] = useState(false);
 
-  function FlowCol({ heights, overallClass, stepNum }) {
-    useEffect(() => {
-      renderedFlowBoxesCount.current += 1;
-      if (renderedFlowBoxesCount.current >= flowBoxes.length) {
-        setFlowBoxesRendered(true);
-        renderedFlowBoxesCount.current = 0;
+  function FlowCol({ overallClass, stepNum, heights }) {
+    renderedFlowBoxesCount.current += 1;
+    if (renderedFlowBoxesCount.current >= flowBoxes.length) {
+      setFlowBoxesRendered(true);
+      renderedFlowBoxesCount.current = 0;
+      setFlowBoxesRendered(false);
+    }
+
+    function Box({height, eventName}) {
+      var color = "";
+      if (eventName == "dropoff") {
+        color = "dropOffBox";
+      } else if (eventName == "trace") {
+        color = "chatBox";
+      } else {
+        color = "productBox";
       }
-    }, []);
+      color = "stepBox " + color + " transitionStyle";
+
+      // label is what is shown on the box
+      return (
+        <Link to={"/paths"}
+          state={{start : startState, end : endState, step : stepNum, type : eventName}}>
+        <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
+        <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
+        </div>
+        </Link>
+      );
+    }
+
+    var boxes = []
+    for (let i = 0; i < heights.length; i++) {
+      boxes.push(<div class="boxSpaces" ></div>);
+      boxes.push(<Box height = {heights[i][1]} eventName = {heights[i][0]}/>);
+      boxes.push(<div class="boxSpaces" ></div>);
+    }
 
     return (
       <div className={`${ overallClass }`}>
-        <div class="boxSpaces"></div>
-        { heights[0] > 0 && (
-          <Link to={'/paths'} 
-                state={{start: startState, end: endState, step: stepNum, type:"LLM"}}>
-          <div id={`chat${stepNum}`} class="stepBox chatBox transitionStyle" style={{ height: `${ heights[0] }%` }}>
-            <Chip icon={<ChatIcon/>} label="LLM" variant='outlined' style={{position:'absolute', backgroundColor:'white', transform:'translate(8px, 8px)', padding:'5px'}}/>
-          </div>
-          </Link>
-        )}
-        <div class="boxSpaces"></div>
-        <div class="boxSpaces"></div>
-        { heights[1] > 0 && (
-         <Link to={'/paths'} 
-          state={{start: startState, end: endState, step: stepNum, type:"Product"}}>
-          <div class="stepBox productBox transitionStyle" style={{ height: `${ heights[1] }%` }}>
-            <Chip icon={<DashboardIcon/>} label="Product" variant='outlined' style={{position:'absolute', backgroundColor:'white', transform:'translate(8px, 8px)', padding:'5px'}}/>
-          </div>
-          </Link>
-        )}
-        <div class="boxSpaces"></div>
-        <div class="boxSpaces"></div>
-        { heights[2] > 0 && (
-         <Link to={'/paths'} 
-          state={{start: startState, end: endState, step: stepNum, type:"Dropoff"}}>
-          <div class="stepBox dropOffBox transitionStyle" style={{ height: `${ heights[2] }%` }}>
-            <Chip icon={<ArrowCircleDownIcon/>} label="Dropoff" variant='outlined' style={{position:'absolute', backgroundColor:'white', transform:'translate(8px, 8px)', padding:'5px'}}/>
-          </div>
-          </Link>
-        )}
+        {boxes}
       </div>
     );
   }
@@ -72,41 +72,66 @@ function Flows() {
         endAnchor={'left'}
         color={'#FFD0C4'}
         showHead={false}
-        strokeWidth={50}
+        strokeWidth={3}
         //animateDrawing={true}
       />
     );
   }
+  
+  const [columnsCount, setColumnsCount] = useState(0);
 
-  const [componentsCount, setComponentsCount] = useState(0);
-
-  const addComponent = () => {
-      setComponentsCount(componentsCount + 1);
-  };
-
+  const addColumn = () => {
+      setColumnsCount(columnsCount + 1);
+  };  
+  
   const steps = [];
   const flowBoxes = [];
-  console.log("hello");
-  flowBoxes.push(<FlowCol key={0} stepNum='1000' heights={[78, 0, 0]} overallClass="step"/>)
-  for (let i = 0; i < componentsCount; i++) {
-    steps.push(<StepComponent key={i} i={i}/>);
-    flowBoxes.push(<FlowCol key={i} stepNum={i} heights={[38, 20, 12]} overallClass="step innerStep"/>)
-  }
-  flowBoxes.push(<FlowCol key={0} stepNum='1001' heights={[78, 0, 0]} overallClass="step ml-auto"/>)
+  const [flowBoxesData, setFlowBoxesData] = useState({});
 
-  const arrows_data = [
-    ["chat1000", "chat0", "80%"],
-    ["chat0", "chat1", "50%"]
-  ];
   const arrows = []; // array of arrows to be rendered
-  for (let i = 0; i < Math.min(componentsCount, arrows_data.length); i++) {
-    arrows.push(
-      <Arrow start={arrows_data[i][0]} end={arrows_data[i][1]} percentage={arrows_data[i][2]} />
-    )
-  }
-
+  const [arrowsData, setArrowsData] = useState([]);    
+  
   const [startState, setStartState] = useState(""); // State to store the selected option
   const [endState, setEndState] = useState("");
+
+  useEffect(() => {
+    const getPercentages = async() => {
+      try {
+        const params = {
+          num_steps : columnsCount + 2,
+          start_event_name : startState,
+          end_event_name : endState,
+        }
+        const response = await axios.get("http://localhost:8000/get-percentages/", {params});
+        setArrowsData(response.data.arrow_percentages);
+        console.log(response.data.arrow_percentages);
+        setFlowBoxesData(response.data.box_percentages);
+        console.log(response.data.box_percentages);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getPercentages();
+  }, [columnsCount, startState, endState]);  
+  
+  if (flowBoxesData.length == (columnsCount + 2)) {
+    for (let i = 0; i < columnsCount + 2; i++) {
+      var overallClass;
+      if (i > 0 && i < columnsCount + 1) {
+        steps.push(<StepComponent key={i - 1} i={i - 1}/>);
+        overallClass = "step innerStep";
+      } else if (i == 0) {
+        overallClass = "step";
+      } else {
+        overallClass = "step ml-auto";
+      }
+      flowBoxes.push(<FlowCol key={i} stepNum={i} overallClass={overallClass} heights={flowBoxesData[i]}/>)
+    }
+  }
+  
+  for (let i = 0; i < arrowsData.length; i++) {
+    arrows.push(<Arrow start={arrowsData[i][0]} end={arrowsData[i][1]} percentage={arrowsData[i][2]} />)
+  }
 
   // Event handler to update the selected option
   const handleStartChange = (event) => {
@@ -116,32 +141,48 @@ function Flows() {
     setEndState(event.target.value);
   };
 
+  const optionsArray = []
+  const [optionsArrayData, setOptionsArrayData] = useState([]);
+
+  useEffect(() => {
+    const getOptions = async() => {
+      try {
+        const response = await axios.get("http://localhost:8000/get-options/");
+        setOptionsArrayData(response.data.options);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getOptions();
+  }, []);
+           
+  optionsArrayData.forEach((option) =>
+    optionsArray.push(<option value={option}>{option}</option>)
+  ) 
+
   return (
       <div class="h-screen">
           <div class="header flex flex-row">
             <div class="beginState">
               <select class="" id="startDropdown" value={startState} onChange={handleStartChange}>
                 <option value="">Start</option>
-                <option value="Option 1">Option 1</option>
-                <option value="Option 2">Option 2</option>
-                <option value="Option 3">Option 3</option>
+                {optionsArray}
               </select>
             </div>
             {steps}
-            <button class="h-full" onClick={addComponent}> <CgAddR class="h-8 w-8 ml-6 thin-icon" /> </button>
+            <button class="h-full" onClick={addColumn}> <CgAddR class="h-8 w-8 ml-6 thin-icon" /> </button>
             <div class="endState ml-auto">
               <select class="state bg-gray-200" id="endDropdown" value={endState} onChange={handleEndChange}>
                 <option value="">End</option>
-                <option value="Option 1">Option 1</option>
-                <option value="Option 2">Option 2</option>
-                <option value="Option 3">Option 3</option>
+                {optionsArray}
               </select>
             </div>
           </div>
           <div class="flex flex-row h-full">
             {flowBoxes}
           </div>
-          {flowBoxesRendered && arrows}
+          {arrows}
       </div>
   );
 }

@@ -4,7 +4,7 @@ import axios from 'axios';
 function Paths() {
   const location = useLocation();
 
-  const [filteredPaths, setFilteredPaths] = useState([]);
+  const [filteredSessions, setFilteredSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { start, end, step, type } = location.state || {}; // Fallback to empty object if state is undefined
@@ -20,8 +20,8 @@ function Paths() {
           step_num: step, 
           type: type,
         };
-        const response = await axios.get('http://localhost:8000/get-fpaths/', { params });
-        setFilteredPaths(response.data.info);
+        const response = await axios.get('http://localhost:8000/get-sessions-at-step/', { params });
+        setFilteredSessions(response.data.session_ids);
       } catch (error) {
         console.error(error);
       } finally {
@@ -33,10 +33,10 @@ function Paths() {
 
   // Effect to log `sesh` on updates CAN DELETE WHEN DONE
   useEffect(() => {
-    if (filteredPaths !== undefined) {
-      console.log(filteredPaths);
+    if (filteredSessions !== undefined) {
+      console.log(filteredSessions);
     }
-  }, [filteredPaths]);
+  }, [filteredSessions]);
 
    // Conditional rendering based on isLoading
   if (isLoading) {
@@ -44,7 +44,7 @@ function Paths() {
   }
 
 
-  return <div>Start: {start}, End: {end}, Step#: {step}, Type: {type}</div>;
+  return <div>Start: {start}, End: {end}, Step#: {step}, Type: {type}, Sessions: {filteredSessions}</div>;
 };
 
 export default Paths;
