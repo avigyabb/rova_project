@@ -9,7 +9,7 @@ import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import '../../styles/SessionSearch.css';
 
-const SessionSearch = ({ setSessionIds, setIsLoading }) => {
+const SessionSearch = ({ setSessions, setIsLoading }) => {
 
   const [queryResponse, setQueryResponse] = useState(`
     SELECT *
@@ -55,7 +55,7 @@ const SessionSearch = ({ setSessionIds, setIsLoading }) => {
           };
           const response = await axios.get('http://localhost:8000/get-sessions/', { params });
           console.log(response);
-          setSessionIds(response.data.sessions);
+          setSessions(response.data.sessions);
           setIsLoading(false);
         } catch (error) {
           console.error(error);

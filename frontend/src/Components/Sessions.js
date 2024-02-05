@@ -5,8 +5,7 @@ import SessionSearch from './SessionComponents/SessionSearch';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const Sessions = () => {
-  // Placeholder data - replace with your actual data fetching logic
-  const [sessionIds, setSessionIds] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -15,7 +14,7 @@ const Sessions = () => {
       setIsLoading(true);
       try {
         const response = await axios.get('http://localhost:8000/get-sessions/');
-        setSessionIds(response.data.sessions);
+        setSessions(response.data.sessions);
       } catch (error) {
         console.error(error);
       } finally {
@@ -27,25 +26,27 @@ const Sessions = () => {
   
   // Effect to log `sesh` on updates CAN DELETE WHEN DONE - what is this?
   useEffect(() => {
-    if (sessionIds !== undefined) {
-      console.log(sessionIds);
+    if (sessions !== undefined) {
+      console.log(sessions);
     }
-  }, [sessionIds]);
+  }, [sessions]);
 
   return (
     <div className="container mx-auto p-4">
-      <SessionSearch setSessionIds={setSessionIds} setIsLoading={setIsLoading}/>
+      <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading}/>
       { isLoading ? (
         <div className="min-h-80 flex justify-center items-center">
           <CircularProgress style={{ color: '#FFA189' }}/>
         </div>
       ) : (
         <div className='overflow-auto' style={{ height: 'calc(100vh - 180px)' }}>
-          {sessionIds.map((sessionId) => (
+          {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
             <SessionCard 
-            key={sessionId} 
-            sessionId={sessionId} // Pass the session count here
-          />
+            key={session_id} 
+            sessionId={session_id} // Pass the session count here
+            userId={user_id}
+            timestamp={earliest_timestamp}
+            />
           ))}
         </div>
       )}

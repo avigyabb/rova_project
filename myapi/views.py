@@ -396,17 +396,17 @@ def process_session_query(query):
     return response
 
 # Returns the session data for the given session ids
-def get_session_data_from_id(session_id):
-    sql = f"""
-        SELECT *
+def get_session_data_from_ids(session_ids):
+    sql = """
+        SELECT session_id, user_id, MIN(timestamp) AS earliest_timestamp
         FROM CombinedData
-        WHERE session_id = {session_id}
-        LIMIT 1
+        WHERE session_id IN (""" + ", ".join([f"{session_id}" for session_id in session_ids]) + """)
+        GROUP BY session_id, user_id
         """
     result = clickhouse_client.query(combined_table_sql + sql)
-    df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(by=['timestamp'])
-    data = {"timestamp": df['timestamp'][0], "user_id": df['user_id'][0]}
-    return data
+    df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    df['earliest_timestamp'] = df['earliest_timestamp'].astype(str)
+    return df.to_dict(orient='records')
 
 def prune_paths (paths):
   return
@@ -564,7 +564,9 @@ def get_sessions(request):
     if sql_query:
         sessions = clickhouse_client.query(sql_query).result_rows
     sessions = [session[0] for session in sessions]
-    return Response({"sessions": sessions})
+    sessions_data = get_session_data_from_ids(sessions)
+    print(sessions_data)
+    return Response({"sessions": sessions_data})
 
 
 # client-server comm for finding trace sessions for specific user
@@ -615,8 +617,3 @@ def get_percentages(request):
 def get_options(request):
   return Response({"options": ["chat_send", "pin_dashboard", "trace"]})
 
-# client-server comm for finding session data
-@api_view(["GET"])
-def get_session_data(request):
-    session_id = request.GET.get("session_id")
-    return Response({"session_data": get_session_data_from_id(session_id)})
