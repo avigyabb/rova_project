@@ -3,18 +3,25 @@ import React from 'react';
 import "../../styles/EventCard.css";
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const EventCard = ({ event, onSelect, isSelected }) => {
   return (
     <div className={`event-card ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(event)}>
-      <div className='flex'>
+      <div className='flex items-center'>
+        {event.error_ocurred && event.table_source === "llm" ? (
+          < ErrorIcon fontSize='small' style={{color: '#B02300'}}/>
+        ) : (
+          < CheckCircleIcon fontSize='small' style={{color: 'green'}}/>
+        )}
         {event.table_source === "llm" && (
-          < ViewTimelineIcon />
+          < ViewTimelineIcon className='ml-12'/>
         )}
         {event.table_source === "product" && (
-          < DashboardIcon />
+          < DashboardIcon className='ml-12'/>
         )}
-        <p className='ml-6'>{event.event_name}</p>
+        <p className='ml-3'>{event.event_name}</p>
       </div>
       <div className='time-container'>
         <p>{new Date(event.timestamp).toLocaleString()}</p>

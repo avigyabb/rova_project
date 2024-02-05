@@ -523,9 +523,9 @@ def compute_percentages(paths, num_steps, end_event_name):
                             # make dest step be the last step
                             arrow_counts[cur_step][key] = {
                                 "src_event_name": src_event_name,
-                                "src_step" : str(cur_step),
+                                "src_step": str(cur_step),
                                 "dest_event_name": dest_event_name,
-                                "dest_step" : str(num_steps - 1),
+                                "dest_step": str(num_steps - 1),
                                 "count": 1,
                             }
                     elif cur_step < (num_steps - 2):
@@ -538,18 +538,18 @@ def compute_percentages(paths, num_steps, end_event_name):
                         elif dest_event_name != end_event_name:
                             arrow_counts[cur_step][key] = {
                                 "src_event_name": src_event_name,
-                                "src_step" : str(cur_step),
+                                "src_step": str(cur_step),
                                 "dest_event_name": dest_event_name,
-                                "dest_step" : str(cur_step + 1),
+                                "dest_step": str(cur_step + 1),
                                 "count": 1,
                             }
                         # dest event is end event, so make dest step be the last step
                         else:
                             arrow_counts[cur_step][key] = {
                                 "src_event_name": src_event_name,
-                                "src_step" : str(cur_step),
+                                "src_step": str(cur_step),
                                 "dest_event_name": dest_event_name,
-                                "dest_step" : str(num_steps - 1),
+                                "dest_step": str(num_steps - 1),
                                 "count": 1,
                             }
 
@@ -582,7 +582,10 @@ def compute_percentages(paths, num_steps, end_event_name):
                             str(percentage) + "%",
                         ]
                     )
-                if cur_arrow["dest_event_name"] != "dropoff" and cur_arrow["dest_event_name"] != end_event_name:
+                if (
+                    cur_arrow["dest_event_name"] != "dropoff"
+                    and cur_arrow["dest_event_name"] != end_event_name
+                ):
                     count_continuing += cur_arrow["count"]
             total_percentage_remaining *= count_continuing / count
         elif cur_step < (num_steps - 1):
@@ -592,6 +595,7 @@ def compute_percentages(paths, num_steps, end_event_name):
             cur_step += 1
 
     return arrow_percentages, box_percentages
+
 
 # Finds all traces per user with specific event occuring at given step and beginning and ending with provided event names
 def get_session_ids_given_step(paths, step, event_name):
@@ -623,7 +627,7 @@ def get_sessions_at_step(request):
 
     events = events_to_traces()
     paths = find_paths(events, startEvent, endEvent)
-    
+
     step_num = request.GET.get("step_num")
     event_name = request.GET.get("event_name")
     session_ids = get_session_ids_given_step(paths, int(step_num), event_name)
@@ -676,9 +680,12 @@ def get_user(request):
                 "table_source": "llm",
                 "event_name": "LLM Trace",
                 "timestamp": row["timestamp"],
+                "error_ocurred": False,
                 "events": [],
             }
             for index, filtered_row in trace_id_filtered_df.iterrows():
+                if filtered_row["error_status"] != "none":
+                    buffer_dict["error_ocurred"] = True
                 event_dict = {
                     k: None if pd.isna(v) else v
                     for k, v in filtered_row.to_dict().items()

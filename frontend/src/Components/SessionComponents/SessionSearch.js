@@ -11,15 +11,7 @@ import '../../styles/SessionSearch.css';
 
 const SessionSearch = ({ setSessions, setIsLoading }) => {
 
-  const [queryResponse, setQueryResponse] = useState(`
-    SELECT *
-    FROM (
-        SELECT session_id FROM buster_dev.llm
-        UNION DISTINCT
-        SELECT session_id FROM buster_dev.product
-    )
-    LIMIT 50
-  `);
+  const [queryResponse, setQueryResponse] = useState(`SELECT *\nFROM (\nSELECT session_id FROM buster_dev.llm\nUNION DISTINCT\nSELECT session_id FROM buster_dev.product\n)\nLIMIT 50\n`);
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {

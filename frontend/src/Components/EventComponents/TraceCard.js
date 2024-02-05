@@ -4,6 +4,7 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import BorderClearIcon from '@mui/icons-material/BorderClear';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import SchemaIcon from '@mui/icons-material/Schema';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelectedTrace }) => {
   console.log(selectedEvent)
@@ -22,9 +23,12 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                 Trace
               </div>
               {selectedEvent.events.map((trace, index) => (
-                <div className="traceBox flex flex-row" onClick={() => setSelectedTrace(trace)}> 
+                <div className="traceBox flex flex-row items-center" onClick={() => setSelectedTrace(trace)}> 
                   <BorderClearIcon className="ml-2 mr-2"/>
                   <p className='text-sm'> {JSON.stringify(trace.event_name)} </p>
+                  { trace.error_status !== "none" && (
+                    < ErrorIcon fontSize='small ml-4' style={{color: '#B02300'}}/>
+                  )}
                 </div>
               ))}
             </div>
@@ -53,24 +57,42 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
 
                   <div className='flex justify-evenly mt-12'>
                     <div>
-                    <p className='metric-label'> LATENCY </p>
-                    <p> {JSON.stringify(selectedTrace.latency).slice(0, 5)}s </p>
+                      <p className='metric-label'> LATENCY </p>
+                      <p> {JSON.stringify(selectedTrace.latency).slice(0, 5)}s </p>
                     </div>
                     <div>
-                    <p className='metric-label'> TOKEN COUNT </p>
-                    <p> {JSON.stringify(+selectedTrace.input_token_count + +selectedTrace.output_token_count)} tokens </p>
+                      <p className='metric-label'> TOKEN COUNT </p>
+                      <p> {JSON.stringify(+selectedTrace.input_token_count + +selectedTrace.output_token_count)} tokens </p>
                     </div>
                     <div>
-                    <p className='metric-label'> COST </p>
-                    <p> ${JSON.stringify(selectedTrace.latency).slice(0, 4)} </p>
+                      <p className='metric-label'> COST </p>
+                      <p> ${JSON.stringify(selectedTrace.latency).slice(0, 4)} </p>
                     </div>
                   </div>
 
                 </div>
               ) : (
                 <div>
-                  <h1 className='text-xl'> Trace Info </h1>
-                  Start Time: {new Date(selectedEvent.timestamp).toLocaleString()}
+                  <div className='flex'>
+                    <SchemaIcon className="mr-2"/>
+                    <p className='text-3xl'> Trace Info </p>
+                    
+                    <p className='ml-auto text-sm text-gray-400'> {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
+                  </div>
+                  <div className='flex justify-evenly mt-5'>
+                    <div>
+                      <p className='metric-label'> START TIME </p>
+                      <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
+                    </div>
+                    <div>
+                      {/* not correct */}
+                      <p className='metric-label'> END TIME </p>
+                      <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
+                    </div>
+                  </div>
+
+                  <p className='metric-label mt-10'> SESSION ID </p>
+                  <p className='text-sm'>  {JSON.stringify(selectedEvent.events[0].session_id)} </p>
                 </div>
               )
               }
