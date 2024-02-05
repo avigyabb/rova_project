@@ -146,17 +146,17 @@ def build_topics_prompt(samples):
 # Builds prompt to generate sql query for sessions
 def build_sessions_sql_prompt(user_query):
     system_prompt = 'You are a ClickHouse expert. Given an input question, create a syntactically \
-                     correct SQL query which returns the rows specified by the question. \n \
+                     correct SQL query which returns the rows specified by the question. \
+                     There are two tables you have access to to query from: 1) buster_dev.llm and 2) buster_dev.product.\n \
                      Unless the user specifies in the question a specific number of examples to obtain, \
                      query for at most 50 results using the LIMIT clause as per SQLite. \n \
-                     Wrap each column name in double quotes (") to denote them as delimited identifiers. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
                      not to query for columns that do not exist. Also, pay attention to which column is in which table. \n \
                      Rows with the same session_id belong to the same session.  \n \
                      Create subqueries whenever possible, especially for UNIONs. For example: \n \
-                     SELECT DISTINCT "session_id" FROM "llm" \n \
+                     SELECT DISTINCT session_id FROM buster_dev.llm \n \
                      UNION \n \
-                     SELECT DISTINCT "session_id" FROM "product" \n \
+                     SELECT DISTINCT session_id FROM buster_dev.product" \n \
                      LIMIT 50; \n \
                      Should be: \n \
                      SELECT * \n \
