@@ -31,7 +31,7 @@ const SessionSearch = ({ setSesh, setIsLoading }) => {
             query: event.target.value
           };
           const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
-          setQueryResponse(response.data.sessions);
+          setQueryResponse(response.data.processed_query);
         } catch (error) {
           console.error(error);
         }

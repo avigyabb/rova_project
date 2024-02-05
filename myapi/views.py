@@ -89,14 +89,28 @@ def build_topics_prompt(samples):
 
 # Builds prompt to generate sql query for sessions
 def build_sessions_sql_prompt(user_query):
-    system_prompt = 'You are a SQLite expert. Given an input question, create a syntactically \
-                     correct SQLite query which returns the rows specified by the question. \n \
+    system_prompt = 'You are a ClickHouse expert. Given an input question, create a syntactically \
+                     correct SQL query which returns the rows specified by the question. \n \
                      Unless the user specifies in the question a specific number of examples to obtain, \
                      query for at most 50 results using the LIMIT clause as per SQLite. \n \
                      Wrap each column name in double quotes (") to denote them as delimited identifiers. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
-                     not to query for columns that do not exist. Also, pay attention to which column is in which table. \n\n \
-                     Rows with the same session_id belong to the same session. Only output SQL code without backticks, not any text. \n\n'
+                     not to query for columns that do not exist. Also, pay attention to which column is in which table. \n \
+                     Rows with the same session_id belong to the same session.  \n \
+                     Create subqueries whenever possible, especially for UNIONs. For example: \n \
+                     SELECT DISTINCT "session_id" FROM "llm" \n \
+                     UNION \n \
+                     SELECT DISTINCT "session_id" FROM "product" \n \
+                     LIMIT 50; \n \
+                     Should be: \n \
+                     SELECT * \n \
+                     FROM ( \n \
+                     SELECT session_id FROM buster_dev.llm \n \
+                     UNION DISTINCT \n \
+                     SELECT session_id FROM buster_dev.product \n \
+                     ) \n \
+                     LIMIT 50 \n \
+                     Only output SQL code without backticks, and do not include the semicolon. \n\n'
 
     tables = 'Only use the following tables: \n\n \
               CREATE TABLE "llm" ( \n \
@@ -104,13 +118,31 @@ def build_sessions_sql_prompt(user_query):
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
               "session_id" UInt32, \n \
-              "output_content" String, \n\n \
+              "data_source_id" UInt32, \n \
+              "input_content" String, \n \
+              "output_content" String, \n \
+              "llm_in_use" Bool, \n \
+              "input_token_count" UInt32, \n \
+              "output_token_count" UInt32, \n \
+              "cost" Float32, \n \
+              "time_to_first_token" Float32, \n \
+              "latency" Float32, \n \
+              "error_status" String, \n \
+              "chat_id" UInt32, \n\n \
               /* \n \
-              3 rows from table "llm" \n \
-              timestamp event_name user_id output_content \n \
-              2022-06-16 16:00:00 LLM 1 "Hello" \n \
-              2022-06-15 16:00:01 LLM 2 "Hi" \n \
-              2022-02-16 16:00:02 LLM 6 "Hey" \n \
+              */\n\n \
+              CREATE TABLE "product" ( \n \
+              "timestamp" DATETIME, \n \
+              "event_name" STRING, \n \
+              "user_id" UInt32, \n \
+              "session_id" UInt32, \n \
+              "data_source_id" UInt32, \n\n \
+              /* \n \
+              3 rows from table "product" \n \
+              timestamp event_name user_id session_id data_source_id \n \
+              2022-06-16 16:00:00 "chat_send" 1 3 1 \n \
+              2022-06-15 16:00:01 "share_dashboard" 2 4 1 \n \
+              2022-02-16 16:00:02 "download_dashboard" 6 7 2 \n \
               */\n\n'
 
     user_prompt = "Question: " + user_query + "\nSQLQuery: "
