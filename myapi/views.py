@@ -29,6 +29,61 @@ clickhouse_client = clickhouse_connect.get_client(
     password="V8fBb2R_ZmW4i",
 )
 
+def load_df_once():
+    sql = """
+    -- Query for buster_dev.product events
+    SELECT
+        'product' AS table_source,
+        event_name,
+        user_id,
+        data_source_id,
+        timestamp,
+        session_id,
+        trace_id,
+        NULL AS input_content, -- Placeholder columns for llm table
+        NULL AS output_content,
+        NULL AS llm_in_use,
+        NULL AS input_token_count,
+        NULL AS output_token_count,
+        NULL AS cost,
+        NULL AS time_to_first_token,
+        NULL AS latency,
+        NULL AS error_status,
+        NULL AS chat_id
+    FROM
+        buster_dev.product
+
+    UNION ALL
+
+    -- Query for buster_dev.llm events
+    SELECT
+        'llm' AS table_source,
+        event_name,
+        user_id,
+        data_source_id,
+        timestamp,
+        session_id,
+        trace_id,
+        input_content,
+        output_content,
+        llm_in_use,
+        input_token_count,
+        output_token_count,
+        cost,
+        time_to_first_token,
+        latency,
+        error_status,
+        chat_id
+    FROM
+        buster_dev.llm
+
+    ORDER BY
+        timestamp
+    """
+    result = clickhouse_client.query(sql)
+    df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(by=['timestamp'])
+    return df
+df = load_df_once()
 
 # Simple function to test CS communication
 @api_view(["GET"])
@@ -221,43 +276,22 @@ def get_df_from_json(path):
 
 
 # Returns all users and their sessions as nested objects
-def events_to_traces(path_to_journeys):
-    dictionaries = []
-
-    # Open your file
-    with open(path_to_journeys, "r") as file:
-        # Iterate over each line
-        dictionaries = json.load(file)
-
-    # Now 'dictionaries' is a list of dictionaries, each representing a line in your file
-    df = pd.DataFrame(dictionaries)
-
-    # Convert 'timestamp' to datetime if not already
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-
-    # Sort by 'userId' first, then by 'timestamp'
-    sorted_df = df.sort_values(by=["userId", "timestamp"])
-    sorted_df = sorted_df.fillna("")
-
+def events_to_traces():
     events = defaultdict(list)
 
-    for userid, group in sorted_df.groupby("userId"):
+    for (user_id, session_id), group in df.groupby(['user_id', 'session_id']):
         buffer = []
         for _, row in group.iterrows():
             row_dict = row.to_dict()
-            if row_dict["type"] == "LLM":
+            if row_dict['table_source'] == 'llm':
                 buffer.append(row_dict)
             else:
                 if buffer:
-                    events[userid].append(
-                        {"type": "Trace", "eventName": "Trace", "events": buffer}
-                    )
+                    events[user_id].append({'table_source': 'llm', 'user_id': user_id, 'session_id':session_id, 'event_name':'trace', 'events':buffer})
                     buffer = []
-                events[userid].append(row_dict)
+                events[user_id].append(row_dict)
         if buffer:
-            events[userid].append(
-                {"type": "Trace", "eventName": "Trace", "events": buffer}
-            )
+            events[user_id].append({'table_source': 'llm', 'user_id': user_id, 'session_id':session_id, 'event_name':'trace', 'events':buffer})
 
     return events
 
@@ -268,43 +302,38 @@ def find_paths(rova_data, start_event_name, end_event_name):
 
     for user in rova_data.keys():
 
-        events_per_user = rova_data[user]
-        users_paths = []
-        tracking = False
-        current_path = []
+      events_per_user = rova_data[user]
+      users_paths = []
+      tracking = False
+      current_path = []
 
-        for event in events_per_user:
+      for event in events_per_user:
+        if(event['event_name'] == start_event_name):
+          tracking = True
+          tracking_id = event['session_id']
+          current_path.append(event)
+        
+        elif(tracking and tracking_id != event['session_id']):
+          tracking_id = -1
+          current_path.append({"user_id": user, "timestamp": np.NaN, 'table_source': "product", "event_name" : "dropoff"})
+          users_paths.append(current_path)
+          current_path = []
+          tracking = False
 
-            if event["eventName"] == start_event_name:
-                tracking = True
-                current_path.append(event)
+        elif(tracking and event['event_name'] == end_event_name):
+          current_path.append(event)
+          users_paths.append(current_path)
+          current_path = []
+          tracking = False
 
-            elif (
-                tracking
-                and event["eventName"] == end_event_name
-                or event["eventName"] == "dropoff"
-            ):
-                current_path.append(event)
-                users_paths.append(current_path)
-                current_path = []
-                tracking = False
+        elif(tracking and event['session_id'] == tracking_id):
+          current_path.append(event)
 
-            elif tracking:
-                current_path.append(event)
+      if len(current_path) > 0:
+        current_path.append({"user_id": user, "timestamp": np.NaN, 'table_source': "product", "event_name" : "dropoff"})
+        users_paths.append(current_path)
 
-        if len(current_path) > 0:
-            current_path.append(
-                {
-                    "userId": user,
-                    "timestamp": np.NaN,
-                    "type": "Product",
-                    "eventName": "dropoff",
-                    "meta": {},
-                }
-            )
-            users_paths.append(current_path)
-
-        paths[user] = users_paths
+      paths[user] = users_paths
 
     return paths
 
