@@ -141,13 +141,11 @@ def get_histogram(request):
 
 # client-server comm for finding num active users
 @api_view(["GET"])
-def get_num_active_users(request):
-    events = request.GET.get("events")
-    time_interval = request.GET.get("time_interval")
-    data = num_active_users(
-        "content/synthetic_user_journeys.json", events, time_interval
-    )
-    return Response({"info": data})
+def get_metrics(request):
+    dau = get_dau(clickhouse_client)
+    acpd = get_acpd(clickhouse_client)
+    alpd = get_alpd(clickhouse_client)
+    return Response({"lines": [("Daily Active Users", dau), ("Average Cost Per Day", acpd), ("Average Latency per Day", alpd)]})
 
 
 # client-server comm for finding processed query

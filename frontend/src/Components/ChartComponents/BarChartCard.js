@@ -1,6 +1,7 @@
 import React, { useState, useHistory } from 'react';
 import { Card } from 'flowbite-react';
 import { Bar } from 'react-chartjs-2';
+import "../../styles/EventComponentsStyles/BarChardCard.css";
 
 const BarChartCard = ({ title, data }) => {
 
@@ -26,6 +27,7 @@ const BarChartCard = ({ title, data }) => {
   
 
   return (
+    <div className='wrapper'>
       <Card className="border rounded border-gray-300">
         <div className="flex justify-between items-center p-4">
           <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
@@ -35,6 +37,7 @@ const BarChartCard = ({ title, data }) => {
         <Bar data={data} options={options} style={{ width: '500px', height: '400px' }} />
         </div>
       </Card>
+    </div>
   );
 };
 

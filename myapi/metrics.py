@@ -17,31 +17,44 @@ def get_df_from_json(path):
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
-"""
-Returns the number of active users (defined as
-users who have performed an event from the given 
-events list) at each time interval 
-"""
-def num_active_users(path_to_journeys, events, time_interval):
-    df = get_df_from_json(path_to_journeys)
-
-    # Filter for rows where 'eventName' is in 'events'
-    events = events.split(",")
-    df_filtered = df[df["eventName"].isin(events)]
-
-    # Round 'timestamp' to 'time_interval'
-    df_filtered["rounded_timestamp"] = df_filtered["timestamp"].dt.round(time_interval)
-    df_filtered["rounded_timestamp"] = df_filtered["rounded_timestamp"].dt.strftime(
-        "%Y-%m-%d %H:%M:%S"
+# daily active users
+def get_dau(clickhouse_client):
+    dau_sql = """
+    SELECT date, COUNT(DISTINCT user_id) AS daily_active_users
+    FROM (
+        SELECT toStartOfDay(timestamp) AS date, user_id
+        FROM buster_dev.llm
+        UNION ALL
+        SELECT toStartOfDay(timestamp) AS date, user_id
+        FROM buster_dev.product
     )
+    GROUP BY date
+    ORDER BY date
+    """
+    result = clickhouse_client.query(dau_sql)
+    result_dict = {str(date.date()): count for date, count in result.result_rows}
+    return result_dict
 
-    # Group by 'rounded_timestamp' and 'userId'
-    df_result = (
-        df_filtered.groupby(["rounded_timestamp", "userId"]).first().reset_index()
-    )
+# cost per day
+def get_acpd(clickhouse_client):
+    acpd_sql = """
+    SELECT toStartOfDay(timestamp) AS date, SUM(cost) AS total_cost
+    FROM buster_dev.llm
+    GROUP BY date
+    ORDER BY date
+    """
+    result = clickhouse_client.query(acpd_sql)
+    result_dict = {str(date.date()): count for date, count in result.result_rows}
+    return result_dict
 
-    # Count the number of unique 'userId' at each 'rounded_timestamp'
-    rounded_timestamp_counts = (
-        df_result["rounded_timestamp"].value_counts(sort=False).to_dict()
-    )
-    return rounded_timestamp_counts
+# average latency per day
+def get_alpd(clickhouse_client):
+    alpd_sql = """
+    SELECT toStartOfDay(timestamp) AS date, AVG(latency) AS average_latency
+    FROM buster_dev.llm
+    GROUP BY date, event_name
+    ORDER BY date, event_name
+    """
+    result = clickhouse_client.query(alpd_sql)
+    result_dict = {str(date.date()): count for date, count in result.result_rows}
+    return result_dict

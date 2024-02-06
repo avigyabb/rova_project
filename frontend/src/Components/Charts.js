@@ -41,12 +41,8 @@ const Charts = () => {
   useEffect(() => {
     const fetchData = async () =>  {
       try {
-        const params = {
-          events: "pin_dashboard,save_dashboard",
-          time_interval: "5S", // 5 seconds
-        };
-        const response = await axios.get('http://localhost:8000/get-num-active-users/', { params });
-        setLineData(response.data.info);
+        const response = await axios.get('http://localhost:8000/get-metrics/');
+        setLineData(response.data.lines);
       } catch (error) {
         console.error(error);
       } finally {
@@ -75,30 +71,25 @@ const Charts = () => {
   }
 
   // Function to transform backend data to line format
-  function transformDataForLineChart(data) {
-    const labels = Object.keys(data);
-    const counts = Object.values(data);
-
-    const line_data = {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Daily Active Users',
-          data: counts,
-          fill: false,
-          backgroundColor: 'rgb(230, 30, 30)',
-          borderColor: 'rgb(230, 30, 30)',
-        },
-      ],
+  function transformDataForLineChart(dataArray) {
+    const lineData = {
+      labels: dataArray.map(([label]) => label), // Extracting labels from tuples
+      datasets: dataArray.map(([label, counts], index) => ({
+        label: label,
+        data: Object.values(counts),
+        fill: false,
+        backgroundColor: 'rgb(230, 30, 30)',
+        borderColor: 'rgb(230, 30, 30)',
+      })),
     };
-
-    return line_data;
+  
+    return lineData;
   }
 
   // Transform and assign to variable
   const bar_data = transformDataForBarChart(barDataBackend);
   const line_data = transformDataForLineChart(lineDataBackend);
-  console.log(bar_data)
+
   return (
     <div className="flex flex-wrap gap-4 p-8">
     <LineChartCard
@@ -106,12 +97,14 @@ const Charts = () => {
         data={line_data}
         options={line_options}
       />
+
     <BarChartCard
         title="Bar Data"
         data={bar_data}
         options={bar_options}
       />
     </div>
+  
   );
 };
 

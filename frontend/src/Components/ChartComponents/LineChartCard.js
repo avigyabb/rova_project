@@ -3,6 +3,7 @@ import { Card } from 'flowbite-react';
 import { Line } from 'react-chartjs-2';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import "../../styles/EventComponentsStyles/LineChartCard.css";
 
 {/* Line Chart Card */}
 const LineChartCard = ({ title, data, options }) => {
@@ -12,6 +13,7 @@ const LineChartCard = ({ title, data, options }) => {
   }, {}));
 
   return (
+    <div className='wrapper'>
     <Card>
         <div className="flex justify-between items-center p-4">
           <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
@@ -45,6 +47,7 @@ const LineChartCard = ({ title, data, options }) => {
         />
         </div>
     </Card>
+    </div>
   );
 };
 
