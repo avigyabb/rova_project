@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# added this for heroku
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Application definition
 
