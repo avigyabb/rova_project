@@ -2,7 +2,7 @@ from .callgpt import *
 import pandas as pd
 
 # Returns sql query to join dbs
-combined_table_sql =  """
+combined_table_sql = """
     WITH CombinedData AS (
         SELECT
             'product' AS table_source,
@@ -11,7 +11,7 @@ combined_table_sql =  """
             data_source_id,
             timestamp,
             session_id,
-            trace_id,
+            NULL AS trace_id,
             NULL AS input_content, -- Placeholder columns for llm table
             NULL AS output_content,
             NULL AS llm_in_use,
@@ -53,6 +53,7 @@ combined_table_sql =  """
         )
     """
 
+
 def process_session_query(gptclient, query):
     response = query_gpt(gptclient, build_sessions_sql_prompt(query))
     return response
@@ -60,7 +61,7 @@ def process_session_query(gptclient, query):
 
 # Returns the session data for the given session ids
 def get_session_data_from_ids(clickhouse_client, session_ids):
-    
+
     sql = (
         """
         SELECT session_id, user_id, MIN(timestamp) AS earliest_timestamp
@@ -75,6 +76,7 @@ def get_session_data_from_ids(clickhouse_client, session_ids):
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
     df["earliest_timestamp"] = df["earliest_timestamp"].astype(str)
     return df.to_dict(orient="records")
+
 
 # Finds all traces per user with specific event occuring at given step and beginning and ending with provided event names
 def get_session_ids_given_step(paths, step, event_name):

@@ -9,21 +9,19 @@ import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import '../../styles/SessionSearch.css';
 
-const SessionSearch = ({ setSessions, setIsLoading }) => {
-
-  const [queryResponse, setQueryResponse] = useState(`SELECT *\nFROM (\nSELECT session_id FROM buster_dev.llm\nUNION DISTINCT\nSELECT session_id FROM buster_dev.product\n)\nLIMIT 50\n`);
+const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {
     if (event.key === 'Enter') {
-      setQueryResponse("");
+      setSqlBox("");
       const fetchQueryResponse = async () => {
         try {
           const params = {
             query: event.target.value
           };
           const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
-          setQueryResponse(response.data.processed_query);
+          setSqlBox(response.data.processed_query);
         } catch (error) {
           console.error(error);
         }
@@ -31,44 +29,10 @@ const SessionSearch = ({ setSessions, setIsLoading }) => {
       fetchQueryResponse();
     }
   };
-
-  const handleSqlChange = (event) => {
-    // Update the sqlQuery state with the new value from the textarea
-    setQueryResponse(event.target.value);
-  };
   
-  const handleSqlQuery = (event) => {
-    // Listen for command + enter key press
-    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      
-      setIsLoading(true);
-  
-      const fetchSqlResponse = async () => {
-        try {
-          const params = {
-            sql: queryResponse
-          };
-          console.log("queryResponse: " + queryResponse);
-          const response = await axios.get('http://localhost:8000/get-sessions/', { params });
-          setSessions(response.data.sessions);
-          setIsLoading(false);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-  
-      fetchSqlResponse();
-    }
-  };
-  
-  // Attach the event listener
-  document.addEventListener('keydown', handleSqlQuery);
-  
-
   // Display the entered query below the search bar
   return (
-    <div className="search-and-filter mb-4">
+    <div className="search mb-4">
         <TextField
           style={{ borderRadius: '0px', zIndex: 100 }}
           fullWidth
@@ -90,22 +54,6 @@ const SessionSearch = ({ setSessions, setIsLoading }) => {
             ),
           }}
         />
-
-        <div className='sql-header'> sql (cmd + enter to run) </div>
-        {queryResponse ? (
-          <textarea
-            className="sql-response"
-            value={queryResponse}
-            placeholder="Write your SQL query here..."
-            spellCheck="false"
-            onChange={handleSqlChange}
-            onKeyPress={handleSqlQuery}
-          />
-        ) : (
-          <div className="sql-response flex justify-center items-center">
-            <CircularProgress style={{ color: '#FFA189' }}/>
-          </div>
-        )}
     </div>
   );
 };

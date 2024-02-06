@@ -26,6 +26,7 @@ clickhouse_client = clickhouse_connect.get_client(
     password="V8fBb2R_ZmW4i",
 )
 
+
 def load_df_once():
     sql = """
         SELECT
@@ -42,10 +43,12 @@ def load_df_once():
 
 df = load_df_once()
 
+
 # Simple function to test CS communication
 @api_view(["GET"])
 def hello_world(request):
     return Response({"message": "Hello, world!"})
+
 
 # client-server comm for finding filtered paths
 @api_view(["GET"])
@@ -74,6 +77,7 @@ def get_sessions_at_step(request):
     sessions = get_session_data_from_ids(clickhouse_client, session_ids)
     return Response({"sessions": sessions})
 
+
 # client-server comm for finding trace sessions for all users
 @api_view(["GET"])
 def get_sessions(request):
@@ -95,6 +99,11 @@ def get_user(request):
         WHERE user_id = {request.GET.get("userId")}
         """
     result = clickhouse_client.query(combined_table_sql + sql_query)
+    output = df_to_user_events(result)
+    return Response({"info": output})
+
+
+def df_to_user_events(result):
     # dataframe of all events of user ordered by timestamp
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
@@ -129,7 +138,7 @@ def get_user(request):
             )
 
     print(user_events)
-    return Response({"info": user_events})
+    return user_events
 
 
 # client-server comm for finding histogram
@@ -145,7 +154,15 @@ def get_metrics(request):
     dau = get_dau(clickhouse_client)
     acpd = get_acpd(clickhouse_client)
     alpd = get_alpd(clickhouse_client)
-    return Response({"lines": [("Daily Active Users", dau), ("Average Cost Per Day", acpd), ("Average Latency per Day", alpd)]})
+    return Response(
+        {
+            "lines": [
+                ("Daily Active Users", dau),
+                ("Average Cost Per Day", acpd),
+                ("Average Latency per Day", alpd),
+            ]
+        }
+    )
 
 
 # client-server comm for finding processed query
