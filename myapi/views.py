@@ -12,6 +12,12 @@ from .topk import *
 from .flows import *
 from .metrics import *
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
+import rova_client
+
 embeddings_model = OpenAIEmbeddings(
     openai_api_key="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"
 )
@@ -25,6 +31,19 @@ clickhouse_client = clickhouse_connect.get_client(
     username="default",
     password="V8fBb2R_ZmW4i",
 )
+rova_client = rova_client.Rova('buster_dev')
+
+@csrf_exempt
+@require_POST
+def track_event(request):
+    try:
+        data = json.loads(request.body)
+        rova_client.capture(data)
+        # Process your data here, e.g., save it to the database or perform other logic
+        print(data)  # Example to print the data received
+        return JsonResponse({'status': 'success', 'message': 'Event tracked successfully.'})
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 
 
 def load_df_once():
