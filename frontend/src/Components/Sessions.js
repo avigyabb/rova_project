@@ -20,7 +20,7 @@ const Sessions = () => {
           sql: sqlBox
         };
         console.log(params);
-        const response = await axios.get('http://localhost:8000/get-sessions/', { params });
+        const response = await axios.get('https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-sessions/', { params });
         setSessions(response.data.sessions);
       } catch (error) {
         console.error(error);
@@ -49,7 +49,7 @@ const Sessions = () => {
             sql: sqlBox
           };
           console.log(params)
-          const response = await axios.get('http://localhost:8000/get-sessions/', { params });
+          const response = await axios.get('https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-sessions/', { params });
           setSessions(response.data.sessions);
           setIsLoading(false);
         } catch (error) {

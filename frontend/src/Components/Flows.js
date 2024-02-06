@@ -102,7 +102,7 @@ function Flows() {
           start_event_name : startState,
           end_event_name : endState,
         }
-        const response = await axios.get("http://localhost:8000/get-percentages/", {params});
+        const response = await axios.get("https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-percentages/", {params});
         setArrowsData(response.data.arrow_percentages);
         console.log(response.data.arrow_percentages);
         setFlowBoxesData(response.data.box_percentages);
@@ -153,7 +153,7 @@ function Flows() {
   useEffect(() => {
     const getOptions = async() => {
       try {
-        const response = await axios.get("http://localhost:8000/get-options/");
+        const response = await axios.get("https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-options/");
         setOptionsArrayData(response.data.options);
         
       } catch (error) {

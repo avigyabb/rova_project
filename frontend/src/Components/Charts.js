@@ -41,7 +41,7 @@ const Charts = () => {
   useEffect(() => {
     const fetchData = async () =>  {
       try {
-        const response = await axios.get('http://localhost:8000/get-metrics/');
+        const response = await axios.get('https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-metrics/');
         setLineData(response.data.lines);
       } catch (error) {
         console.error(error);
