@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-cregy+byp5ma2i+&ad&duv625--oz=uy_(2bxo7fqwfc5m4%qa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["warm-bastion-76053.herokuapp.com", "127.0.0.1"]
 
 # added this for heroku
 STATIC_ROOT = BASE_DIR / "staticfiles"
