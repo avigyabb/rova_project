@@ -1,1 +1,1 @@
-web: gunicorn rova_project.wsgi
+web: gunicorn rova_demo.wsgi
