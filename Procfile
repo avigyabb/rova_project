@@ -1,0 +1,1 @@
+web: gunicorn rova_project.wsgi

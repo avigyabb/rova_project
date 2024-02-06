@@ -78,6 +78,13 @@ def get_session_data_from_ids(clickhouse_client, session_ids):
     return df.to_dict(orient="records")
 
 
+def get_all_paths(paths):
+    all_paths = []
+    for user in paths.keys():
+        all_paths += paths[user]
+    return all_paths
+
+
 # Finds all traces per user with specific event occuring at given step and beginning and ending with provided event names
 def get_session_ids_given_step(paths, step, event_name):
     session_ids = []
