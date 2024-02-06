@@ -78,9 +78,9 @@ const EventsTrace = () => {
             <h1 className='ml-5 mb-1 text-xl'>
               Events Feed
             </h1>
-            <button className='ml-auto mr-5'> Select </button>
+            {/* <button className='ml-auto mr-5'> Select </button>
             <button className='mr-5'> Filter </button>
-            <button> Export </button>
+            <button> Export </button> */}
           </div>
           <div className="event-list">
             {userData.map((event, index) => (
