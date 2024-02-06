@@ -1,7 +1,9 @@
 # Asks ChatGPT to identify topics
 import json
 
-def query_gpt(client,
+
+def query_gpt(
+    client,
     msg_arr,
     model="gpt-4-turbo-preview",
     temperature=0.0,
@@ -56,7 +58,8 @@ def build_sessions_sql_prompt(user_query):
                      query for at most 50 results using the LIMIT clause as per SQLite. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
                      not to query for columns that do not exist. Also, pay attention to which column is in which table. \n \
-                     Rows with the same session_id belong to the same session.  \n \
+                     Rows with the same session_id belong to the same session. When filtering for specific values, make sure you\n \
+                     wrap the identifiers in single quotes. \n \
                      Create subqueries whenever possible, especially for UNIONs. For example: \n \
                      SELECT DISTINCT session_id FROM buster_dev.llm \n \
                      UNION \n \

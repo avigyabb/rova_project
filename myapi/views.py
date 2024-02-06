@@ -118,7 +118,7 @@ def get_user(request):
     sql_query = f"""
         SELECT *
         FROM CombinedData
-        WHERE user_id = {request.GET.get("userId")}
+        WHERE user_id = '{request.GET.get("userId")}'
         """
     result = clickhouse_client.query(combined_table_sql + sql_query)
     output = df_to_user_events(result)

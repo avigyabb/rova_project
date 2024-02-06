@@ -31,7 +31,7 @@ pytz==2023.4
 PyYAML==6.0.1
 regex==2023.12.25
 requests==2.31.0
-rova-client==2.0.7
+rova-client==2.0.9
 scikit-learn==1.4.0
 scipy==1.12.0
 setuptools==68.2.2
