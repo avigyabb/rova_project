@@ -30,7 +30,7 @@ function Flows() {
       var color = "";
       if (eventName == "dropoff") {
         color = "dropOffBox";
-      } else if (eventName == "trace") {
+      } else if (eventName == "LLM Trace") {
         color = "chatBox";
       } else {
         color = "productBox";
@@ -40,7 +40,7 @@ function Flows() {
       // label is what is shown on the box
       return (
         <Link to={"/paths"}
-          state={{start : startState, end : endState, step : stepNum, event : eventName}}>
+          state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
         <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
         <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
         </div>
@@ -102,7 +102,7 @@ function Flows() {
           start_event_name : startState,
           end_event_name : endState,
         }
-        const response = await axios.get("https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-percentages/", {params});
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-percentages/", {params});
         setArrowsData(response.data.arrow_percentages);
         console.log(response.data.arrow_percentages);
         setFlowBoxesData(response.data.box_percentages);
@@ -172,7 +172,7 @@ function Flows() {
           <div class="header flex flex-row">
             <div class="beginState">
               <select class="" id="startDropdown" value={startState} onChange={handleStartChange}>
-                <option value="">Start</option>
+                <option value="">Start Event</option>
                 {optionsArray}
               </select>
             </div>
@@ -180,7 +180,7 @@ function Flows() {
             <button class="h-full" onClick={addColumn}> <CgAddR class="h-8 w-8 ml-6 thin-icon" /> </button>
             <div class="endState ml-auto">
               <select class="state bg-gray-200" id="endDropdown" value={endState} onChange={handleEndChange}>
-                <option value="">End</option>
+                <option value="">End Event</option>
                 {optionsArray}
               </select>
             </div>

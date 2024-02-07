@@ -16,6 +16,7 @@ const EventsTrace = () => {
 
     const location = useLocation();
     const { userId, sessionId } = location.state || {}; // Get the passed state
+    const [sessionIdState, setSessionIdState] = useState(sessionId);
 
     useEffect(() => {
 
@@ -24,6 +25,7 @@ const EventsTrace = () => {
         try {
           const params = {
             userId: userId,
+            sessionId: sessionIdState,
           };
           const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
           setData(response.data.info);
@@ -34,7 +36,7 @@ const EventsTrace = () => {
         }
       };
       fetchData();
-    }, []);
+    }, [sessionIdState]);
 
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
@@ -47,6 +49,10 @@ const EventsTrace = () => {
         </div>
       );
     }
+
+    const seeAllUserEvents = () => {
+      setSessionIdState(-1);
+    };
 
     if (!userId) return <div>No user data</div>;
 
@@ -75,12 +81,18 @@ const EventsTrace = () => {
             <p className='mt-2'>Session ID: {sessionId}</p>
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
-            <h1 className='ml-5 mb-1 text-xl'>
-              Events Feed
-            </h1>
-            {/* <button className='ml-auto mr-5'> Select </button>
+            {sessionIdState >= 0 ? (
+              <h1 className='ml-5 mb-1 text-xl'>
+                Session {sessionId} Events
+              </h1>
+            ) : (
+              <h1 className = 'ml-5 mb-1 text-xl'>
+                Events Feed
+              </h1>
+            )}
+            <button className='ml-auto mr-5'> Select </button>
             <button className='mr-5'> Filter </button>
-            <button> Export </button> */}
+            <button> Export </button>
           </div>
           <div className="event-list">
             {userData.map((event, index) => (
@@ -91,6 +103,7 @@ const EventsTrace = () => {
                 isSelected={selectedEvent && selectedEvent === event}
               />
             ))}
+            {sessionIdState >= 0 && <button class = "button_see_all_user_events" onClick={seeAllUserEvents}> See all of user {userId}'s events </button>}
           </div>
         </div>
         {selectedEvent && (

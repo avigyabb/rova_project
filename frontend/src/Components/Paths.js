@@ -8,7 +8,7 @@ function Paths() {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { start, end, step, event } = location.state || {}; // Fallback to empty object if state is undefined
+  const { start, end, step, numSteps, event } = location.state || {}; // Fallback to empty object if state is undefined
 
   useEffect(() => {
 
@@ -19,6 +19,7 @@ function Paths() {
           start_event:start,
           end_event: end, 
           step_num: step, 
+          num_steps: numSteps,
           event_name: event,
         };
         const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions-at-step/', { params });

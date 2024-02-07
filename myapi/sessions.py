@@ -88,10 +88,18 @@ def get_all_paths(paths):
 
 
 # Finds all traces per user with specific event occuring at given step and beginning and ending with provided event names
-def get_session_ids_given_step(paths, step, event_name):
+def get_session_ids_given_step(paths, step, num_steps, event_name):
     session_ids = []
     for user in paths.keys():
         for path in paths[user]:
-            if step < len(path) and path[step]["event_name"] == event_name:
+            # step given is last step (end event), so last event in path must be the given event
+            # dropoff can occur at earlier step than last step so doesn't count if event_name is "dropoff"
+            if step == (num_steps - 1) and path[len(path) - 1]["event_name"] == event_name and event_name != "dropoff":
+                session_ids.append(path[len(path) - 1]["session_id"])
+            # if step == num_steps - 1 and event_name is "dropoff", this check still applies
+            elif step < len(path) and path[step]["event_name"] == event_name:
                 session_ids.append(path[step]["session_id"])
+            # case where "dropoff" at num_steps - 1 is selected
+            elif step == (num_steps - 1) and event_name == "dropoff" and path[len(path) - 1] == "dropoff":
+                session_ids.append(path[len(path) - 1]["session_id"])
     return session_ids

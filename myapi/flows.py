@@ -57,15 +57,16 @@ def find_paths(rova_data, start_event_name, end_event_name):
                 current_path.append(event)
 
             elif tracking and tracking_id != event["session_id"]:
-                tracking_id = -1
                 current_path.append(
                     {
                         "user_id": user,
                         "timestamp": np.NaN,
                         "table_source": "product",
                         "event_name": "dropoff",
+                        "session_id" : tracking_id,
                     }
                 )
+                tracking_id = -1
                 users_paths.append(current_path)
                 current_path = []
                 tracking = False
@@ -86,10 +87,11 @@ def find_paths(rova_data, start_event_name, end_event_name):
                     "timestamp": np.NaN,
                     "table_source": "product",
                     "event_name": "dropoff",
+                    "session_id" : tracking_id,
                 }
             )
             users_paths.append(current_path)
-
+            
         paths[user] = users_paths
 
     return paths

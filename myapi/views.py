@@ -88,12 +88,13 @@ def get_sessions_at_step(request):
     startEvent = request.GET.get("start_event")
     endEvent = request.GET.get("end_event")
 
-    events = events_to_traces(df)
+    events = df_to_user_events_by_user(df)
     paths = find_paths(events, startEvent, endEvent)
 
     step_num = request.GET.get("step_num")
+    num_steps = request.GET.get("num_steps")
     event_name = request.GET.get("event_name")
-    session_ids = get_session_ids_given_step(paths, int(step_num), event_name)
+    session_ids = get_session_ids_given_step(paths, int(step_num), int(num_steps), event_name)
     sessions = get_session_data_from_ids(clickhouse_client, session_ids)
     return Response({"sessions": sessions})
 
@@ -113,22 +114,28 @@ def get_sessions(request):
 # client-server comm for finding trace sessions for specific user
 @api_view(["GET"])
 def get_user(request):
-    sql_query = f"""
-        SELECT *
-        FROM CombinedData
-        WHERE user_id = '{request.GET.get("userId")}'
-        """
-    result = clickhouse_client.query(combined_table_sql + sql_query)
-    output = df_to_user_events(result)
-    return Response({"info": output})
-
-
-def df_to_user_events(result):
+    if (int(request.GET.get("sessionId")) >= 0):
+        sql_query = f"""
+            SELECT *
+            FROM CombinedData
+            WHERE user_id = '{request.GET.get("userId")}' AND session_id = '{request.GET.get("sessionId")}'
+            """
+    else:
+        sql_query = f"""
+            SELECT *
+            FROM CombinedData
+            WHERE user_id = '{request.GET.get("userId")}'
+            """
+    result = clickhouse_client.query(combined_table_sql + sql_query)     
     # dataframe of all events of user ordered by timestamp
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
     )
+    output = df_to_user_events(df)
+    return Response({"info": output})
 
+
+def df_to_user_events(df):    
     user_events = []
     completed_events = set()
     for index, row in df.iterrows():
@@ -141,6 +148,8 @@ def df_to_user_events(result):
                 "timestamp": row["timestamp"],
                 "error_ocurred": False,
                 "events": [],
+                "user_id": row["user_id"],
+                "session_id": row["session_id"],
             }
             for index, filtered_row in trace_id_filtered_df.iterrows():
                 if filtered_row["error_status"] != "none":
@@ -158,6 +167,15 @@ def df_to_user_events(result):
             )
 
     return user_events
+
+
+def df_to_user_events_by_user(df):
+    user_events = df_to_user_events(df)
+
+    user_events_by_user = defaultdict(list)
+    for event in user_events:
+        user_events_by_user[event["user_id"]].append(event)
+    return user_events_by_user
 
 
 # client-server comm for finding histogram
@@ -193,7 +211,7 @@ def get_processed_query(request):
 
 @api_view(["GET"])
 def get_percentages(request):
-    events = events_to_traces(df)
+    events = df_to_user_events_by_user(df)
 
     start_event_name = request.GET.get("start_event_name")
     end_event_name = request.GET.get("end_event_name")
@@ -214,5 +232,5 @@ def get_options(request):
       FROM buster_dev.product
     """
     options = clickhouse_client.query(sql_query).result_rows
-    options.append("trace")
+    options.append("LLM Trace")
     return Response({"options": options})
