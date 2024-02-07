@@ -41,10 +41,8 @@ def track_event(request):
         data = json.loads(request.body)
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
-        print(data)  # Example to print the data received
-        return JsonResponse(
-            {"status": "success", "message": "Event tracked successfully."}
-        )
+        #print(data)  # Example to print the data received
+        return JsonResponse({'status': 'success', 'message': 'Event tracked successfully.'})
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
@@ -159,7 +157,6 @@ def df_to_user_events(result):
                 {k: None if pd.isna(v) else v for k, v in row.to_dict().items()}
             )
 
-    print(user_events)
     return user_events
 
 

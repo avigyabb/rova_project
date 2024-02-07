@@ -7,6 +7,7 @@ combined_table_sql = """
         SELECT
             'product' AS table_source,
             event_name,
+            event_type,
             user_id,
             data_source_id,
             timestamp,
@@ -30,6 +31,7 @@ combined_table_sql = """
         SELECT
             'llm' AS table_source,
             event_name,
+            event_type,
             user_id,
             data_source_id,
             timestamp,
