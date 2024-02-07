@@ -52,9 +52,23 @@ def get_alpd(clickhouse_client):
     alpd_sql = """
     SELECT toStartOfDay(timestamp) AS date, AVG(latency) AS average_latency
     FROM buster_dev.llm
-    GROUP BY date, event_name
-    ORDER BY date, event_name
+    GROUP BY date
+    ORDER BY date
     """
     result = clickhouse_client.query(alpd_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
+    return result_dict
+
+# get list of dates
+def get_dates(clickhouse_client):
+    dates_sql = """
+    SELECT DISTINCT toStartOfDay(timestamp) AS date
+    FROM buster_dev.llm
+    UNION ALL
+    SELECT DISTINCT toStartOfDay(timestamp) AS date
+    FROM buster_dev.product
+    ORDER BY date
+    """
+    result = clickhouse_client.query(dates_sql)
+    result_dict = [date for date in result.result_rows]
     return result_dict

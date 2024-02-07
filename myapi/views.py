@@ -191,13 +191,15 @@ def get_metrics(request):
     dau = get_dau(clickhouse_client)
     acpd = get_acpd(clickhouse_client)
     alpd = get_alpd(clickhouse_client)
+    dates = get_dates(clickhouse_client)
     return Response(
         {
             "lines": [
                 ("Daily Active Users", dau),
                 ("Average Cost Per Day", acpd),
                 ("Average Latency per Day", alpd),
-            ]
+            ],
+            "dates":dates
         }
     )
 
