@@ -16,7 +16,6 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
       </div>
         {selectedEvent.table_source == "llm" && (
           <div className="event-metadata-content">
-            {/* <pre>{JSON.stringify(selectedEvent || {}, null, 2)}</pre> */}
             <div className="sidebar flex flex-col">
               <div className="traceBox mb-1 flex" onClick={() => setSelectedTrace(null)}>
                 <ViewTimelineIcon className="mr-2"/>

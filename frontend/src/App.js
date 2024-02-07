@@ -17,7 +17,6 @@ const customTheme = createTheme({
 });
 
 function App() {
-
   return (
     <>
     <Router>
@@ -25,12 +24,11 @@ function App() {
         <ThemeProvider theme={customTheme}>
         <Navbar/>
         <Routes>
-          <Route exact path="/" element={<Flows />} />
-          <Route path="/charts" element={<Charts />} />
-          <Route path="/trace/:userId" element={<EventsTrace/>}/>
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/paths" element={<Paths/>} />
-          <Route path='/hello-world' element={<HelloWorld />} />
+          <Route exact path={`${process.env.REACT_APP_AUTH_HEADER}`} element={<Flows />} />
+          <Route path={`${process.env.REACT_APP_AUTH_HEADER}/charts`} element={<Charts />} />
+          <Route path={`${process.env.REACT_APP_AUTH_HEADER}/trace/:userId`} element={<EventsTrace/>}/>
+          <Route path={`${process.env.REACT_APP_AUTH_HEADER}/sessions`} element={<Sessions />} />
+          <Route path={`${process.env.REACT_APP_AUTH_HEADER}/paths`} element={<Paths/>} />
         </Routes>
         </ThemeProvider>
       </div>

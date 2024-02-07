@@ -8,7 +8,7 @@ const SessionCard = ({ sessionId, userId, timestamp }) => {
 
     const navigate = useNavigate();
     const handleClick = () => {
-        navigate(`/trace/${userId}`, { state: { userId, sessionId } });
+        navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${userId}`, { state: { userId, sessionId } });
     };
     return (
       <div className="user-card" onClick={handleClick}>

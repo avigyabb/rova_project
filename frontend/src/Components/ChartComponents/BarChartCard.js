@@ -9,7 +9,7 @@ const BarChartCard = ({ title, data }) => {
     onClick: (event, elements) => {
       if (elements.length > 0) {
         const index = elements[0].index;
-        window.location.href = '/sessions';
+        window.location.href = `/${process.env.REACT_APP_AUTH_HEADER}/sessions`;
       }
     },
     scales: {
