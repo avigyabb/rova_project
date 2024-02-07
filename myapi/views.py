@@ -57,9 +57,9 @@ def load_df_once():
             CombinedData
         """
     result = clickhouse_client.query(combined_table_sql + sql)
-    df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
-        by=["timestamp"]
-    )
+    df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    if len(df) != 0:
+        df = df.sort_values(by=["timestamp"])
     return df
 
 
