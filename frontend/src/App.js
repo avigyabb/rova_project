@@ -9,6 +9,7 @@ import Paths from './Components/Paths';
 import HelloWorld from "./HelloWorld"
 import Navbar from './Components/Navbar';
 import { createTheme, ThemeProvider, Chip } from '@mui/material';
+// import Website from './Components/Website/Website';
 
 const customTheme = createTheme({
   typography: {
@@ -29,6 +30,7 @@ function App() {
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/trace/:userId`} element={<EventsTrace/>}/>
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/sessions`} element={<Sessions />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/paths`} element={<Paths/>} />
+          {/* <Route path={`/`} element={<Website />} /> */}
         </Routes>
         </ThemeProvider>
       </div>

@@ -103,7 +103,7 @@ const EventsTrace = () => {
                 isSelected={selectedEvent && selectedEvent === event}
               />
             ))}
-            {sessionIdState >= 0 && <button class = "button_see_all_user_events" onClick={seeAllUserEvents}> See all of user {userId}'s events </button>}
+            {sessionIdState >= 0 && <button class = "button_see_all_user_events text-sm ml-5" onClick={seeAllUserEvents}> See all of {userId}'s events </button>}
           </div>
         </div>
         {selectedEvent && (

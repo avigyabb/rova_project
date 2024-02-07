@@ -39,11 +39,10 @@ function Flows() {
 
       // label is what is shown on the box
       return (
-        <Link to={`/${process.env.REACT_APP_AUTH_HEADER}/paths`}
-          state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
-        <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
-        <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
-        </div>
+        <Link to={`${process.env.REACT_APP_AUTH_HEADER}/paths`} state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
+          <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
+              <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
+          </div>
         </Link>
       );
     }
