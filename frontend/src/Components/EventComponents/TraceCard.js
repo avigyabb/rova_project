@@ -25,7 +25,7 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                 <div className="traceBox flex flex-row items-center" onClick={() => setSelectedTrace(trace)}> 
                   <BorderClearIcon className="ml-2 mr-2"/>
                   <p className='text-sm'> {JSON.stringify(trace.event_name)} </p>
-                  { trace.error_status !== "none" && (
+                  { trace.error_status !== "" && trace.error_status !== "none" && (
                     < ErrorIcon fontSize='small ml-4' style={{color: '#B02300'}}/>
                   )}
                 </div>

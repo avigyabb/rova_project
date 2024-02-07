@@ -62,7 +62,7 @@ const EventsTrace = () => {
           <div className="user-info-card">
             <div className='flex flex-row'>
               <img
-                src="https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/1024px-Default_pfp.svg.png"
                 alt="Profile"
                 style={{
                   width: '100px', // Set the width (and height) to the desired value

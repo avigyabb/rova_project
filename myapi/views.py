@@ -41,8 +41,10 @@ def track_event(request):
         data = json.loads(request.body)
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
-        #print(data)  # Example to print the data received
-        return JsonResponse({'status': 'success', 'message': 'Event tracked successfully.'})
+        # print(data)  # Example to print the data received
+        return JsonResponse(
+            {"status": "success", "message": "Event tracked successfully."}
+        )
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
@@ -94,7 +96,9 @@ def get_sessions_at_step(request):
     step_num = request.GET.get("step_num")
     num_steps = request.GET.get("num_steps")
     event_name = request.GET.get("event_name")
-    session_ids = get_session_ids_given_step(paths, int(step_num), int(num_steps), event_name)
+    session_ids = get_session_ids_given_step(
+        paths, int(step_num), int(num_steps), event_name
+    )
     sessions = get_session_data_from_ids(clickhouse_client, session_ids)
     return Response({"sessions": sessions})
 
@@ -114,7 +118,7 @@ def get_sessions(request):
 # client-server comm for finding trace sessions for specific user
 @api_view(["GET"])
 def get_user(request):
-    if (int(request.GET.get("sessionId")) >= 0):
+    if int(request.GET.get("sessionId")) >= 0:
         sql_query = f"""
             SELECT *
             FROM CombinedData
@@ -126,7 +130,7 @@ def get_user(request):
             FROM CombinedData
             WHERE user_id = '{request.GET.get("userId")}'
             """
-    result = clickhouse_client.query(combined_table_sql + sql_query)     
+    result = clickhouse_client.query(combined_table_sql + sql_query)
     # dataframe of all events of user ordered by timestamp
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
@@ -135,7 +139,7 @@ def get_user(request):
     return Response({"info": output})
 
 
-def df_to_user_events(df):    
+def df_to_user_events(df):
     user_events = []
     completed_events = set()
     for index, row in df.iterrows():
@@ -152,7 +156,10 @@ def df_to_user_events(df):
                 "session_id": row["session_id"],
             }
             for index, filtered_row in trace_id_filtered_df.iterrows():
-                if filtered_row["error_status"] != "none":
+                if (
+                    filtered_row["error_status"] != "none"
+                    and filtered_row["error_status"] != ""
+                ):
                     buffer_dict["error_ocurred"] = True
                 event_dict = {
                     k: None if pd.isna(v) else v
