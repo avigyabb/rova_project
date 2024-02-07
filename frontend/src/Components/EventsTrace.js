@@ -25,7 +25,7 @@ const EventsTrace = () => {
           const params = {
             userId: userId,
           };
-          const response = await axios.get('https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-user/', { params });
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
           setData(response.data.info);
         } catch (error) {
           console.error(error);

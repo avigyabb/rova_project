@@ -153,7 +153,7 @@ function Flows() {
   useEffect(() => {
     const getOptions = async() => {
       try {
-        const response = await axios.get("https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-options/");
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
         setOptionsArrayData(response.data.options);
         
       } catch (error) {

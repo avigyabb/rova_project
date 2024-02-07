@@ -20,7 +20,7 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
           const params = {
             query: event.target.value
           };
-          const response = await axios.get('http://localhost:8000/get-processed-query/', { params });
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-processed-query/', { params });
           setSqlBox(response.data.processed_query);
         } catch (error) {
           console.error(error);

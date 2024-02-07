@@ -21,7 +21,7 @@ function Paths() {
           step_num: step, 
           event_name: event,
         };
-        const response = await axios.get('https://warm-bastion-76053-a1e76fa98e82.herokuapp.com/get-sessions-at-step/', { params });
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions-at-step/', { params });
         setSessions(response.data.sessions);
         console.log(sessions);
       } catch (error) {
