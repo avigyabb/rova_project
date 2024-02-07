@@ -70,6 +70,10 @@ def find_paths(rova_data, start_event_name, end_event_name):
                 users_paths.append(current_path)
                 current_path = []
                 tracking = False
+                if event["event_name"] == start_event_name:
+                    tracking = True
+                    tracking_id = event["session_id"]
+                    current_path.append(event)
 
             elif tracking and event["event_name"] == end_event_name:
                 current_path.append(event)
