@@ -9,6 +9,7 @@ const BarChartCard = ({ title, data }) => {
     onClick: (event, elements) => {
       if (elements.length > 0) {
         const index = elements[0].index;
+        // this might not work
         window.location.href = `/${process.env.REACT_APP_AUTH_HEADER}/sessions`;
       }
     },

@@ -8,6 +8,7 @@ import EventsTrace from "./Components/EventsTrace";
 import Sessions from "./Components/Sessions";
 import Paths from './Components/Paths';
 import Hero from './Components/Website/Hero';
+import Login from './Components/Website/Login';
 
 const customTheme = createTheme({
   typography: {
@@ -29,6 +30,7 @@ const AppContent = () => {
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/trace/:userId`} element={<EventsTrace/>}/>
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/sessions`} element={<Sessions />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/paths`} element={<Paths/>} />
+          <Route path={`/login`} element={<Login />} />
           <Route path={`/`} element={<Hero />} />
         </Routes>
       </div>

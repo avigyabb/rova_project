@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import logo from './images/rovalogo.png'
+import { Link } from 'react-router-dom'
 
 import './WebNavbar.css'
 
@@ -53,10 +54,10 @@ const WebNavbar = () => {
                         </a>
                     </li>
                     <li className='nav-item'>
-                        <a href='/' onClick={closeMenu}>
-                            <span class="label-down">Sign In</span>
-                            <span class="label-down">Sign In</span>
-                        </a>
+                        <Link to={`/login`} onClick={closeMenu}>
+                            <span class="label-down">Log In</span>
+                            <span class="label-down">Log In</span>
+                        </Link>
                     </li>
                 </ul>
             </nav>
