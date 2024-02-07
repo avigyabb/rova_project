@@ -31,7 +31,7 @@ clickhouse_client = clickhouse_connect.get_client(
     username="default",
     password="V8fBb2R_ZmW4i",
 )
-rova_client = rova_client.Rova("buster_dev")
+rova_client = rova_client.Rova("buster_dev", )
 
 
 @csrf_exempt

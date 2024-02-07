@@ -24,7 +24,7 @@ const LineChartCard = ({ title, data, options }) => {
             <Line data={{
               ...data,
               datasets: data.datasets.filter(dataset => selectedData[dataset.label])
-            }} options={options} style={{ width: '1000px', height: '500px' }} />
+            }} options={options} style={{ width: '1000px', height: '400px' }} />
           </div>
         </div>
         <div className="flex flex-col items-center" style={{margin: '0 auto'}}>
