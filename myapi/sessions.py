@@ -76,6 +76,9 @@ def get_session_data_from_ids(clickhouse_client, session_ids):
     )
     result = clickhouse_client.query(combined_table_sql + sql)
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    # Check if nothing returned in the query
+    if len(df) == 0:
+        return {}
     df = df.sort_values(by="earliest_timestamp", ascending=False)
     df["earliest_timestamp"] = df["earliest_timestamp"].astype(str)
     return df.to_dict(orient="records")
