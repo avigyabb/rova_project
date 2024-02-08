@@ -1,0 +1,64 @@
+.charts-container {
+    height: 100vh;
+    margin-top: -1.25rem;
+}
+
+.home-sidebar {
+    background-color: #f3f4f6;
+    height: 100%;
+    width: 15%;
+    padding: 2%;
+}
+
+.home-sidebar p {
+    font-weight: 1000;
+    font-size: larger;
+    margin-bottom: 20%;
+}
+
+.home-sidebar button {
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.home-sidebar button:hover {
+    background-color: rgba(255, 161, 137, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    transition-duration: 1s;
+}
+
+.charts-content {
+    margin-left: 5%;
+    margin-top: 3%;
+}
+
+.charts-content td, th {
+    font-size: small;
+    padding: 10px;
+    border: 1.5px solid rgb(201, 201, 201);
+}
+
+.charts-content thead th {
+    font-size: small;
+    height: 40px;
+    vertical-align: bottom;
+    text-align: left;
+    color: gray;
+}
+
+.categ-name {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+.add-btn {
+    background-color: rgba(255, 161, 137, 0.3);
+    color: #FF8263;
+    border: 2px solid #FF8263;
+    padding: 5px;
+    border-radius: 10px;
+}
