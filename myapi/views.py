@@ -97,7 +97,7 @@ def get_sessions_at_step(request):
     num_steps = request.GET.get("num_steps")
     event_name = request.GET.get("event_name")
     session_ids = get_session_ids_given_step(
-        paths, int(step_num), int(num_steps), event_name
+        get_all_paths(paths), int(step_num), int(num_steps), event_name
     )
     sessions = get_session_data_from_ids(clickhouse_client, session_ids)
     return Response({"sessions": sessions})
