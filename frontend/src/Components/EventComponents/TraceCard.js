@@ -74,12 +74,15 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                   <div className='input-text-header mt-5' style={{backgroundColor: 'gray'}}> INPUT </div>
                   <textarea
                     className='input-text'
-                    value={JSON.stringify(selectedTrace.input_content)}
+                    value={selectedTrace.input_content}
                   />
                   
                   <div className='input-text mt-3' style={{borderRadius: '10px', border: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red'}}>
                     <p className='text-sm mb-2'> OUTPUT </p>
-                    {JSON.stringify(selectedTrace.input_content)}
+                    <textarea
+                      className = 'input-text' style = {{border : 'none'}}
+                      value = {selectedTrace.output_content}
+                    />
                   </div>
                   <div className='flex items-end'>
                     <p className='metric-label mt-2 ml-2'> STATUS </p>

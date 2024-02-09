@@ -127,6 +127,24 @@ def df_to_user_events(df):
                     and filtered_row["error_status"] != ""
                 ):
                     buffer_dict["error_ocurred"] = True
+
+                try:
+                    input_dict = json.loads(filtered_row["input_content"])
+                    input_dict = input_dict[0]
+                    filtered_row["input_content"] = ""
+                    for key in input_dict:
+                        filtered_row["input_content"] += key + ": " + input_dict[key] + "\n"
+                except Exception:
+                    pass
+                
+                try:
+                    output_dict = json.loads(filtered_row["output_content"])
+                    filtered_row["output_content"] = ""
+                    for key in output_dict:
+                        filtered_row["output_content"] += key + ": " + output_dict[key] + "\n"
+                except Exception:
+                    pass
+
                 event_dict = {
                     k: None if pd.isna(v) else v
                     for k, v in filtered_row.to_dict().items()
