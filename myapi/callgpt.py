@@ -117,3 +117,30 @@ def build_sessions_sql_prompt(user_query):
         {"role": "user", "content": user_prompt},
     ]
     return messages
+
+# Builds prompt to determine if LLM event belongs to category
+def build_classify_event_prompt(category_description, event_name, input, output):
+    system_prompt = "You will be provided with an event name, input content, and output content \
+                     that corresponds to a specific user's interaction with my chat-based product. \n \
+                     You will also be provided with a text description of a category that encompasses \
+                     some set of user interactions. \n \
+                     You want to determine if the provided interaction corresponds to the provided category. \n\n \
+                     For example, here is a sample category and user interaction. \n \
+                     Category: The output is a SQL query that generates data from the llm table. \n\n \
+                     Event Name: SQL Generated \n \
+                     Input Content:  \n \
+                     Output Content: SELECT * FROM llm \n\n \
+                     Classification: True \n\n \
+                     Another example is as follows. \n \
+                     Category: The user asks about their sales data \n\n \
+                     Event Name: Classify response \n \
+                     Input Content: What is the retention rate of the user? \n \
+                     Output Content: Retention rate \n\n \
+                     Classification: False"
+
+    user_prompt = f"Category: {category_description}\n\nEvent Name: {event_name}\nInput Content: {input}\nOutput Content: {output}\n\nClassification:"
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    return messages
