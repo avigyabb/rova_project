@@ -8,6 +8,7 @@ from .topk import *
 from .flows import *
 from .metrics import *
 from .consts import *
+from .categories import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -223,3 +224,9 @@ def get_options(request):
     options = clickhouse_client.query(sql_query).result_rows
     options.append("LLM Trace")
     return Response({"options": options})
+
+
+@api_view(["GET"])
+def get_user_categories(request):
+    categories = get_categories()
+    return Response({"categories": categories})

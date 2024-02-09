@@ -1,24 +1,67 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import '../../styles/Charts.css';
+import axios from  'axios';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Category = () => {
 
-    const categories = [
-        {
-          name: 'Lost or Stolen Card',
-          description: 'Description of Lost or Stolen Card. Lost or Stolen Card. Description of Lost or Stolen Card',
-          volume: '52k',
-          trend: '+46%',
-          path: "M0 40 L20 30 L40 34 L60 20 L80 25 L100 20 L120 0"
-        },
-        {
-          name: 'Lost or Stolen Card',
-          description: 'Description of Lost or Stolen Card. Lost or Stolen Card. Description of Lost or Stolen Card',
-          volume: '52k',
-          trend: '-46%',
-          path: "M0 0 L20 24 L40 34 L60 20 L80 25 L100 20 L120 40"
-        },
-      ];    
+    const [categoryList, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [newCategory, setNewCategory] = useState({ name: '', description: '', volume: '', trend: '', path: '' });
+    const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () =>  {
+        setIsLoading(true);
+          try {
+            const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+            setCategories(response.data.categories);
+          } catch (error) {
+            console.error(error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchData();
+      }, []);
+
+    const handleAddNewCategory = () => {
+        setShowNewCategoryRow(true);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewCategory((prevCategory) => ({
+            ...prevCategory,
+            [name]: value,
+        }));
+    };    
+
+    const handleSaveNewCategory = () => {
+        // Save new category logic here
+        // For example, you can send an API request to save the new category
+        // After successful save, update category list and reset new category state
+        setShowNewCategoryRow(false);
+        setCategories((prevCategories) => [...prevCategories, newCategory]);
+        setNewCategory({ name: '', description: '', volume: '', trend: '', path: '' });
+    };
+
+    // Conditional rendering based on isLoading
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex justify-center items-center">
+          <CircularProgress style={{ color: '#FFA189' }}/>
+        </div>
+      );
+    }
+
+    const categories = categoryList.map(category => ({
+        name: category.name,
+        description: category.description,
+        volume: '52k', // Example volume
+        trend: '+46%', // Example trend
+        path: "M0 40 L20 30 L40 34 L60 20 L80 25 L100 20 L120 0" // Example path
+        }));
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -50,11 +93,36 @@ const Category = () => {
           </td>
         </tr>
       );
+
+      const NewTableRow = () => (
+        <tr>
+            <td>
+                <input
+                    type="text"
+                    name="name"
+                    value={newCategory.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter category"
+                />
+            </td>
+            <td>
+                <input
+                    type="text"
+                    name="description"
+                    value={newCategory.description}
+                    onChange={handleInputChange}
+                    placeholder="Enter description"
+                />
+            </td>
+            <td>-</td>
+            <td>-</td>
+            <td>
+                <button onClick={handleSaveNewCategory}>Save</button>
+            </td>
+        </tr>
+    );    
       
       const TopicTable = () => {
-        console.log(categories.map((category, index) => (
-          <TableRow key={index} category={category} />
-        )))
         return (
           <table>
             <thead>
@@ -66,6 +134,7 @@ const Category = () => {
               </tr>
             </thead>
             <tbody>
+            {showNewCategoryRow && <NewTableRow/>}
               {categories.map((category, index) => (
                 <TableRow key={index} category={category} />
               ))}
@@ -78,7 +147,7 @@ const Category = () => {
         <div className='charts-content'>
         <div className='flex'>
         <p className='text-4xl mb-7'>Category Insights</p>
-        <button className='add-btn ml-auto mb-5'> Add New </button>
+        <button className='add-btn ml-auto mb-5' onClick={handleAddNewCategory}> Add New </button>
         </div>
         <TopicTable />
         </div>
