@@ -225,11 +225,11 @@ def get_options(request):
     options.append("LLM Trace")
     return Response({"options": options})
 
-
 @api_view(["GET"])
 def get_user_categories(request):
     categories = get_categories()
     return Response({"categories": categories})
+
 @api_view(["GET"])
 def get_summary(request):
     trace_id = request.GET.get("trace_id")
