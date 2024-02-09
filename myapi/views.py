@@ -17,6 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 
+traces_df = embed_all_traces()
+
 @csrf_exempt
 @require_POST
 def track_event(request):
@@ -35,7 +37,6 @@ def track_event(request):
 @api_view(["GET"])
 def hello_world(request):
     return Response({"message": "Hello, world!"})
-
 
 # client-server comm for finding filtered paths
 @api_view(["GET"])
@@ -222,7 +223,6 @@ def get_summary(request):
 
 @api_view(["GET"])
 def get_similar_traces(request):
-    traces_df = embed_all_traces()
     trace_id = int(request.GET.get("trace_id"))
     similar = find_similar(trace_id, traces_df)
     print(similar)
