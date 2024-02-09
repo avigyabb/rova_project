@@ -1,25 +1,36 @@
-import React from 'react';
-import { Card } from 'flowbite-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-{/* Key Metric  Card */}
-const KeyMetricCard = ({ title }) => {
-  return (
-    <Card className="border rounded border-gray-300">
-      <div className="flex justify-between items-center p-4">
-          <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
-      </div>
-      <hr style={{marginTop: '-1.0rem', marginBottom: '-1.0rem'}} />
-      <div className="p-4 text-center">
-        <div className="mt-2">
-          <span className="text-5xl font-bold text-gray-900">2.2K</span>
-          <p className="text-sm text-gray-500 mt-2">chats</p>
-        </div>
-        <div className="mt-3">
-          <span className="text-sm font-semibold text-green-600">↑ 2.1%</span>
-        </div>
-      </div>
-    </Card>
-  );
-};
+const KeyMetricCard = () => {
+  const [optionsArrayData, setOptionsArrayData] = useState([]);
+  const [selectedEvents, setSelectedEvents] = useState([{}]);
 
-export default KeyMetricCard;
+  useEffect(() => {
+    const getOptions = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}get-options/`);
+        setOptionsArrayData(response.data.options);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getOptions();
+  }, []);
+
+    const handleEventChange = (index, value) => {
+      const newSelectedEvents = [...selectedEvents];
+      newSelectedEvents[index] = { value };
+      setSelectedEvents(newSelectedEvents);
+    };
+  
+    const handleAddEvent = () => {
+      setSelectedEvents([...selectedEvents, { value: '' }]);
+    };
+  
+    return (
+      <p className='text-4xl my-10 ml-10 mb-7'>Key Metrics & Sequences</p>
+    );
+  };
+  
+  export default KeyMetricCard;
+  

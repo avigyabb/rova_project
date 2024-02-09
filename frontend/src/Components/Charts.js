@@ -171,26 +171,27 @@ const Charts = () => {
       </table>
     );
   };
+ // State to track the current view
+ const [currentView, setCurrentView] = useState('categories'); // default view
 
-  return (
-    <div className='charts-container flex'>
-      <div className='home-sidebar'>
-        <p> My Metrics </p>
-        <button> Categories </button>
-        <button> KPIs </button>
-        <button> Graphs </button>
-      </div>
-      <Category />
-    </div>
-    // <div className="flex flex-wrap gap-4 p-8">
-    // <LineChartCard
-    //   title="Daily Metrics (beta)"
-    //   data={line_data}
-    //   options={line_options}
-    // />
-    // </div>
-  
-  );
-};
+ // Function to change the current view
+ const changeView = (view) => setCurrentView(view);
+
+ return (
+   <div className='charts-container flex'>
+     <div className='home-sidebar'>
+       <p>My Metrics</p>
+       <button onClick={() => changeView('categories')}>Categories</button>
+       <button onClick={() => changeView('kpis')}>KPIs</button>
+       <button onClick={() => changeView('graphs')}>Graphs</button>
+     </div>
+     <div>
+       {currentView === 'categories' && <Category/>}
+       {currentView === 'kpis' && <KeyMetricCard />}
+       {/* {currentView === 'graphs' && <Graphs />} */}
+     </div>
+   </div>
+ );
+}
 
 export default Charts;
