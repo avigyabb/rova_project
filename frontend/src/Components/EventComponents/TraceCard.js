@@ -136,12 +136,12 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                     </div>
                     {/* Similar Traces Section */}
                     <div className="similar-traces-section mt-3">
-                      {/* <h2 className="text-lg mb-2 font-semibold">Similar Traces</h2> */}
+                      <h2 className="text-lg mb-2 font-semibold">Similar Traces</h2>
                       {Object.keys(similarTraces).length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {Object.entries(similarTraces).map(([traceId, similarity]) => (
                             <div key={traceId} className="card bg-white shadow-lg rounded-lg p-4">
-                              <h3 className="text-md font-semibold">Trace ID: {traceId}</h3>
+                              <h3 className="text-md font-semibold"> {traceId}</h3>
                               <p className="text-sm">Similarity: {similarity.toFixed(2)}</p>
                             </div>
                           ))}
