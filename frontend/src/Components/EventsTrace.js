@@ -65,7 +65,8 @@ const EventsTrace = () => {
     }
 
     const handleEventSelect = (event) => {
-      if (selectMode) {
+      console.log(event)
+      if (selectMode && event.table_source === "llm") {
         if (!selectedTraces.includes(event)) {
           setSelectedTraces(prevItems => [...prevItems, event]);
         } else {
@@ -73,25 +74,33 @@ const EventsTrace = () => {
           console.log(selectedTraces.indexOf(event))
           setSelectedTraces(prevItems => prevItems.filter(item => item !== event));
         }
-      } else {
+      } else if (!selectMode) {
         setSelectedEvent(event);
       }
     }
 
     function arrayToCSV() {
-      console.log("hello")
       // Assuming all objects have the same keys, use the keys from the first object for the header row
       const csvRows = [];
-      const headers = Object.keys(selectedTraces[0]);
+      // const headers = Object.keys(selectedTraces[0]);
+      const headers = ["timestamp", "event_name", "input_content", "output_content"]
       csvRows.push(headers.join(',')); // Create the header row
     
       // Add each object's values as a row
       for (const row of selectedTraces) {
-        const values = headers.map(header => {
-          const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
-          return `"${escaped}"`; // Wrap values in double quotes
-        });
-        csvRows.push(values.join(','));
+        // const values = headers.map(header => {
+        //   const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
+        //   return `"${escaped}"`; // Wrap values in double quotes
+        // });
+        // csvRows.push(values.join(','));
+
+        for (const traceStep of row.events) {
+          const values = headers.map(header => {
+            const escaped = ('' + traceStep[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
+            return `"${escaped}"`; // Wrap values in double quotes
+          });
+          csvRows.push(values.join(','));
+        }
       }
     
       const csvString = csvRows.join('\n');
@@ -166,6 +175,7 @@ const EventsTrace = () => {
                 onSelect={handleEventSelect}
                 isSelected={selectedEvent && selectedEvent === event}
                 isSelectedInMode={selectedTraces.includes(event)}
+                selectMode={selectMode}
               />
             ))}
             {sessionIdState >= 0 && <button class = "button_see_all_user_events text-sm ml-5" onClick={seeAllUserEvents}> See all of {userId}'s events </button>}

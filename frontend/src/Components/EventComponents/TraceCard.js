@@ -75,15 +75,39 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                   <textarea
                     className='input-text'
                     value={selectedTrace.input_content}
+                    style={{fontSize: 'small'}}
                   />
                   
-                  <div className='input-text mt-3' style={{borderRadius: '10px', border: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red'}}>
+                  <div 
+                    className='input-text-header mt-3' 
+                    style={{
+                      borderTop: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderLeft: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderRight: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderBottom: 'none',
+                      color: 'gray'
+                    }}> 
+                    OUTPUT 
+                  </div>
+                  <textarea
+                    className='input-text'
+                    value={selectedTrace.output_content}
+                    style={{
+                      borderBottom: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderLeft: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderRight: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderTop: 'none',
+                      fontSize: 'small',
+                    }}
+                  />
+
+                  {/* <div className='input-text mt-3' style={{borderRadius: '10px', border: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red'}}>
                     <p className='text-sm mb-2'> OUTPUT </p>
                     <textarea
                       className = 'input-text' style = {{border : 'none'}}
                       value = {selectedTrace.output_content}
                     />
-                  </div>
+                  </div> */}
                   <div className='flex items-end'>
                     <p className='metric-label mt-2 ml-2'> STATUS </p>
                     <p className='ml-2 text-sm'> {JSON.stringify(selectedTrace.error_status)} </p>

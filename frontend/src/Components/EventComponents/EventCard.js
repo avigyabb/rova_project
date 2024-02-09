@@ -6,9 +6,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const EventCard = ({ event, onSelect, isSelected, isSelectedInMode }) => {
+const EventCard = ({ event, onSelect, isSelected, isSelectedInMode, selectMode }) => {
   return (
-    <div className={`event-card ${isSelectedInMode ? 'selectedInMode' : isSelected ? 'selected' : ''}`} onClick={() => onSelect(event)}>
+    <div className={`event-card ${isSelectedInMode ? 'selectedInMode' : isSelected && !selectMode ? 'selected' : ''}`} onClick={() => onSelect(event)}>
       <div className='flex items-center'>
         {event.error_ocurred && event.table_source === "llm" ? (
           < ErrorIcon fontSize='small' style={{color: '#B02300'}}/>
