@@ -62,3 +62,13 @@ def get_session_ids_given_step(paths, step, num_steps, event_name):
             ):
                 session_ids.append(path[len(path) - 1]["session_id"])
     return session_ids
+
+def find_sessions_with_kpis(df, event_names):
+    # Filter DataFrame to only rows with event_name in event_names list
+    filtered_df = df[df['event_name'].isin(event_names)]
+    # Group by session_id and check if all event_names are present
+    valid_sessions = filtered_df.groupby('session_id').filter(lambda x: all(name in x['event_name'].values for name in event_names))
+    # Get unique session_ids
+    valid_session_ids = valid_sessions['session_id'].unique().tolist()
+    
+    return valid_session_ids

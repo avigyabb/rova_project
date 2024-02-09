@@ -19,10 +19,9 @@ clickhouse_client = clickhouse_connect.get_client(
     password="V8fBb2R_ZmW4i",
 )
 clickhouse_client.command('USE rova_dev')
-
-rova_client = rova_client.Rova("buster_dev")
-
 db_name = "rova_dev"
+
+rova_client = rova_client.Rova(db_name)
 
 # Returns sql query to join dbs
 combined_table_sql = """

@@ -1,7 +1,6 @@
 # Asks ChatGPT to identify topics
 import json
-
-db_name = "rova_dev"
+from .consts import *
 
 def query_gpt(
     client,
