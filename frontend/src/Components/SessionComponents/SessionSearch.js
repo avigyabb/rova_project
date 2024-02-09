@@ -8,8 +8,16 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import '../../styles/SessionSearch.css';
+import SessionFilters from './SessionFilters';
 
 const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
+
+  const [showFilters, setShowFilters] = useState(false); // State variable for showing/hiding filters
+
+  // Function to toggle the display of filters
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {
@@ -47,13 +55,14 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton>
+                <IconButton onClick={toggleFilters}>
                   <FilterListIcon />
                 </IconButton>
               </InputAdornment>
             ),
           }}
         />
+        {showFilters && <SessionFilters />}
     </div>
   );
 };
