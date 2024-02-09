@@ -19,6 +19,7 @@ import json
 
 traces_df = embed_all_traces()
 
+
 @csrf_exempt
 @require_POST
 def track_event(request):
@@ -33,10 +34,12 @@ def track_event(request):
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
+
 # Simple function to test CS communication
 @api_view(["GET"])
 def hello_world(request):
     return Response({"message": "Hello, world!"})
+
 
 # client-server comm for finding filtered paths
 @api_view(["GET"])
@@ -133,15 +136,19 @@ def df_to_user_events(df):
                     input_dict = input_dict[0]
                     filtered_row["input_content"] = ""
                     for key in input_dict:
-                        filtered_row["input_content"] += key + ": " + input_dict[key] + "\n"
+                        filtered_row["input_content"] += (
+                            key + ": " + input_dict[key] + "\n"
+                        )
                 except Exception:
                     pass
-                
+
                 try:
                     output_dict = json.loads(filtered_row["output_content"])
                     filtered_row["output_content"] = ""
                     for key in output_dict:
-                        filtered_row["output_content"] += key + ": " + output_dict[key] + "\n"
+                        filtered_row["output_content"] += (
+                            key + ": " + output_dict[key] + "\n"
+                        )
                 except Exception:
                     pass
 
@@ -190,7 +197,7 @@ def get_metrics(request):
                 ("Average Cost Per Day", acpd),
                 ("Average Latency per Day", alpd),
             ],
-            "dates":dates
+            "dates": dates,
         }
     )
 
@@ -217,27 +224,40 @@ def get_percentages(request):
         {"arrow_percentages": arrow_percentages, "box_percentages": box_percentages}
     )
 
+
 @api_view(["GET"])
 def get_options(request):
     sql_query = """
       SELECT DISTINCT event_name
       FROM {}.product
-    """.format(db_name)
+    """.format(
+        db_name
+    )
     options = clickhouse_client.query(sql_query).result_rows
     options.append("LLM Trace")
     return Response({"options": options})
+
 
 @api_view(["GET"])
 def get_user_categories(request):
     categories = get_categories()
     return Response({"categories": categories})
 
+
 @api_view(["GET"])
 def get_summary(request):
     trace_id = request.GET.get("trace_id")
     messages = explain_trace(df, trace_id)
-    summary = query_gpt(client, messages, model='gpt-3.5-turbo-0125', max_tokens=100, temperature=0, json_output=False) 
+    summary = query_gpt(
+        client,
+        messages,
+        model="gpt-3.5-turbo-0125",
+        max_tokens=100,
+        temperature=0,
+        json_output=False,
+    )
     return Response({"summary": summary})
+
 
 @api_view(["GET"])
 def get_similar_traces(request):
@@ -245,3 +265,21 @@ def get_similar_traces(request):
     similar = find_similar(trace_id, traces_df)
     print(similar)
     return Response({"similar_traces": similar})
+
+
+@api_view(["POST"])
+def post_user_category(request):
+    user_id = request.data.get("name")
+    category = request.data.get("description")
+    add_category(user_id, category)
+    return Response({"message": "Category added successfully"})
+
+
+@api_view(["GET"])
+def delete_user_category(request):
+    print("loc1")
+    index = request.GET.get("index")
+    print(request.GET)
+    print(index)
+    delete_category(index)
+    return Response({"message": "Category deleted successfully"})

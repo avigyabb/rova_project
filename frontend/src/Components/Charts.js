@@ -53,7 +53,6 @@ const Charts = () => {
     const fetchData = async () =>  {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + 'get-metrics/');
-        const category_data = await axios.get(process.env.REACT_APP_API_URL + 'get-categories/');
         setLineData(response.data.lines);
         setDates(response.data.dates)
       } catch (error) {

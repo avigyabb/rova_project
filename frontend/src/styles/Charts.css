@@ -62,3 +62,27 @@
     padding: 5px;
     border-radius: 10px;
 }
+
+.save-btn {
+    background-color: rgba(255, 161, 137, 0.3);
+    color: #FF8263;
+    border: 2px solid #FF8263;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.charts-content input {
+    padding: 10px;
+}
+
+.charts-content textarea {
+    padding: 10px;
+}
+
+.charts-content input:focus {
+    outline: none;
+}
+
+.charts-content textarea:focus {
+    outline: none;
+}
