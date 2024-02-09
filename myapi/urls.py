@@ -12,6 +12,7 @@ urlpatterns = [
     path('get-sessions-at-step/', views.get_sessions_at_step, name='get_sessions_at_step'),
     path("get-percentages/", views.get_percentages, name = "get_percentages"),
     path("get-options/", views.get_options, name = "get_options"),
+    path("get-summary/", views.get_summary, name = "get_summary"),
     path("track/", views.track_event, name = "track_event"),
     path('get-user-categories/', views.get_user_categories, name='get_user_categories'),
 ]

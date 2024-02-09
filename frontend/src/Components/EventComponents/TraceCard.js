@@ -5,9 +5,36 @@ import BorderClearIcon from '@mui/icons-material/BorderClear';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import SchemaIcon from '@mui/icons-material/Schema';
 import ErrorIcon from '@mui/icons-material/Error';
+import React, { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import axios from 'axios';
 
 const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelectedTrace }) => {
-  console.log(selectedEvent)
+  
+  const [traceSummary, setTraceSummary] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  var trace_id = -1
+  if(selectedEvent['event_name'] === 'LLM Trace') {
+    trace_id = selectedEvent['events'][0]['trace_id']
+  }
+  useEffect(() => {
+    const fetchData = async () =>  {
+      setIsLoading(true);
+      try {
+        const params = {
+          trace_id: trace_id
+        }
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'get-summary/', {params});
+        setTraceSummary(response.data.summary);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [selectedEvent]);
+
   return (
     <div className="right-column">
       <div className='event-metadata-navbar flex items-center'>
@@ -91,7 +118,16 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                   </div>
 
                   <p className='metric-label mt-10'> SESSION ID </p>
-                  <p className='text-sm'>  {JSON.stringify(selectedEvent.events[0].session_id)} </p>
+                  <p className='text-sm mb-10'>  {JSON.stringify(selectedEvent.events[0].session_id)} </p>
+                  {isLoading ? (
+                    <div className="flex justify-center items-center">
+                      <CircularProgress style={{ color: '#FFA189' }}/>
+                    </div>
+                  ) : (
+                    <div className='input-text mt-3'>
+                      <p className='text-sm mb-2'> {traceSummary} </p>
+                    </div>
+                  )}
                 </div>
               )
               }

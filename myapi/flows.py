@@ -1,6 +1,7 @@
 from collections import defaultdict
 import numpy as np
 import pandas as pd
+from .consts import *
 
 # Returns all users and their sessions as nested objects
 def events_to_traces(df):

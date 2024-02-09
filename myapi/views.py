@@ -9,6 +9,7 @@ from .flows import *
 from .metrics import *
 from .consts import *
 from .categories import *
+from .callgpt import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -214,7 +215,6 @@ def get_percentages(request):
         {"arrow_percentages": arrow_percentages, "box_percentages": box_percentages}
     )
 
-
 @api_view(["GET"])
 def get_options(request):
     sql_query = """
@@ -230,3 +230,9 @@ def get_options(request):
 def get_user_categories(request):
     categories = get_categories()
     return Response({"categories": categories})
+@api_view(["GET"])
+def get_summary(request):
+    trace_id = request.GET.get("trace_id")
+    messages = explain_trace(df, trace_id)
+    summary = query_gpt(client, messages, model='gpt-3.5-turbo-0125', max_tokens=100, temperature=0, json_output=False) 
+    return Response({"summary": summary})

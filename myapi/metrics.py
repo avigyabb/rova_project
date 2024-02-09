@@ -1,8 +1,8 @@
 import json
 import pandas as pd
 import numpy as np
+from .consts import *
 
-db_name = "rova_dev"
 # Return the df corresponding to a JSON file
 def get_df_from_json(path):
     dictionaries = []
