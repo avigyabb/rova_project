@@ -113,7 +113,7 @@ def get_churned_users(timedelta_str="00:07 00:00:00"):
 
     # Group by session_id and apply the check_sequence function, then filter groups that return True.
     valid_users = df.groupby('user_id').filter(check_group)
-    return set(valid_users['user_id'])
+    return list(set(valid_users['user_id']))
 
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, event_names, in_order=False):
