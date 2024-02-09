@@ -42,3 +42,6 @@
 }
 
 /* Additional styling */
+.event-card.selectedInMode {
+  background-color: #DBECF6;
+}

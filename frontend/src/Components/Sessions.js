@@ -19,7 +19,7 @@ const Sessions = () => {
         const params = {
           sql: sqlBox
         };
-        console.log(process.env.REACT_APP_API_URL + 'get-sessions/');
+        console.log(process.env.REACT_APP_API_URL + 'get-sessions/'); // dont delete for now
         const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
         setSessions(response.data.sessions);
       } catch (error) {

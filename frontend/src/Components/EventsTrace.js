@@ -17,6 +17,10 @@ const EventsTrace = () => {
     const location = useLocation();
     const { userId, sessionId } = location.state || {}; // Get the passed state
     const [sessionIdState, setSessionIdState] = useState(sessionId);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [selectedTrace, setSelectedTrace] = useState(null);
+    const [selectMode, setSelectMode] = useState(false);
+    const [selectedTraces, setSelectedTraces] = useState([]);
 
     useEffect(() => {
 
@@ -38,9 +42,6 @@ const EventsTrace = () => {
       fetchData();
     }, [sessionIdState]);
 
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [selectedTrace, setSelectedTrace] = useState(null);
-
     // Conditional rendering based on isLoading
     if (isLoading) {
       return (
@@ -55,6 +56,59 @@ const EventsTrace = () => {
     };
 
     if (!userId) return <div>No user data</div>;
+
+    const handleSelectBtn= () => {
+      setSelectMode(prevMode => !prevMode);
+      if (selectMode) {
+        setSelectedTraces([]);
+      }
+    }
+
+    const handleEventSelect = (event) => {
+      if (selectMode) {
+        if (!selectedTraces.includes(event)) {
+          setSelectedTraces(prevItems => [...prevItems, event]);
+        } else {
+          console.log("ran")
+          console.log(selectedTraces.indexOf(event))
+          setSelectedTraces(prevItems => prevItems.filter(item => item !== event));
+        }
+      } else {
+        setSelectedEvent(event);
+      }
+    }
+
+    function arrayToCSV() {
+      console.log("hello")
+      // Assuming all objects have the same keys, use the keys from the first object for the header row
+      const csvRows = [];
+      const headers = Object.keys(selectedTraces[0]);
+      csvRows.push(headers.join(',')); // Create the header row
+    
+      // Add each object's values as a row
+      for (const row of selectedTraces) {
+        const values = headers.map(header => {
+          const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
+          return `"${escaped}"`; // Wrap values in double quotes
+        });
+        csvRows.push(values.join(','));
+      }
+    
+      const csvString = csvRows.join('\n');
+
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'exported_traces.csv');
+      document.body.appendChild(link); // Required for Firefox
+      link.click();
+      document.body.removeChild(link); // Clean up
+    }
+
+    console.log(selectMode);
+    console.log(selectedTraces);
+
 
     return (
       <div className="event-list-container">
@@ -90,17 +144,28 @@ const EventsTrace = () => {
                 Events Feed
               </h1>
             )}
-            <button className='ml-auto mr-5'> Select </button>
-            <button className='mr-5'> Filter </button>
-            <button> Export </button>
+            {!selectMode && (
+              <>
+              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Select </button>
+              <button className='mr-5'> Filter </button>
+              </>
+            )}
+            {selectMode && (
+              <>
+              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
+              <button onClick={arrayToCSV}> Export </button>
+              </>
+            )}
+            
           </div>
           <div className="event-list">
             {userData.map((event, index) => (
               <EventCard
                 key={index}
                 event={event}
-                onSelect={setSelectedEvent}
+                onSelect={handleEventSelect}
                 isSelected={selectedEvent && selectedEvent === event}
+                isSelectedInMode={selectedTraces.includes(event)}
               />
             ))}
             {sessionIdState >= 0 && <button class = "button_see_all_user_events text-sm ml-5" onClick={seeAllUserEvents}> See all of {userId}'s events </button>}
