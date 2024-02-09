@@ -13,7 +13,7 @@ def add_category(name, description):
     categories.append({"name": name, "description": description})
     print("add")
     print(categories)
-
+    
 # Get all categories
 def get_categories():
     return categories

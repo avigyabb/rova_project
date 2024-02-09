@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import axios from 'axios';
 
 const KeyMetricCard = () => {
+
   const [optionsArrayData, setOptionsArrayData] = useState([]);
-  const [selectedEvents, setSelectedEvents] = useState([{}]);
 
   useEffect(() => {
     const getOptions = async () => {
@@ -17,18 +17,10 @@ const KeyMetricCard = () => {
     getOptions();
   }, []);
 
-    const handleEventChange = (index, value) => {
-      const newSelectedEvents = [...selectedEvents];
-      newSelectedEvents[index] = { value };
-      setSelectedEvents(newSelectedEvents);
-    };
-  
-    const handleAddEvent = () => {
-      setSelectedEvents([...selectedEvents, { value: '' }]);
-    };
-  
     return (
-      <p className='text-4xl my-10 ml-10 mb-7'>Key Metrics & Sequences</p>
+      <div>
+        <p className='text-4xl my-10 ml-10 mb-7'>Key Metrics</p>
+      </div>
     );
   };
   
