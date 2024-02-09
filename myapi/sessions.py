@@ -1,59 +1,6 @@
 from .callgpt import *
+from .consts import *
 import pandas as pd
-
-# Returns sql query to join dbs
-combined_table_sql = """
-    WITH CombinedData AS (
-        SELECT
-            'product' AS table_source,
-            event_name,
-            event_type,
-            user_id,
-            data_source_id,
-            timestamp,
-            session_id,
-            NULL AS trace_id,
-            NULL AS input_content, -- Placeholder columns for llm table
-            NULL AS output_content,
-            NULL AS llm_in_use,
-            NULL AS input_token_count,
-            NULL AS output_token_count,
-            NULL AS cost,
-            NULL AS time_to_first_token,
-            NULL AS latency,
-            NULL AS error_status,
-            NULL AS chat_id
-        FROM
-            buster_dev.product
-
-        UNION ALL
-
-        SELECT
-            'llm' AS table_source,
-            event_name,
-            event_type,
-            user_id,
-            data_source_id,
-            timestamp,
-            session_id,
-            trace_id,
-            input_content,
-            output_content,
-            llm_in_use,
-            input_token_count,
-            output_token_count,
-            cost,
-            time_to_first_token,
-            latency,
-            error_status,
-            chat_id
-        FROM
-            buster_dev.llm
-        
-        ORDER BY
-            timestamp
-        )
-    """
 
 
 def process_session_query(gptclient, query):

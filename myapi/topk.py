@@ -4,6 +4,7 @@ import numpy as np
 import sklearn.cluster
 import json
 from .callgpt import *
+from .consts import *
 
 # Grab all questions from file
 def questions_from_file(path):

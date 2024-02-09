@@ -9,7 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 const Sessions = () => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM buster_dev.llm\nUNION DISTINCT\nSELECT session_id FROM buster_dev.product\n)\nLIMIT 50\n`);
+  const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM rova_dev.llm\nUNION DISTINCT\nSELECT session_id FROM rova_dev.product\n)\nLIMIT 50\n`);
 
   useEffect(() => {
 

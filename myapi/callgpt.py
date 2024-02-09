@@ -1,6 +1,7 @@
 # Asks ChatGPT to identify topics
 import json
 
+db_name = "rova_dev"
 
 def query_gpt(
     client,
@@ -53,7 +54,7 @@ def build_topics_prompt(samples):
 def build_sessions_sql_prompt(user_query):
     system_prompt = 'You are a ClickHouse expert. Given an input question, create a syntactically \
                      correct SQL query which returns the rows specified by the question. \
-                     There are two tables you have access to to query from: 1) buster_dev.llm and 2) buster_dev.product.\n \
+                     There are two tables you have access to to query from: 1) {}.llm and 2) {}.product.\n \
                      Unless the user specifies in the question a specific number of examples to obtain, \
                      query for at most 50 results using the LIMIT clause as per SQLite. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
@@ -61,22 +62,24 @@ def build_sessions_sql_prompt(user_query):
                      Rows with the same session_id belong to the same session. When filtering for specific values, make sure you\n \
                      wrap the identifiers in single quotes. \n \
                      Create subqueries whenever possible, especially for UNIONs. For example: \n \
-                     SELECT DISTINCT session_id FROM buster_dev.llm \n \
+                     SELECT DISTINCT session_id FROM {}.llm \n \
                      UNION \n \
-                     SELECT DISTINCT session_id FROM buster_dev.product" \n \
+                     SELECT DISTINCT session_id FROM {}.product" \n \
                      LIMIT 50; \n \
                      Should be: \n \
                      SELECT * \n \
                      FROM ( \n \
-                     SELECT session_id FROM buster_dev.llm \n \
+                     SELECT session_id FROM {}.llm \n \
                      UNION DISTINCT \n \
-                     SELECT session_id FROM buster_dev.product \n \
+                     SELECT session_id FROM {}.product \n \
                      ) \n \
                      LIMIT 50 \n \
-                     Only output SQL code without backticks, and do not include the semicolon. \n\n'
+                     Only output SQL code without backticks, and do not include the semicolon. \n\n'.format(db_name, db_name,
+                                                                                                            db_name, db_name,
+                                                                                                            db_name, db_name)
 
     tables = 'Only use the following tables: \n\n \
-              CREATE TABLE "buster_dev.llm" ( \n \
+              CREATE TABLE {}.llm ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
@@ -94,7 +97,7 @@ def build_sessions_sql_prompt(user_query):
               "chat_id" UInt32, \n\n \
               /* \n \
               */\n\n \
-              CREATE TABLE "buster_dev.product" ( \n \
+              CREATE TABLE {}.product ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
@@ -106,7 +109,7 @@ def build_sessions_sql_prompt(user_query):
               2022-06-16 16:00:00 "chat_send" 1 3 1 \n \
               2022-06-15 16:00:01 "share_dashboard" 2 4 1 \n \
               2022-02-16 16:00:02 "download_dashboard" 6 7 2 \n \
-              */\n\n'
+              */\n\n'.format(db_name, db_name)
 
     user_prompt = "Question: " + user_query + "\nSQLQuery: "
 
