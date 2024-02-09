@@ -1,6 +1,7 @@
 # Asks ChatGPT to identify topics
 import json
 from .consts import *
+from .traces import parse_trace
 from langchain.prompts import PromptTemplate
 
 def query_gpt(
@@ -146,22 +147,12 @@ def build_classify_event_prompt(category_description, event_name, input, output)
     ]
     return messages
 
-def parse_trace(filtered):
-    template = ""
-    count = 0
-    for index, row in filtered.iterrows():
-      count += 1
-      prompt_template = PromptTemplate.from_template(
-      "\n\n step: {step_number} \n event_name: {event_name} \n" + "input_content: {input_content}\n" + 
-      "output_content: {output_content}\n" + "error_status: {error_status}\n").format(step_number=count, event_name=row['event_name'], input_content=row['input_content'], 
-              output_content=row['output_content'], error_status=row['error_status'])
-      template += prompt_template
-    return {'role':'user', 'content':template}
-
 def explain_trace(df, trace_id):
+  
   filtered = df[df['trace_id'] == int(trace_id)]
-  user_prompt = parse_trace(filtered)
 
+  user_prompt_raw = parse_trace(filtered)
+  user_prompt = {'role':'user', 'content':user_prompt_raw}
   system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app.Analyze the following function-call trace triggered by a user's interaction with an LLM-based app. \
                    Provide a summary of the entire interaction, summarizing all steps. Then highlight specific point of interest, for example if the content of the otuput does not answer the user's question or command"}
 

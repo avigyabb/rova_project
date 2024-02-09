@@ -15,4 +15,5 @@ urlpatterns = [
     path("get-summary/", views.get_summary, name = "get_summary"),
     path("track/", views.track_event, name = "track_event"),
     path('get-user-categories/', views.get_user_categories, name='get_user_categories'),
+    path('get-similar-traces/', views.get_similar_traces, name='get_similar_traces'),
 ]

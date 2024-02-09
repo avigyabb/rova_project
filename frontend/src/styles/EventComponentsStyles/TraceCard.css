@@ -30,3 +30,8 @@
     font-size: small;
     color: rgb(128, 128, 128);
 }
+
+.scrollable-div {
+    max-height: 500px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }

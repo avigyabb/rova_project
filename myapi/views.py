@@ -10,6 +10,7 @@ from .metrics import *
 from .consts import *
 from .categories import *
 from .callgpt import *
+from .traces import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -29,24 +30,6 @@ def track_event(request):
         )
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
-
-
-def load_df_once():
-    sql = """
-        SELECT
-            *
-        FROM
-            CombinedData
-        """
-    result = clickhouse_client.query(combined_table_sql + sql)
-    df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
-    if len(df) != 0:
-        df = df.sort_values(by=["timestamp"])
-    return df
-
-
-df = load_df_once()
-
 
 # Simple function to test CS communication
 @api_view(["GET"])
@@ -236,3 +219,11 @@ def get_summary(request):
     messages = explain_trace(df, trace_id)
     summary = query_gpt(client, messages, model='gpt-3.5-turbo-0125', max_tokens=100, temperature=0, json_output=False) 
     return Response({"summary": summary})
+
+@api_view(["GET"])
+def get_similar_traces(request):
+    traces_df = embed_all_traces()
+    trace_id = int(request.GET.get("trace_id"))
+    similar = find_similar(trace_id, traces_df)
+    print(similar)
+    return Response({"similar_traces": similar})

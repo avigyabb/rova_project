@@ -8,3 +8,8 @@ npm start
 When pushing to prod:
 pip freeze > requirements.txt
 git push main
+
+Things to convert to models
+traces_df
+categories
+

@@ -2,6 +2,7 @@ import rova_client  # this is the clickhouse client
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 import clickhouse_connect
+import pandas as pd
 import os
 
 ## Constants ##
@@ -76,3 +77,19 @@ combined_table_sql = """
             timestamp
         )
     """.format(db_name, db_name)
+
+def load_df_once():
+    sql = """
+        SELECT
+            *
+        FROM
+            CombinedData
+        """
+    result = clickhouse_client.query(combined_table_sql + sql)
+    df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    if len(df) != 0:
+        df = df.sort_values(by=["timestamp"])
+    return df
+
+
+df = load_df_once()
