@@ -51,6 +51,27 @@ def assign_session_ids_to_category(category, similarity_threshold=0.66):
     unique_session_ids = llm_df[llm_df[category['name']]]['session_id'].unique()
     return unique_session_ids
 
+def update_categories_with_new_event(row):
+    # Get embedding for this new row
+    row['event_text'] = 'Event name: ' + row['event_name'] + \
+                        '\n Input: ' + row['input_content'] + \
+                        '\n Output: ' + row['output_content']
+    row['embeds'] = np.array(embeddings_model.embed_documents([row['event_text']]))[0]
+
+    for category in categories:
+        # Determine if the event is in the category
+        category_embedding = np.array(embeddings_model.embed_documents([category["description"]]))[0]
+        category_embedding = category_embedding.reshape(1, -1)
+        row[category['name']] = cosine_similarity(category_embedding, row['embeds'].reshape(1, -1))[0][0] > 0.66
+
+        # If the event in the category, add the session id to the list
+        if row[category['name']]:
+            if row['session_id'] not in category['session_ids']:
+                category['session_ids'].append(row['session_id'])
+            category['num_events'] += 1
+
+    llm_df.append(row, ignore_index=True)
+
 def get_session_ids_given_filters(topics, kpis, users):
     sql_query = f"""
         SELECT *

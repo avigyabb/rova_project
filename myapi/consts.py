@@ -95,17 +95,3 @@ def load_df_once():
 
 df = load_df_once()
 
-# Appends the newest event to the df
-def add_most_recent_event():
-    sql = """
-        SELECT
-            *
-        FROM
-            CombinedData
-        ORDER BY timestamp DESC
-        LIMIT 1
-        """
-    result = clickhouse_client.query(combined_table_sql + sql)
-    new_row = pd.DataFrame(data=result.result_rows, columns=result.column_names)
-    df.append(new_row.iloc[0], ignore_index=True)
-
