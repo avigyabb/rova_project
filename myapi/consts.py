@@ -3,6 +3,7 @@ from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 import clickhouse_connect
 import pandas as pd
+import numpy as np
 import os
 
 ## Constants ##
@@ -103,3 +104,17 @@ def load_df_once():
 
 df = load_df_once()
 
+# Creates embeddings for all llm events
+def embed_llm_events():
+    # Grab the llm events
+    llm_df = df[df['event_type'] == 'llm']
+    llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
+                        '\n Input: ' + llm_df['input_content'] + \
+                        '\n Output: ' + llm_df['output_content']
+
+    embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
+    llm_df['embeds'] = [np.array(e) for e in embeds]
+    return llm_df
+
+# Store the embeddings for all llm_events
+llm_df = embed_llm_events()

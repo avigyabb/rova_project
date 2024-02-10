@@ -4,30 +4,27 @@ from .consts import *
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Creates embeddings for all llm events
-def embed_llm_events():
-    # Grab the llm events
-    llm_df = df[df['event_type'] == 'llm']
-    llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
-                        '\n Input: ' + llm_df['input_content'] + \
-                        '\n Output: ' + llm_df['output_content']
-
-    embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
-    llm_df['embeds'] = [np.array(e) for e in embeds]
-    return llm_df
-
-# Store the embeddings for all llm_events
-llm_df = embed_llm_events()
-
 # Stores the user-defined categories and distinct event ids that correspond to it
 categories = [{"name": "NAME", "description": "DESCRIPTION", "session_ids": [], "num_events": 0}]
 keymetrics = [{"name": "NAME", "description": "DESCRIPTION", "importance": 0,"session_ids": [], "num_events": 0}]
+
+# Returns a dictionary mapping the number of events in each category over time
+def get_trend_for_category(time_range, category):
+    # Grab time, category columns
+    selected_columns = llm_df[[category['name'], 'timestamp']]
+    # Sort by timestamp and group by time range
+    llm_df_sorted = selected_columns.sort_values(by='timestamp')
+    llm_df_sorted.set_index('timestamp', inplace=True)
+    # counts = llm_df_sorted.resample(time_range).sum()
+    # counts_dict = counts['boolean_column'].to_dict()
+    return llm_df_sorted
 
 # Add a new category
 def add_category(name, description):
     new_category = {"name": name, "description": description, "session_ids": [], "num_events": 0}
     new_category["session_ids"] = assign_session_ids_to_category(new_category)
     new_category["num_events"] = llm_df[name].sum()
+    print(get_trend_for_category("1D", new_category))
     categories.append(new_category)
 
 # Add a new category
@@ -48,6 +45,9 @@ def get_categories():
 
 # function to delete a category from the list
 def delete_category(index):
+     # remove the category from the llm_df
+    category = categories[len(categories) - int(index) - 1]
+    llm_df = llm_df.drop(columns=[category['name']])
     categories.pop(len(categories) - int(index) - 1) # when displaying categories index is reversed
 
 # function to delete a keymetric from the list
