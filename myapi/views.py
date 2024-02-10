@@ -250,8 +250,7 @@ def get_options(request):
     """.format(
         db_name
     )
-    options = clickhouse_client.query(sql_query).result_rows
-    options.append("LLM Trace")
+    options = options_clickhouse_client.query(sql_query).result_rows
     return Response({"options": options})
 
 
@@ -304,9 +303,15 @@ def delete_user_category(request):
 
 @api_view(["GET"])
 def get_filtered_sessions(request):
-    topics = request.GET.get("topics")
-    kpis = request.GET.get("kpis")
-    users = request.GET.get("users")
-
-    session_ids = get_session_ids_given_filters
-    return Response({"sessions": get_session_data_from_ids(session_ids)})
+    included_categories = json.loads(request.GET.get("included_categories"))
+    excluded_categories = json.loads(request.GET.get("excluded_categories"))
+    included_signals = json.loads(request.GET.get("included_signals"))
+    excluded_signals = json.loads(request.GET.get("excluded_signals"))
+    engagement_time = request.GET.get("engagement_time")
+    
+    session_ids = get_session_ids_given_filters(included_categories, excluded_categories,
+                                                included_signals, excluded_signals,
+                                                engagement_time)
+    if session_ids == []:
+        return Response({"sessions" : {}})
+    return Response({"sessions" : get_session_data_from_ids(clickhouse_client, session_ids)})

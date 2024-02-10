@@ -72,14 +72,62 @@ def update_categories_with_new_event(row):
 
     llm_df.append(row, ignore_index=True)
 
-def get_session_ids_given_filters(topics, kpis, users):
-    sql_query = f"""
-        SELECT *
-        FROM CombinedData
-        WHERE user_id IN {users}
+def get_session_ids_given_filters(included_categories, excluded_categories, included_signals, excluded_signals, engagement_time):
+    sql_query = (
         """
-    result = clickhouse_client.query(combined_table_sql + sql_query)
-    df = pd.DataFrame(data = result.result_rows, columns = result.column_names).sort_values(
-        by = ["timestamp"]
+        SELECT session_id, user_id, MAX(timestamp) AS last_timestamp
+        FROM CombinedData AS t1
+        """
     )
-
+    if len(included_signals) > 0:
+        sql_query += (
+            """
+            WHERE session_id IN (
+                SELECT session_id
+                FROM CombinedData AS t2
+                WHERE t2.event_name IN ("""
+                + ", ".join([f"'{included_signal}'" for included_signal in included_signals])
+                + """)
+                )
+            """
+        )
+        if len(excluded_signals) > 0:
+            sql_query += (
+                """    
+                AND session_id NOT IN (
+                    SELECT session_id
+                    FROM CombinedData AS t3
+                    WHERE t3.event_name IN ("""
+                    + ", ".join([f"'{excluded_signal}'" for excluded_signal in excluded_signals])
+                    + """)
+                    )
+                """
+            )   
+    elif len(excluded_signals) > 0:
+        sql_query += (
+            """
+            WHERE session_id NOT IN (
+                SELECT session_id
+                FROM CombinedData AS t2
+                WHERE t2.event_name IN ("""
+                + ", ".join([f"'{excluded_signal}'" for excluded_signal in excluded_signals]) 
+                + """)
+                )
+            """
+        ) 
+    if int(engagement_time) > 0:
+        sql_query += (
+            """
+            HAVING DATEADD(day, {}, last_timestamp) <= CURRENT_TIME()
+            """
+        )
+    sql_query += (
+        """
+        GROUP BY session_id, user_id
+        """
+    )
+    result = filters_clickhouse_client.query(combined_table_sql + sql_query)
+    df = pd.DataFrame(data = result.result_rows, columns = result.column_names)
+    if len(df) == 0:
+        return []
+    return df["session_id"].unique().tolist()

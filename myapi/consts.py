@@ -13,13 +13,21 @@ os.environ["OPENAI_API_KEY"] = "sk-XurJgF5BTIjlXwZZcXH3T3BlbkFJ3RaxVfLawCcOG9B7J
 client = OpenAI()
 
 # setup clickhouse client
-clickhouse_client = clickhouse_connect.get_client(
-    host="tbbhwu2ql2.us-east-2.aws.clickhouse.cloud",
-    port=8443,
-    username="default",
-    password="V8fBb2R_ZmW4i",
-)
-clickhouse_client.command('USE rova_dev')
+def new_clickhouse_client():
+    clickhouse_client = clickhouse_connect.get_client(
+        host="tbbhwu2ql2.us-east-2.aws.clickhouse.cloud",
+        port=8443,
+        username="default",
+        password="V8fBb2R_ZmW4i",
+    )
+    clickhouse_client.command('USE rova_dev')
+    return clickhouse_client
+
+clickhouse_client = new_clickhouse_client()
+
+options_clickhouse_client = new_clickhouse_client()
+filters_clickhouse_client = new_clickhouse_client()
+
 db_name = "rova_dev"
 
 rova_client = rova_client.Rova(db_name)

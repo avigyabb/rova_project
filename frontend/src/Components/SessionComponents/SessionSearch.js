@@ -28,23 +28,6 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
     },
   });
 
-  useEffect(() => {
-    const notifySessions = async() => {
-      try {
-        const params = {
-          topics : selectedFilters["topics"],
-          kpis : selectedFilters["kpis"],
-          users : selectedFilters["users"],
-        }
-        const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered_sessions/", {params});
-        setSessions(response.data.sessions);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    notifySessions();
-  }, [selectedFilters]);
-
   // Function to toggle the display of filters
   const toggleFilters = () => {
     setShowFilters(!showFilters);

@@ -21,18 +21,20 @@ const names = [
   'Kelly Snyder',
 ];
 
-export default function MultipleSelectChip({ label }) {
+export default function MultipleSelectChip({ label, setFilters, options }) {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
 
   const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    // const {
+    //   target: { value },
+    // } = event;
+    // setPersonName(
+    //   // On autofill we get a stringified value.
+    //   typeof value === 'string' ? value.split(',') : value,
+    // );
+    setPersonName(event.target.value)
+    setFilters(event.target.value);
   };
 
   return (
@@ -51,7 +53,7 @@ export default function MultipleSelectChip({ label }) {
             </Box>
           )}
         >
-          {names.map((name) => (
+          {options.map((name) => (
             <MenuItem
               key={name}
               value={name}

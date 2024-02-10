@@ -13,6 +13,12 @@ const Sessions = () => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM rova_dev.llm\nUNION DISTINCT\nSELECT session_id FROM rova_dev.product\n)\nLIMIT 50\n`);
+  
+  const [includedCategories, setIncludedCategories] = useState([]);
+  const [excludedCategories, setExcludedCategories] = useState([]);  
+  const [includedSignals, setIncludedSignals] = useState([]);
+  const [excludedSignals, setExcludedSignals] = useState([]);
+  const [engagementTime, setEngagementTime] = useState(0);
 
   useEffect(() => {
 
@@ -63,6 +69,49 @@ const Sessions = () => {
     }
   };
 
+  const engagementTimeOnChange = (event) => {
+    setEngagementTime(event.target.value);
+  }
+
+  useEffect(() => {
+    const applyFilters = async() => {
+      try {
+        const params = {
+          included_categories : JSON.stringify(includedCategories),
+          excluded_categories : JSON.stringify(excludedCategories),
+          included_signals : JSON.stringify(includedSignals),
+          excluded_signals : JSON.stringify(excludedSignals),
+          engagement_time : engagementTime,
+        }
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
+        console.log(response.data.sessions)
+        setSessions(response.data.sessions);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    applyFilters();
+  }, [includedCategories, excludedCategories, includedSignals, excludedSignals, engagementTime]);
+
+  const optionsArray = [];
+  const [optionsArrayData, setOptionsArrayData] = useState([]);
+
+  useEffect(() => {
+    const getOptions = async() => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
+        setOptionsArrayData(response.data.options);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getOptions();
+  }, []);
+
+  optionsArrayData.forEach((option) =>
+    optionsArray.push(option[0])
+  )
+
   return (
     <div className="flex flex-col items-center h-screen">
       <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading} setSqlBox={setSqlBox}/>
@@ -72,13 +121,13 @@ const Sessions = () => {
             <div className='filters mb-6'> 
               <p className='mb-2'> Categories: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Categories Include:"/>
-                <SessionFiltersNew label="Categories Exclude:"/>
+                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {optionsArray}/>
+                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {optionsArray}/>
               </div>
               <p className='mt-3 mb-2'> Signals: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Signals Include:"/>
-                <SessionFiltersNew label="Signals Exclude:"/>
+                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {optionsArray}/>
+                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {optionsArray}/>
               </div>
               <p className='mt-3 mb-3'> Engagement: </p>
               <div>
@@ -89,6 +138,7 @@ const Sessions = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  onChange={engagementTimeOnChange}
                 />
               </div>
             </div>
@@ -108,7 +158,7 @@ const Sessions = () => {
               </div>
             )}
           </div>
-          { !isLoading ? (
+          { (!isLoading && Object.keys(sessions).length > 0) ? (
             <div className='sessions-list'>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 

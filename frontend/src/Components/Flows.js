@@ -159,6 +159,7 @@ function Flows() {
     const getOptions = async() => {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
+        response.data.options.push(["LLM Trace"]);
         setOptionsArrayData(response.data.options);
       } catch (error) {
         console.error(error);
