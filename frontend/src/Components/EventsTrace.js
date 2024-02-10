@@ -7,6 +7,7 @@ import EventCard from './EventComponents/EventCard';
 import TraceCard from './EventComponents/TraceCard';
 
 import { CircularProgress } from '@mui/material';
+import GetAppIcon from '@mui/icons-material/GetApp';
 
 
 const EventsTrace = () => {
@@ -53,6 +54,7 @@ const EventsTrace = () => {
 
     const seeAllUserEvents = () => {
       setSessionIdState(-1);
+      setSelectedTraces([]);
     };
 
     if (!userId) return <div>No user data</div>;
@@ -83,7 +85,7 @@ const EventsTrace = () => {
       // Assuming all objects have the same keys, use the keys from the first object for the header row
       const csvRows = [];
       // const headers = Object.keys(selectedTraces[0]);
-      const headers = ["timestamp", "event_name", "input_content", "output_content"]
+      const headers = ["timestamp", "trace_id","event_name", "input_content", "output_content"]
       csvRows.push(headers.join(',')); // Create the header row
     
       // Add each object's values as a row
@@ -162,7 +164,12 @@ const EventsTrace = () => {
             {selectMode && (
               <>
               <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
-              <button onClick={arrayToCSV}> Export </button>
+              {selectedTraces.length > 0 && 
+                <div className='export-btn flex items-center'>
+                  <GetAppIcon className='mr-2'/>
+                  <button onClick={arrayToCSV}> Export </button>
+                </div>
+              }
               </>
             )}
             

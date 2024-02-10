@@ -76,3 +76,15 @@
   color: rgb(47, 135, 198);
 }
   
+.export-btn {
+  background-color: #DBECF6;
+  padding: 5px;
+  padding-right: 10px;
+  border-radius: 10px;
+}
+
+.export-btn:hover {
+  background-color: #acc8d8;
+  cursor: pointer;
+  transition-duration: 0.5s;
+}
