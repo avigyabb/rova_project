@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../../styles/EventComponentsStyles/KeyMetricCard.css';
+import '../../styles/EventComponentsStyles/Sequences.css';
 
-const KeyMetricCard = () => {
+const Sequences = () => {
   const [optionsArrayData, setOptionsArrayData] = useState([]);
   const [events, setEvents] = useState([{ value: '' }]);
 
@@ -72,4 +72,4 @@ const KeyMetricCard = () => {
   );
 };
 
-export default KeyMetricCard;
+export default Sequences;
