@@ -66,8 +66,8 @@ const Charts = () => {
         label: label,
         data: Object.values(counts),
         fill: false,
-        backgroundColor: 'rgba(255, 165, 0, 0.6)',
-        borderColor: 'rgba(255, 165, 0, 0.6)',
+        backgroundColor: 'rgba(255, 161, 137, 1.0)',
+        borderColor: 'rgba(255, 161, 137, 1.0)',
       })),
     };
     console.log(dataArray)
