@@ -3,6 +3,7 @@ import '../../styles/EventComponentsStyles/KeyMetricCard.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import '../../styles/Charts.css';
 
 const KeyMetricCard = () => {
 
@@ -11,53 +12,23 @@ const KeyMetricCard = () => {
     // const [newCategory, setNewCategory] = useState({ name: '', description: ''});
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    
-    const [optionsArrayData, setOptionsArrayData] = useState([]);
-    const [events, setEvents] = useState([{ value: '' }]);
-  
-    useEffect(() => {
-      const getOptions = async () => {
+
+    // Fetches the category data
+    const fetchData = async () =>  {
+      setIsLoading(true);
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-options/`);
-          setOptionsArrayData(response.data.options);
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          console.log(response);
+          setCategoryList(response.data.categories);
         } catch (error) {
           console.error(error);
+        } finally {
+          setIsLoading(false);
         }
       };
-      getOptions();
-    }, []);
-  
-    // Function to handle adding a new event
-    const addEvent = () => {
-      setEvents([...events, { value: '' }]);
-    };
-  
-    // Function to handle changing an event
-    const handleEventChange = (index, newValue) => {
-      const newEvents = [...events];
-      newEvents[index].value = newValue;
-      setEvents(newEvents);
-    };
-  
-    // Function to handle deleting an event
-    const deleteEvent = (index) => {
-      const newEvents = events.filter((_, eventIndex) => eventIndex !== index);
-      setEvents(newEvents);
-    };
 
+    // Fetch data on page open
     useEffect(() => {
-        const fetchData = async () =>  {
-        setIsLoading(true);
-          try {
-            const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
-            console.log(response);
-            setCategoryList(response.data.categories);
-          } catch (error) {
-            console.error(error);
-          } finally {
-            setIsLoading(false);
-          }
-        };
         fetchData();
       }, []);
 
@@ -69,13 +40,22 @@ const KeyMetricCard = () => {
         setEditMode(!editMode);
     };
 
-    const [selectedOption, setSelectedOption] = useState('');
-
-    // Handler for when an option is selected
-    const handleSelectChange = (event) => {
-      setSelectedOption(event.target.value);
-    };
-
+    const [optionsArrayData, setOptionsArrayData] = useState([]);
+    const [events, setEvents] = useState([{ value: '' }]);
+  
+    useEffect(() => {
+      const getOptions = async () => {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-options/`);
+          setOptionsArrayData(response.data.options);
+          console.log(response.data.options);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      getOptions();
+    }, []);
+  
     const handleSaveNewCategory = async () => {
         // Save new category logic here
         // For example, you can send an API request to save the new category
@@ -93,10 +73,32 @@ const KeyMetricCard = () => {
           console.log(response);
         } catch (error) {
           console.error(error);
+        } finally {
+          fetchData();
         }
-        setCategoryList((prevCategories) => [...prevCategories, newCategory]);
-        // setNewCategory({ name: '', description: '', volume: '', trend: '', path: '' });
     };
+    function Dropdown({ options }) {
+      // This function checks if the option is an array and returns the appropriate value
+      const getOptionValue = (option) => {
+        if (Array.isArray(option)) {
+          // Assuming the first element of the array is the value we want
+          return option[0];
+        }
+        return option; // If it's not an array, return the string directly
+      };
+    
+      return (
+        <select className="form-select">
+          {options.map((option, index) => (
+            <option key={index} value={getOptionValue(option)}>
+              {getOptionValue(option)}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    
+    
 
     // Conditional rendering based on isLoading
     if (isLoading) {
@@ -110,10 +112,10 @@ const KeyMetricCard = () => {
     const categories = categoryList.map(category => ({
         name: category.name,
         description: category.description,
-        volume: '52k', // Example volume
-        trend: '+46%', // Example trend
-        path: "M0 40 L20 30 L40 34 L60 20 L80 25 L100 20 L120 0" // Example path
-        }));
+        volume: category.num_events, // Example volume
+        trend: '', // Example trend
+        path: "" // Example path
+        })); 
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -166,14 +168,7 @@ const KeyMetricCard = () => {
       const NewTableRow = () => (
         <tr>
             <td>
-            <select value={selectedOption} onChange={handleSelectChange} className="form-select">
-        <option value="">Select an option</option> {/* Optional: default prompt */}
-        {optionsArrayData.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+              <Dropdown options={optionsArrayData}/>
             </td>
             <td style={{padding: "0"}}>
                 <textarea
@@ -182,8 +177,6 @@ const KeyMetricCard = () => {
                     cols="55"
                     type="text"
                     name="description"
-                    // value={newCategory.description}
-                    // onChange={handleInputChange}
                     placeholder="Enter description"
                 />
             </td>
@@ -200,13 +193,13 @@ const KeyMetricCard = () => {
       
       const TopicTable = () => {
         return (
-          <table>
+          <table style={{ width: '1100px' }}>
             <thead>
               <tr>
                 <th className="w-60">Category</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th>Trend</th>
+                <th>Trend (coming soon)</th>
               </tr>
             </thead>
             <tbody>
@@ -238,4 +231,3 @@ const KeyMetricCard = () => {
   };
   
   export default KeyMetricCard;
-
