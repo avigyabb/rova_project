@@ -177,7 +177,7 @@ const KeyMetricCard = () => {
           <table style={{ width: '1100px' }}>
             <thead>
               <tr>
-                <th className="w-60">Category</th>
+                <th className="w-60">Event</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
                 <th>Importance</th>
