@@ -35,7 +35,7 @@ combined_table_sql = """
             data_source_id,
             timestamp,
             session_id,
-            distinct_id,
+            CAST(distinct_id AS String) AS distinct_id,
             NULL AS trace_id,
             NULL AS input_content, -- Placeholder columns for llm table
             NULL AS output_content,
@@ -59,8 +59,8 @@ combined_table_sql = """
             user_id,
             data_source_id,
             timestamp,
-            distinct_id,
             session_id,
+            CAST(distinct_id AS String) AS distinct_id,
             trace_id,
             input_content,
             output_content,
