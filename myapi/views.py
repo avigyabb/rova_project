@@ -11,6 +11,7 @@ from .consts import *
 from .categories import *
 from .callgpt import *
 from .traces import *
+from .keymetrics import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -259,6 +260,11 @@ def get_user_categories(request):
     categories = get_categories()
     return Response({"categories": categories})
 
+@api_view(["GET"])
+def get_user_keymetrics(request):
+    keymetrics = get_keymetrics()
+    return Response({"keymetrics": keymetrics})
+
 
 @api_view(["GET"])
 def get_summary(request):
@@ -290,14 +296,25 @@ def post_user_category(request):
     add_category(user_id, category)
     return Response({"message": "Category added successfully"})
 
+@api_view(["POST"])
+def post_user_keymetric(request):
+    user_id = request.data.get("name")
+    category = request.data.get("description")
+    importance = request.data.get("importance")
+    add_keymetric(user_id, category, importance)
+    return Response({"message": "Category added successfully"})
+
 
 @api_view(["GET"])
 def delete_user_category(request):
-    print("loc1")
     index = request.GET.get("index")
-    print(request.GET)
-    print(index)
     delete_category(index)
+    return Response({"message": "Category deleted successfully"})
+
+@api_view(["GET"])
+def delete_user_keymetric(request):
+    index = request.GET.get("index")
+    delete_keymetric(index)
     return Response({"message": "Category deleted successfully"})
 
 

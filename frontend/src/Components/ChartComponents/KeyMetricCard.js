@@ -7,7 +7,7 @@ import '../../styles/Charts.css';
 
 const KeyMetricCard = () => {
 
-    const [categoryList, setCategoryList] = useState([]);
+    const [keymetricList, setKeyMetricList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     // const [newCategory, setNewCategory] = useState({ name: '', description: ''});
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
@@ -17,9 +17,9 @@ const KeyMetricCard = () => {
     const fetchData = async () =>  {
       setIsLoading(true);
         try {
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-keymetrics/');
           console.log(response);
-          setCategoryList(response.data.categories);
+          setKeyMetricList(response.data.keymetrics);
         } catch (error) {
           console.error(error);
         } finally {
@@ -32,7 +32,7 @@ const KeyMetricCard = () => {
         fetchData();
       }, []);
 
-    const handleAddNewCategory = () => {
+    const handleAddNewKeyMetric = () => {
         setShowNewCategoryRow(!showNewCategoryRow);
     };
 
@@ -41,14 +41,12 @@ const KeyMetricCard = () => {
     };
 
     const [optionsArrayData, setOptionsArrayData] = useState([]);
-    const [events, setEvents] = useState([{ value: '' }]);
   
     useEffect(() => {
       const getOptions = async () => {
         try {
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-options/`);
           setOptionsArrayData(response.data.options);
-          console.log(response.data.options);
         } catch (error) {
           console.error(error);
         }
@@ -56,20 +54,21 @@ const KeyMetricCard = () => {
       getOptions();
     }, []);
   
-    const handleSaveNewCategory = async () => {
+    const handleSaveNewKeyMetric = async () => {
+        const newKeyMetric = {
+            name: document.getElementById("newKeyMetricName").value,
+            description: document.getElementById("newKeyMetricDescription").value,
+            volume: '',
+            importance: document.getElementById("newKeyMetricImportance").value,
+            path: ''
+        }
         // Save new category logic here
         // For example, you can send an API request to save the new category
         // After successful save, update category list and reset new category state
         setShowNewCategoryRow(false);
-        const newCategory = {
-            name: document.getElementById("newCategoryName").value,
-            description: document.getElementById("newCategoryDescription").value,
-            volume: '',
-            trend: '',
-            path: ''
-        }
         try {
-          const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-category/', newCategory);
+          console.log("NEW", newKeyMetric)
+          const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-keymetric/', newKeyMetric);
           console.log(response);
         } catch (error) {
           console.error(error);
@@ -77,7 +76,8 @@ const KeyMetricCard = () => {
           fetchData();
         }
     };
-    function Dropdown({ options }) {
+  
+    function Dropdown({ options, id }) {
       // This function checks if the option is an array and returns the appropriate value
       const getOptionValue = (option) => {
         if (Array.isArray(option)) {
@@ -88,7 +88,7 @@ const KeyMetricCard = () => {
       };
     
       return (
-        <select className="form-select">
+        <select className="form-select" id={id}>
           {options.map((option, index) => (
             <option key={index} value={getOptionValue(option)}>
               {getOptionValue(option)}
@@ -109,70 +109,51 @@ const KeyMetricCard = () => {
       );
     }
 
-    const categories = categoryList.map(category => ({
-        name: category.name,
-        description: category.description,
-        volume: category.num_events, // Example volume
-        trend: '', // Example trend
+    const keymetrics = keymetricList.map(keymetric => ({
+        name: keymetric.name,
+        description: keymetric.description,
+        volume: keymetric.num_events, // Example volume
+        importance: keymetric.importance, // Example trend
         path: "" // Example path
         })); 
-    
-      const TrendLine = ({ value, trend, path }) => {
-        // Choose the path based on the trend
-        // const pathData = trend === 'up' ? trendPath.up : trendPath.down;
-      
-        // Set the color based on whether the value is positive or negative
-        const color = value.startsWith('-') ? 'red' : 'green';
-      
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span className="mr-3" style={{ color: color }}>{value}</span>
-            <svg width="120" height="40" viewBox="0 0 120 40" >
-              <path d={path} fill="none" stroke={color} strokeWidth="2" />
-            </svg>
-          </div>
-        );
-      };
 
-      const removeCategory = async (index) => {
+
+      const removeKeyMetric = async (index) => {
         console.log({"index": index})
         const params = {
           index: index
         };
         try {
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'delete-user-category/', { params });
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'delete-user-keymetric/', { params });
         } catch (error) {
           console.error(error);
         } finally {
-          setCategoryList(prevCategories => prevCategories.filter((_, idx) => idx !== categories.length - index - 1));
+          setKeyMetricList(prevList => prevList.filter((_, idx) => idx !== keymetrics.length - index - 1));
         }
       }
       
-      const TableRow = ({ category, index }) => (
+      const TableRow = ({ keymetric, index }) => (
         <tr>
-          <td><p className="inline-block categ-name">{category.name}</p></td>
-          <td>{category.description}</td>
-          <td>{category.volume}</td>
-          <td>
-            {/* This would be replaced with a chart component */}
-            <div className="trend-line">
-              <TrendLine value={category.trend} trend='up' path={category.path}/>
-            </div>
-          </td>
+          <td><p className="inline-block categ-name">{keymetric.name}</p></td>
+          <td>{keymetric.description}</td>
+          <td>{keymetric.volume}</td>
+          <td>{keymetric.importance}</td>
           <td style={{border: "none"}}>
-            {editMode && <RemoveCircleIcon onClick={() => removeCategory(index)}/>}
+            {editMode && <RemoveCircleIcon onClick={() => removeKeyMetric(index)}/>}
           </td>
         </tr>
       );
 
+      const importanceArray = ["Low", "Medium", "High"];
+
       const NewTableRow = () => (
         <tr>
             <td>
-              <Dropdown options={optionsArrayData}/>
+              <Dropdown options={optionsArrayData} id={"newKeyMetricName"}/>
             </td>
             <td style={{padding: "0"}}>
                 <textarea
-                    id="newCategoryDescription"
+                    id="newKeyMetricDescription"
                     row="2"
                     cols="55"
                     type="text"
@@ -181,12 +162,12 @@ const KeyMetricCard = () => {
                 />
             </td>
             <td>-</td>
-            <td>-</td>
+            <td><Dropdown options={importanceArray} id={"newKeyMetricImportance"}/></td>
             <td style={{border: "none"}}>
-              <button className="save-btn" style={{verticalAlign: "middle"}} onClick={handleSaveNewCategory}>Save</button>
+              <button className="save-btn" style={{verticalAlign: "middle"}} onClick={handleSaveNewKeyMetric}>Save</button>
             </td>
             <td style={{border: "none"}}>
-              <button style={{verticalAlign: "middle"}} onClick={handleAddNewCategory}>Cancel</button>
+              <button style={{verticalAlign: "middle"}} onClick={handleAddNewKeyMetric}>Cancel</button>
             </td>
         </tr>
     );    
@@ -199,13 +180,13 @@ const KeyMetricCard = () => {
                 <th className="w-60">Category</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th>Trend (coming soon)</th>
+                <th>Importance</th>
               </tr>
             </thead>
             <tbody>
             {showNewCategoryRow && <NewTableRow/>}
-              {categories.slice().reverse().map((category, index) => (
-                <TableRow key={index} category={category} index={index}/>
+              {keymetrics.slice().reverse().map((keymetric, index) => (
+                <TableRow key={index} keymetric={keymetric} index={index}/>
               ))}
             </tbody>
           </table>
@@ -215,11 +196,11 @@ const KeyMetricCard = () => {
       return (
         <div className='charts-content'>
           <div className='flex'>
-            <p className='text-4xl mb-7'>KPIs and Intended Behaviors</p>
+            <p className='text-4xl mb-7'>Key Performance Indicators</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
-                <button className='add-btn ml-10 mb-5' onClick={handleAddNewCategory}> Add New </button>
+                <button className='add-btn ml-10 mb-5' onClick={handleAddNewKeyMetric}> Add New </button>
               </>
             ) : editMode ? (
               <button className='ml-auto' onClick={handleEdit}> Done </button>
