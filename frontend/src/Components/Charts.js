@@ -3,6 +3,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, BarElement,
 import LineChartCard from './ChartComponents/LineChartCard';
 import BarChartCard from './ChartComponents/BarChartCard';
 import KeyMetricCard from './ChartComponents/KeyMetricCard';
+import Sequences from './ChartComponents/Sequences';
 import Category from './ChartComponents/Category';
 import '../styles/Charts.css';
 import axios from 'axios';
@@ -188,7 +189,7 @@ const Charts = () => {
      <div>
        {currentView === 'categories' && <Category/>}
        {currentView === 'kpis' && <KeyMetricCard />}
-       {/* {currentView === 'graphs' && <Graphs />} */}
+       {currentView === 'sequences' && <Sequences />}
      </div>
    </div>
  );

@@ -38,7 +38,7 @@ const KeyMetricCard = () => {
 
   return (
     <div className='ml-10'>
-      <p className='text-4xl my-10 ml-10 mb-7'>Key Metrics</p>
+      <p className='text-4xl my-10 ml-10 mb-7'>Sequences</p>
       {events.map((event, index) => (
       <div key={index} className="event-container">
         <div className="dropdown-container">
@@ -67,7 +67,7 @@ const KeyMetricCard = () => {
         )}
       </div>
       ))}
-      <button onClick={addEvent} className="add-btn">Add Event</button>
+      <button onClick={addEvent} className="add-btn w-64">Add Event</button>
     </div>
   );
 };
