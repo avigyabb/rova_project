@@ -10,10 +10,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import axios from 'axios';
 
 const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelectedTrace }) => {
-  
   const [traceSummary, setTraceSummary] = useState("");
   const [similarTraces, setSimilarTraces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  console.log(selectedEvent);
+
   var trace_id = -1
   if(selectedEvent['event_name'] === 'LLM Trace') {
     trace_id = selectedEvent['events'][0]['trace_id']
@@ -28,7 +30,6 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
         const summary = await axios.get(process.env.REACT_APP_API_URL + 'get-summary/', {params});
         const similar_traces = await axios.get(process.env.REACT_APP_API_URL + 'get-similar-traces/', {params});
         setTraceSummary(summary.data.summary);
-        console.log(similar_traces.data.similar_traces)
         setSimilarTraces(similar_traces.data.similar_traces)
       } catch (error) {
         console.error(error);
@@ -143,9 +144,10 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                       <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
                     </div>
                     <div>
-                      {/* not correct */}
                       <p className='metric-label'> END TIME </p>
-                      <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
+                      <p className='text-sm'>  {
+                        new Date(new Date(selectedEvent.events[selectedEvent.events.length - 1].timestamp).getTime() + parseFloat(selectedEvent.events[selectedEvent.events.length - 1].latency) * 1000).toLocaleString()
+                      } </p>
                     </div>
                   </div>
 

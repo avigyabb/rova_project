@@ -1,18 +1,20 @@
 .sessions-list {
-    width: 50%;
-    margin-left: 4%;
+    width: 52%;
+    margin-left: 2%;
     height: 100%;
     overflow: hidden;
     overflow-y: auto;
 }
 
 .sql-col {
-    width: 38%;
+    width: 40%;
     height: 100%;
-    margin-left: 4%;
+    margin-left: 3%;
+    padding-right: 2%;
     margin-top: 1%;
     overflow: hidden;
     overflow-y: auto;
+    border-right: 2px solid lightgray;
 }
 
 .filters {
@@ -43,4 +45,5 @@
     padding: 10px;
     height: 50%;
     background-color: #F0F0EB;
+    margin-bottom: 5%;
 }

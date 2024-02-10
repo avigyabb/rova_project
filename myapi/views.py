@@ -101,6 +101,8 @@ def get_user(request):
             WHERE user_id = '{request.GET.get("userId")}'
             """
     result = clickhouse_client.query(combined_table_sql + sql_query)
+    print("loc2")
+    print(len(result.result_rows))
     # dataframe of all events of user ordered by timestamp
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
@@ -285,6 +287,7 @@ def delete_user_category(request):
     delete_category(index)
     return Response({"message": "Category deleted successfully"})
 
+
 @api_view(["GET"])
 def get_filtered_sessions(request):
     topics = request.GET.get("topics")
@@ -292,4 +295,4 @@ def get_filtered_sessions(request):
     users = request.GET.get("users")
 
     session_ids = get_session_ids_given_filters
-    return Response({"sessions" : get_session_data_from_ids(session_ids)})
+    return Response({"sessions": get_session_data_from_ids(session_ids)})

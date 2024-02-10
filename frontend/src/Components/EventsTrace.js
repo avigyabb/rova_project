@@ -33,6 +33,7 @@ const EventsTrace = () => {
             sessionId: sessionIdState,
           };
           const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
+          console.log(response.data.info)
           setData(response.data.info);
         } catch (error) {
           console.error(error);

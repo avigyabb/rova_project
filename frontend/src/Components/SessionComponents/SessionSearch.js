@@ -86,7 +86,8 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={toggleFilters}>
+                {/* <IconButton onClick={toggleFilters}> */}
+                <IconButton>
                   <FilterListIcon />
                 </IconButton>
               </InputAdornment>

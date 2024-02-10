@@ -171,11 +171,11 @@ function Flows() {
     optionsArray.push(<option value={option}>{option}</option>)
   ) 
 
-  if (isLoading) {
-    return <div className="nin-h flex justify-center items-center" style = {{margin : "auto", position : "absolute", top : "0", bottom : "0", left : "0", right : "0"}}>
-      <CircularProgress size = "5rem" style = {{color : "#FFA500"}}/>
-    </div>
-  }
+  // if (isLoading) {
+  //   return <div className="nin-h flex justify-center items-center" style = {{margin : "auto", position : "absolute", top : "0", bottom : "0", left : "0", right : "0"}}>
+  //     <CircularProgress size = "5rem" style = {{color : "#FFA189"}}/>
+  //   </div>
+  // }
 
   return (
       <div class="h-screen">
@@ -187,7 +187,7 @@ function Flows() {
               </select>
             </div>
             {steps}
-            <button class="h-full" onClick={addColumn}> <CgAddR class="h-8 w-8 ml-6 thin-icon" /> </button>
+            {!isLoading && <button class="h-full" onClick={addColumn}> <CgAddR class="h-8 w-8 ml-6 thin-icon" /> </button>}
             <div class="endState ml-auto">
               <select class="state bg-gray-200" id="endDropdown" value={endState} onChange={handleEndChange}>
                 <option value="">End Event</option>
@@ -195,10 +195,18 @@ function Flows() {
               </select>
             </div>
           </div>
-          <div class="flex flex-row h-full">
-            {flowBoxes}
-          </div>
-          {arrows}
+          {isLoading ? (
+            <div className="flex justify-center items-center" style = {{margin : "auto", position : "absolute", top : "0", bottom : "0", left : "0", right : "0"}}>
+              <CircularProgress size = "5rem" style = {{color : "#FFA189"}}/>
+            </div>
+          ) : (
+            <>
+            <div class="flex flex-row h-full">
+              {flowBoxes}
+            </div>
+            {arrows}
+            </>
+          )}
       </div>
   );
 }

@@ -4,6 +4,7 @@ import KeyMetricCard from './ChartComponents/KeyMetricCard';
 import Sequences from './ChartComponents/Sequences';
 import Category from './ChartComponents/Category';
 import Graphs from './ChartComponents/Graphs';
+import Homepage from './ChartComponents/Homepage';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
@@ -179,13 +180,14 @@ const Charts = () => {
  return (
    <div className='charts-container flex'>
      <div className='home-sidebar'>
-       <p>My Metrics</p>
+       <p onClick={() => changeView('homepage')}>Homepage</p>
        <button onClick={() => changeView('categories')}>Categories</button>
        <button onClick={() => changeView('kpis')}>KPIs</button>
        <button onClick={() => changeView('sequences')}>Sequences</button>
        <button onClick={() => changeView('graphs')}>Graphs</button>
      </div>
      <div>
+       {currentView === 'homepage' && <Homepage />}
        {currentView === 'categories' && <Category/>}
        {currentView === 'kpis' && <KeyMetricCard />}
        {currentView === 'sequences' && <Sequences />}
