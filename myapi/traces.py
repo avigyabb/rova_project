@@ -40,7 +40,8 @@ def parse_session(group):
 def embed_all_traces():
 
   # Group by 'trace_id' and apply the function to each group
-  traces_df = df.groupby('trace_id').apply(parse_trace).to_frame(name='trace_to_text')
+  result_series = df.groupby('trace_id').apply(parse_trace)
+  traces_df = result_series.reset_index(name='trace_to_text')
   embeds = embeddings_model.embed_documents(traces_df['trace_to_text'])
   traces_df['embeds'] = [np.array(e) for e in embeds]
 
@@ -49,7 +50,8 @@ def embed_all_traces():
 def embed_all_sessions():
 
   # Now, you can group by 'session_id' and then 'group_id'
-  sessions_df = df.groupby(['session_id']).apply(parse_session).to_frame(name='session_to_text')
+  result_series = df.groupby(['session_id']).apply(parse_session)
+  sessions_df = result_series.reset_index(name='session_to_text')
   embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
   sessions_df['embeds'] = [np.array(e) for e in embeds]
 
