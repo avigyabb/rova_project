@@ -180,11 +180,11 @@ const Charts = () => {
  return (
    <div className='charts-container flex'>
      <div className='home-sidebar'>
-       <p onClick={() => changeView('homepage')}>Homepage</p>
+       {/* <p onClick={() => changeView('homepage')}>Homepage</p> */}
        <button onClick={() => changeView('categories')}>Categories</button>
        {/* <button onClick={() => changeView('kpis')}>KPIs</button>
        <button onClick={() => changeView('sequences')}>Sequences</button> */}
-       <button onClick={() => changeView('graphs')}>Graphs</button>
+       <button className='w-32' onClick={() => changeView('graphs')}>Graphs</button>
      </div>
      <div>
        {currentView === 'homepage' && <Homepage />}
