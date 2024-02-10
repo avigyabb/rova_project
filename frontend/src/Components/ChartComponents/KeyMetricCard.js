@@ -215,7 +215,7 @@ const KeyMetricCard = () => {
       return (
         <div className='charts-content'>
           <div className='flex'>
-            <p className='text-4xl mb-7'>Category Insights</p>
+            <p className='text-4xl mb-7'>KPIs and Intended Behaviors</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
