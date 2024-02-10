@@ -20,12 +20,13 @@ def embed_llm_events():
 llm_df = embed_llm_events()
 
 # Stores the user-defined categories and distinct event ids that correspond to it
-categories = [{"name": "NAME", "description": "DESCRIPTION", "session_ids": []}]
+categories = [{"name": "NAME", "description": "DESCRIPTION", "session_ids": [], "num_events": 0}]
 
 # Add a new category
 def add_category(name, description):
-    new_category = {"name": name, "description": description, "session_ids": []}
-    new_category = assign_session_ids_to_category(new_category)
+    new_category = {"name": name, "description": description, "session_ids": [], "num_events": 0}
+    new_category["session_ids"] = assign_session_ids_to_category(new_category)
+    new_category["num_events"] = llm_df[name].sum()
     categories.append(new_category)
 
 # Get all categories
@@ -44,11 +45,11 @@ def assign_session_ids_to_category(category, similarity_threshold=0.66):
 
     # Find similarity between the category description and the llm events
     llm_df[category['name']] = cosine_similarity(category_embedding, list(llm_df['embeds'])).flatten()
+    llm_df[category['name']] = llm_df[category['name']] > similarity_threshold
 
     # Find all session ids that have a similarity above the threshold
-    unique_session_ids = llm_df[llm_df[category['name']] > similarity_threshold]['session_id'].unique()
-    category["session_ids"] = unique_session_ids.to_list()
-    return category
+    unique_session_ids = llm_df[llm_df[category['name']]]['session_id'].unique()
+    return unique_session_ids
 
 def get_session_ids_given_filters(topics, kpis, users):
     sql_query = f"""

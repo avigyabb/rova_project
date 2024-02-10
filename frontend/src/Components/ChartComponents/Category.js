@@ -12,19 +12,22 @@ const Category = () => {
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
 
+    // Fetches the category data
+    const fetchData = async () =>  {
+      setIsLoading(true);
+        try {
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          console.log(response);
+          setCategoryList(response.data.categories);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+    // Fetch data on page open
     useEffect(() => {
-        const fetchData = async () =>  {
-        setIsLoading(true);
-          try {
-            const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
-            console.log(response);
-            setCategoryList(response.data.categories);
-          } catch (error) {
-            console.error(error);
-          } finally {
-            setIsLoading(false);
-          }
-        };
         fetchData();
       }, []);
 
@@ -45,7 +48,7 @@ const Category = () => {
     //     // }));
     //     console.log(newCategoryName);
     //     setNewCategoryName(e.target.value);
-    // };    
+    // };   
 
     const handleSaveNewCategory = async () => {
         // Save new category logic here
@@ -64,9 +67,9 @@ const Category = () => {
           console.log(response);
         } catch (error) {
           console.error(error);
+        } finally {
+          fetchData();
         }
-        setCategoryList((prevCategories) => [...prevCategories, newCategory]);
-        // setNewCategory({ name: '', description: '', volume: '', trend: '', path: '' });
     };
 
     // Conditional rendering based on isLoading
@@ -81,10 +84,10 @@ const Category = () => {
     const categories = categoryList.map(category => ({
         name: category.name,
         description: category.description,
-        volume: '52k', // Example volume
+        volume: category.num_events, // Example volume
         trend: '+46%', // Example trend
         path: "M0 40 L20 30 L40 34 L60 20 L80 25 L100 20 L120 0" // Example path
-        }));
+        })); 
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -177,7 +180,7 @@ const Category = () => {
                 <th className="w-60">Category</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th>Trend</th>
+                <th>Trend (coming soon)</th>
               </tr>
             </thead>
             <tbody>
