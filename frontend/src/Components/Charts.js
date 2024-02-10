@@ -182,6 +182,7 @@ const Charts = () => {
        <p>My Metrics</p>
        <button onClick={() => changeView('categories')}>Categories</button>
        <button onClick={() => changeView('kpis')}>KPIs</button>
+       <button onClick={() => changeView('sequences')}>Sequences</button>
        <button onClick={() => changeView('graphs')}>Graphs</button>
      </div>
      <div>
