@@ -85,8 +85,8 @@ const Category = () => {
         name: category.name,
         description: category.description,
         volume: category.num_events, // Example volume
-        trend: '+46%', // Example trend
-        path: "M0 40 L20 30 L40 34 L60 20 L80 25 L100 20 L120 0" // Example path
+        trend: '', // Example trend
+        path: "" // Example path
         })); 
     
       const TrendLine = ({ value, trend, path }) => {
