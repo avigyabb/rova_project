@@ -22,4 +22,5 @@ urlpatterns = [
     path(
         "delete-user-category/", views.delete_user_category, name="delete_user_category"
     ),
+    path("get-filtered_sessions/", views.get_filtered_sessions, name = "get_filtered_sessions")
 ]

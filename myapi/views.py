@@ -284,3 +284,12 @@ def delete_user_category(request):
     print(index)
     delete_category(index)
     return Response({"message": "Category deleted successfully"})
+
+@api_view(["GET"])
+def get_filtered_sessions(request):
+    topics = request.GET.get("topics")
+    kpis = request.GET.get("kpis")
+    users = request.GET.get("users")
+
+    session_ids = get_session_ids_given_filters
+    return Response({"sessions" : get_session_data_from_ids(session_ids)})

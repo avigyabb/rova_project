@@ -8,6 +8,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import { Link } from 'react-router-dom'; // Import Link
+import CircularProgress from '@mui/material/CircularProgress'
 
 function Flows() {
   const StepComponent = ({i}) => 
@@ -93,8 +94,11 @@ function Flows() {
   const [startState, setStartState] = useState(""); // State to store the selected option
   const [endState, setEndState] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const getPercentages = async() => {
+      setIsLoading(true);
       try {
         const params = {
           num_steps : columnsCount + 2,
@@ -108,6 +112,8 @@ function Flows() {
         console.log(response.data.box_percentages);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     if (startState != "" && endState != "") {
@@ -118,7 +124,7 @@ function Flows() {
       setColumnsCount(0);
     }
   }, [columnsCount, startState, endState]);  
-  
+
   if (flowBoxesData.length == (columnsCount + 2)) {
     for (let i = 0; i < columnsCount + 2; i++) {
       var overallClass;
@@ -154,7 +160,6 @@ function Flows() {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
         setOptionsArrayData(response.data.options);
-        
       } catch (error) {
         console.error(error);
       }
@@ -165,6 +170,12 @@ function Flows() {
   optionsArrayData.forEach((option) =>
     optionsArray.push(<option value={option}>{option}</option>)
   ) 
+
+  if (isLoading) {
+    return <div className="nin-h flex justify-center items-center" style = {{margin : "auto", position : "absolute", top : "0", bottom : "0", left : "0", right : "0"}}>
+      <CircularProgress size = "5rem" style = {{color : "#FFA500"}}/>
+    </div>
+  }
 
   return (
       <div class="h-screen">

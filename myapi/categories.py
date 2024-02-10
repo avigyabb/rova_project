@@ -42,3 +42,18 @@ def create_categories_df():
     # categories_df[categories[0]["name"]] = categories_df.apply(assign_category, args=(categories[0]["description"],), axis=1)
 
 create_categories_df()   
+
+def get_session_ids_given_filters(topics, kpis, users):
+    sql_query = f"""
+        SELECT *
+        FROM CombinedData
+        WHERE user_id IN {users}
+        """
+    result = clickhouse_client.query(combined_table_sql + sql_query)
+    df = pd.DataFrame(data = result.result_rows, columns = result.column_names).sort_values(
+        by = ["timestamp"]
+    )
+
+
+
+
