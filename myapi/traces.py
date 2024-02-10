@@ -6,20 +6,7 @@ import numpy as np
 
 # traeces.py
 
-def parse_session(group):
-  prev_trace_id = -1
-  template = ''
-  for index, row in group.iterrows():
-    if(row['event_type'] == 'llm' and prev_trace_id != row['trace_id']):
-      prev_trace_id = row['trace_id']
-      subgroup = group[group['trace_id'] == prev_trace_id]
-      prompt = f"Event #{index}\n" + parse_trace(group)
-    else:
-      prompt = f"Event #{index}\n" + parse_session(row, index)
-    template += prompt
-  return template
-
-def parse_session(group):
+def parse_product(group):
       prompt_template = PromptTemplate.from_template(
       "\n\n event_name: {event_name} was executed by user: {user_id} at timestamp: {timestamp} \n").format(event_name=group['event_name'], user_id=group['user_id'],
               timestamp=group['timestamp'])
@@ -37,6 +24,19 @@ def parse_trace(group):
       template += prompt_template
     return template
 
+def parse_session(group):
+  prev_trace_id = -1;
+  template = ''
+  for index, row in group.iterrows():
+    if(row['event_type'] == 'llm' and prev_trace_id != row['trace_id']):
+      prev_trace_id = row['trace_id']
+      subgroup = group[group['trace_id'] == prev_trace_id]
+      prompt = f"Event #{index}\n" + parse_trace(subgroup)
+    else:
+      prompt = f"Event #{index}\n" + parse_product(row)
+    template += prompt
+  return template
+
 def embed_all_traces():
 
   # Group by 'trace_id' and apply the function to each group
@@ -51,8 +51,7 @@ def embed_all_traces():
 def embed_all_sessions():
 
   # Now, you can group by 'session_id' and then 'group_id'
-  result_series = df.groupby(['session_id']).apply(parse_session)
-  sessions_df = result_series.reset_index(name='session_to_text')
+  sessions_df = df.groupby(['session_id']).apply(parse_session).to_frame(name='session_to_text')
   embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
   sessions_df['embeds'] = [np.array(e) for e in embeds]
 
