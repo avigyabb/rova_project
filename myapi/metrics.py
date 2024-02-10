@@ -77,27 +77,6 @@ def get_dates(clickhouse_client):
     result_dict = [date for date in result.result_rows]
     return result_dict
 
-# Helper function to get churned users
-def convert_to_timedelta(time_str):
-    # Assuming MM:DD HH:MM:SS format and treating each month as 30 days
-    parts = time_str.split(" ")
-    mm_dd = parts[0].split(":")
-    hh_mm_ss = parts[1].split(":")
-    
-    # Extracting individual components
-    months = int(mm_dd[0])
-    days = int(mm_dd[1])
-    hours = int(hh_mm_ss[0])
-    minutes = int(hh_mm_ss[1])
-    seconds = int(hh_mm_ss[2])
-    
-    # Convert months to days (approximation: 1 month = 30 days)
-    total_days = days + (months * 30)
-    
-    # Creating timedelta object
-    td = timedelta(days=total_days, hours=hours, minutes=minutes, seconds=seconds)
-    return td
-
 # Get churned sessions
 def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
     # Convert the timedelta string to a pandas.Timedelta object
