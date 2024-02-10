@@ -7,11 +7,25 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Stores the user-defined categories and distinct event ids that correspond to it
 categories = [{"name": "NAME", "description": "DESCRIPTION", "session_ids": [], "num_events": 0}]
 
+# Returns a dictionary mapping the number of events in each category over time
+def get_trend_for_category(time_range, category):
+    # Grab time, category columns
+    selected_columns = llm_df[[category['name'], 'timestamp']]
+    # Sort by timestamp and group by time range
+    llm_df_sorted = selected_columns.sort_values(by='timestamp')
+    llm_df_sorted.set_index('timestamp', inplace=True)
+    counts = llm_df_sorted.resample(time_range).sum()
+    
+    counts_dict = counts[category['name']].to_dict()
+
+    return counts_dict
+
 # Add a new category
 def add_category(name, description):
     new_category = {"name": name, "description": description, "session_ids": [], "num_events": 0}
     new_category["session_ids"] = assign_session_ids_to_category(new_category)
     new_category["num_events"] = llm_df[name].sum()
+    print(get_trend_for_category("1D", new_category))
     categories.append(new_category)
 
 # Get all categories
