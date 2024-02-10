@@ -19,7 +19,6 @@ import json
 
 traces_df = embed_all_traces()
 
-
 @csrf_exempt
 @require_POST
 def track_event(request):
@@ -28,7 +27,7 @@ def track_event(request):
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
         # print(data)  # Example to print the data received
-        df = load_df_once()
+        add_most_recent_event()
         return JsonResponse(
             {"status": "success", "message": "Event tracked successfully."}
         )
