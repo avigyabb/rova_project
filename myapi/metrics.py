@@ -98,22 +98,31 @@ def convert_to_timedelta(time_str):
     td = timedelta(days=total_days, hours=hours, minutes=minutes, seconds=seconds)
     return td
 
-# Get churned users
-def get_churned_users(timedelta_str="00:07 00:00:00"):
-    today = datetime.datetime.now()
-    timedelta_datetime = convert_to_timedelta(timedelta_str)
+# Get churned sessions
+def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
+    # Convert the timedelta string to a pandas.Timedelta object
+    timedelta_datetime = pd.to_timedelta(timedelta_str)
+    
+    # Ensure timestamp is in datetime format
     df["timestamp"] = pd.to_datetime(df["timestamp"])
-    def check_group(group):
-        group = group.sort_values('timestamp')
-        last = group.iloc[-1]
-        if(today - last['timestamp'] < timedelta_datetime):
-          return False
-        else:
-          return True
+    
+    # Sort the DataFrame by 'sessions' and then by 'timestamp' to ensure the order
+    df = df.sort_values(by=['session_id', 'timestamp'])
+    prev_max_timestamp = None
+    churned_sessions = []
+    for session_id, group in df.groupby('session_id'):
+        # Check if there is a previous group to compare with
+        if prev_max_timestamp is not None:
+            # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
+            time_diff = group['timestamp'].min() - prev_max_timestamp
+            # If the time difference is greater than the specified timedelta, add the session to the list
+            if time_diff > timedelta_datetime:
+                churned_sessions.append(session_id)
 
-    # Group by session_id and apply the check_sequence function, then filter groups that return True.
-    valid_users = df.groupby('user_id').filter(check_group)
-    return list(set(valid_users['user_id']))
+        # Update the prev_max_timestamp with the max timestamp of the current group
+        prev_max_timestamp = group['timestamp'].max()
+      
+    return set(churned_sessions)
 
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, event_names, in_order=False):

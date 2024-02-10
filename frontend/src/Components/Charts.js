@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend} from 'chart.js';
-import LineChartCard from './ChartComponents/LineChartCard';
-import BarChartCard from './ChartComponents/BarChartCard';
 import KeyMetricCard from './ChartComponents/KeyMetricCard';
 import Sequences from './ChartComponents/Sequences';
 import Category from './ChartComponents/Category';
+import Graphs from './ChartComponents/Graphs';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
@@ -190,6 +189,7 @@ const Charts = () => {
        {currentView === 'categories' && <Category/>}
        {currentView === 'kpis' && <KeyMetricCard />}
        {currentView === 'sequences' && <Sequences />}
+       {currentView === "graphs" && <Graphs />}
      </div>
    </div>
  );
