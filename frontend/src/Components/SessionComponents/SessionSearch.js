@@ -13,6 +13,20 @@ import SessionFilters from './SessionFilters';
 const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
 
   const [showFilters, setShowFilters] = useState(false); // State variable for showing/hiding filters
+  const [selectedFilters, setSelectedFilters] = useState({
+    topics: {
+      'Topic 1': false,
+      'Topic 2': false,
+      'Topic 3': false
+    },
+    kpis: {
+      'KPI 1': false
+    },
+    users: {
+      'User 1': false,
+      'User 2': false
+    },
+  });
 
   // Function to toggle the display of filters
   const toggleFilters = () => {
@@ -62,7 +76,12 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             ),
           }}
         />
-        {showFilters && <SessionFilters />}
+        {showFilters && (
+        <SessionFilters
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+        />
+      )}
     </div>
   );
 };
