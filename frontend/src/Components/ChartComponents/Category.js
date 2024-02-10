@@ -85,7 +85,7 @@ const Category = () => {
         name: category.name,
         description: category.description,
         volume: category.num_events, // Example volume
-        trend: '', // Example trend
+        trend: category.trend, // Example trend
         path: "" // Example path
         })); 
     
@@ -128,7 +128,8 @@ const Category = () => {
           <td>
             {/* This would be replaced with a chart component */}
             <div className="trend-line">
-              <TrendLine value={category.trend} trend='up' path={category.path}/>
+              {category.trend}
+              {/* <TrendLine value={category.trend} trend='up' path={category.path}/> */}
             </div>
           </td>
           <td style={{border: "none"}}>
