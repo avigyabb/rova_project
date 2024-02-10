@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import SessionCard from "./SessionComponents/SessionCard";
 import axios from 'axios';
 import '../styles/SessionSearch.css';
+import '../styles/Sessions.css';
 
 import SessionSearch from './SessionComponents/SessionSearch';
+import SessionFiltersNew from './SessionComponents/SessionFiltersNew';
 import CircularProgress from '@mui/material/CircularProgress';
+import { TextField } from '@mui/material';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState([]);
@@ -65,6 +68,30 @@ const Sessions = () => {
       <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading} setSqlBox={setSqlBox}/>
         <div className='main-content flex'>
           <div className='sql-col'>
+            <div className='sql-header' style={{background: '#00161C'}}> Filters </div>
+            <div className='filters mb-6'> 
+              <p className='mb-2'> Categories: </p>
+              <div className='flex justify-between'>
+                <SessionFiltersNew label="Categories Include:"/>
+                <SessionFiltersNew label="Categories Exclude:"/>
+              </div>
+              <p className='mt-3 mb-2'> Signals: </p>
+              <div className='flex justify-between'>
+                <SessionFiltersNew label="Signals Include:"/>
+                <SessionFiltersNew label="Signals Exclude:"/>
+              </div>
+              <p className='mt-3 mb-3'> Engagement: </p>
+              <div>
+                <TextField
+                  id="outlined-number"
+                  label="Days since last session"
+                  type="number"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </div>
+            </div>
             <div className='sql-header'> sql (cmd + enter to run) </div>
             {sqlBox ? (
               <textarea
@@ -85,10 +112,10 @@ const Sessions = () => {
             <div className='sessions-list'>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 
-                key={session_id} 
-                sessionId={session_id} // Pass the session count here
-                userId={user_id}
-                timestamp={earliest_timestamp}
+                  key={session_id} 
+                  sessionId={session_id} // Pass the session count here
+                  userId={user_id}
+                  timestamp={earliest_timestamp}
                 />
               ))}
             </div>

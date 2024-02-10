@@ -158,8 +158,9 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                   ) : (
                   <div>
                     {/* Trace Summary */}
-                    <div className='input-text mt-3'>
-                      <p className='text-sm mb-5'> {traceSummary} </p>
+                    <div className='input-text-header mt-5' style={{backgroundColor: 'black'}}> Trace Summary </div>
+                    <div className='input-text mb-5'>
+                      <p className='text-sm'> {traceSummary} </p>
                     </div>
                     {/* Similar Traces Section */}
                     <div className="similar-traces-section mt-3">
