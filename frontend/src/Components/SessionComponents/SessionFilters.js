@@ -1,31 +1,36 @@
-// SessionSearch.js
+// SessionFilters.js
 import React from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import '../../styles/SessionSearch.css';
 
-const SessionFilters = () => {
+const SessionFilters = ({ selectedFilters, setSelectedFilters }) => {
+  
+  const handleFilterChange = (filterCategory, filterValue) => {
+    const updatedFilters = {
+      ...selectedFilters,
+      [filterCategory]: {
+        ...selectedFilters[filterCategory],
+        [filterValue]: !selectedFilters[filterCategory][filterValue]
+      }
+    };
+    setSelectedFilters(updatedFilters);
+  };
 
   return (
     <div className="filters">
-    <div className="filter-category">
-        <h3>Topics</h3>
-        <FormControlLabel control={<Checkbox />} label="Topic 1" />
-        <FormControlLabel control={<Checkbox />} label="Topic 2" />
-        <FormControlLabel control={<Checkbox />} label="Topic 3" />
-    </div>
-    <div className="filter-category">
-        <h3>KPIs</h3>
-        <FormControlLabel control={<Checkbox />} label="KPI 1" />
-        <FormControlLabel control={<Checkbox />} label="KPI 2" />
-        <FormControlLabel control={<Checkbox />} label="KPI 3" />
-    </div>
-    <div className="filter-category">
-        <h3>Users</h3>
-        <FormControlLabel control={<Checkbox />} label="User 1" />
-        <FormControlLabel control={<Checkbox />} label="User 2" />
-        <FormControlLabel control={<Checkbox />} label="User 3" />
-    </div>
+      {Object.keys(selectedFilters).map(category => (
+        <div className="filter-category" key={category}>
+          <h3>{category}</h3>
+          {Object.keys(selectedFilters[category]).map(filterValue => (
+            <FormControlLabel
+              key={filterValue}
+              control={<Checkbox checked={selectedFilters[category][filterValue]} onChange={() => handleFilterChange(category, filterValue)} />}
+              label={filterValue}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   );
 };
