@@ -40,6 +40,12 @@
     position: absolute; /* Position inside the dropdown container */
     right: 10px; /* Distance from right */
   }
+
+  .charts-content{
+    overflow: hidden;
+    overflow-y:auto;
+    height: 85%;
+  }
   
   /* Ensure additional styles for buttons and layout are updated for vertical stacking */
   

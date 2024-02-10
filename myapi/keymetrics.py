@@ -7,8 +7,10 @@ keymetrics = [{"name": "NAME", "description": "DESCRIPTION", "importance": 0,"se
 
 # Add a new category
 def add_keymetric(name, description, importance):
+    steps = name.split(',')
+    formatted = [s.strip() for s in steps]
     new_keymetric = {"name": name, "description": description, "session_ids": [], "num_events": 0}
-    new_keymetric["session_ids"] = find_sessions_with_kpis(df, [name], False)
+    new_keymetric["session_ids"] = find_sessions_with_kpis(df, formatted, False)
     new_keymetric["importance"] = importance
     new_keymetric["num_events"] = len(new_keymetric['session_ids'])
     keymetrics.append(new_keymetric)

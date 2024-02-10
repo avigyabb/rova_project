@@ -3,6 +3,7 @@ import '../../styles/EventComponentsStyles/KeyMetricCard.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { Bar } from 'react-chartjs-2';
 import '../../styles/Charts.css';
 
 const KeyMetricCard = () => {
@@ -12,6 +13,7 @@ const KeyMetricCard = () => {
     // const [newCategory, setNewCategory] = useState({ name: '', description: ''});
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [selectedOptions, setSelectedOptions] = useState([]);
 
     // Fetches the category data
     const fetchData = async () =>  {
@@ -55,8 +57,9 @@ const KeyMetricCard = () => {
     }, []);
   
     const handleSaveNewKeyMetric = async () => {
+        console.log(selectedOptions)
         const newKeyMetric = {
-            name: document.getElementById("newKeyMetricName").value,
+            name: selectedOptions.join(', '),
             description: document.getElementById("newKeyMetricDescription").value,
             volume: '',
             importance: document.getElementById("newKeyMetricImportance").value,
@@ -97,7 +100,63 @@ const KeyMetricCard = () => {
         </select>
       );
     }
+
+    function MultiSelectDropdown({ options, id }) {
+      // State to keep track of selected options and their order
     
+      // This function checks if the option is an array and returns the appropriate value
+      const getOptionValue = (option) => {
+        if (Array.isArray(option)) {
+          // Assuming the first element of the array is the value we want
+          return option[0];
+        }
+        return option; // If it's not an array, return the string directly
+      };
+    
+      // Function to handle option toggle
+      const toggleOption = (optionValue) => {
+        const currentIndex = selectedOptions.findIndex((opt) => opt === optionValue);
+        let newSelectedOptions = [...selectedOptions];
+    
+        if (currentIndex === -1) {
+          // Option not currently selected, add it to the state
+          newSelectedOptions.push(optionValue);
+        } else {
+          // Option already selected, remove it from the state
+          newSelectedOptions.splice(currentIndex, 1);
+        }
+    
+        setSelectedOptions(newSelectedOptions);
+      };
+    
+      return (
+        <div>
+          {options.map((option, index) => {
+            const optionValue = getOptionValue(option);
+            return (
+              <div key={index}>
+                <input
+                  type="checkbox"
+                  id={`${id}_option_${index}`}
+                  name="selectedOption"
+                  value={optionValue}
+                  checked={selectedOptions.includes(optionValue)}
+                  onChange={() => toggleOption(optionValue)}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
+              </div>
+            );
+          })}
+          <div>Selected Options in Order:</div>
+          <ul>
+            {selectedOptions.map((option, index) => (
+              <li key={index}>{option}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
     
 
     // Conditional rendering based on isLoading
@@ -149,7 +208,7 @@ const KeyMetricCard = () => {
       const NewTableRow = () => (
         <tr>
             <td>
-              <Dropdown options={optionsArrayData} id={"newKeyMetricName"}/>
+              <MultiSelectDropdown options={optionsArrayData} id={"newKeyMetricName"}/>
             </td>
             <td style={{padding: "0"}}>
                 <textarea
@@ -180,7 +239,7 @@ const KeyMetricCard = () => {
                 <th className="w-60">Event</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th>Importance</th>
+                <th className='w-48'>Importance</th>
               </tr>
             </thead>
             <tbody>
@@ -193,6 +252,34 @@ const KeyMetricCard = () => {
         );
       };
 
+          // Prepare data for chart
+      const chartData = {
+        labels: keymetrics.slice(1).map(metric => metric.name),
+        datasets: [
+          {
+            label: 'Volume',
+            data: keymetrics.slice(1).map(metric => metric.volume),
+            backgroundColor: 'rgba(255, 161, 137, 1.0)',
+          },
+        ],
+      };
+
+    const chartOptions = {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Volume by Event',
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      maintainAspectRatio: false, // Adjust aspect ratio here
+      aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
+    };
+
       return (
         <div className='charts-content'>
           <div className='flex'>
@@ -200,13 +287,16 @@ const KeyMetricCard = () => {
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
-                <button className='add-btn ml-10 mb-5' onClick={handleAddNewKeyMetric}> Add New </button>
+                <button className='add-btn ml-10 mb-5 w-32' onClick={handleAddNewKeyMetric}> Add New </button>
               </>
             ) : editMode ? (
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
           <TopicTable />
+          <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
+            <Bar data={chartData} options={chartOptions} />
+          </div>
         </div>
       );
   };

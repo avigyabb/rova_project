@@ -181,7 +181,7 @@ const Category = () => {
                 <th className="w-60">Category</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th>Trend (coming soon)</th>
+                <th className='w-48'>Trend (coming soon)</th>
               </tr>
             </thead>
             <tbody>
@@ -201,7 +201,7 @@ const Category = () => {
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
-                <button className='add-btn ml-10 mb-5' onClick={handleAddNewCategory}> Add New </button>
+                <button className='add-btn ml-10 mb-5 w-32' onClick={handleAddNewCategory}> Add New </button>
               </>
             ) : editMode ? (
               <button className='ml-auto' onClick={handleEdit}> Done </button>
