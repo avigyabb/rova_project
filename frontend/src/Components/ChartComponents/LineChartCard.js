@@ -23,7 +23,7 @@ const LineChartCard = ({ title, data, options }) => {
             <Line data={{
               ...data,
               datasets: data.datasets.filter(dataset => selectedData[dataset.label])
-            }} options={options} style={{ width: '1000px', height: '500px' }} />
+            }} options={options} style={{ width: '1100px', height: '500px' }} />
           </div>
         </div>
         <div className="flex flex-col items-center" style={{margin: '0 auto'}}>
@@ -33,7 +33,7 @@ const LineChartCard = ({ title, data, options }) => {
           options={data.datasets.map((option) => option.label)}
           disableCloseOnSelect
           getOptionLabel={(option) => option}
-          style={{ width:400 }}
+          style={{ width:500 }}
           renderInput={(params) => (
             <TextField {...params} variant="outlined" label="Select data" placeholder="Select data" />
           )}
