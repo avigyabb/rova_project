@@ -13,10 +13,9 @@ const LineChartCard = ({ title, data, options }) => {
   }, {}));
 
   return (
-    <div className='wrapper'>
-    <Card>
-        <div className="flex justify-between items-center p-4">
-          <h5 className="text-xl font-semibold leading-tight text-gray-900">{title}</h5>
+    <div>
+        <div className="flex justify-between items-center ">
+          <h5 className="text-xl mb-5 font-semibold leading-tight text-gray-900">{title}</h5>
         </div>
         <hr style={{marginTop: '-1.0rem', marginBottom: '-1.0rem'}} />
         <div className="flex flex-col items-center">
@@ -24,7 +23,7 @@ const LineChartCard = ({ title, data, options }) => {
             <Line data={{
               ...data,
               datasets: data.datasets.filter(dataset => selectedData[dataset.label])
-            }} options={options} style={{ width: '750px', height: '400px' }} />
+            }} options={options} style={{ width: '1000px', height: '500px' }} />
           </div>
         </div>
         <div className="flex flex-col items-center" style={{margin: '0 auto'}}>
@@ -34,7 +33,7 @@ const LineChartCard = ({ title, data, options }) => {
           options={data.datasets.map((option) => option.label)}
           disableCloseOnSelect
           getOptionLabel={(option) => option}
-          style={{ width: 300 }}
+          style={{ width:400 }}
           renderInput={(params) => (
             <TextField {...params} variant="outlined" label="Select data" placeholder="Select data" />
           )}
@@ -46,7 +45,6 @@ const LineChartCard = ({ title, data, options }) => {
           }}
         />
         </div>
-    </Card>
     </div>
   );
 };

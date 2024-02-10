@@ -63,18 +63,34 @@ def get_alpd(clickhouse_client):
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
-# get list of dates
-def get_dates(clickhouse_client):
-    dates_sql = """
-    SELECT DISTINCT toStartOfDay(timestamp) AS date
-    FROM {}.llm
-    UNION ALL
-    SELECT DISTINCT toStartOfDay(timestamp) AS date
-    FROM {}.product
-    ORDER BY date
+def get_asdpd(clickhouse_client):
+    asdpd_sql = """
+    SELECT
+        session_date,
+        AVG(session_duration) as avg_session_duration
+    FROM (
+        SELECT
+            toDate(MIN(timestamp)) as session_date,
+            session_id,
+            dateDiff('second', MIN(timestamp), MAX(timestamp)) as session_duration
+        FROM (
+            SELECT session_id, timestamp
+            FROM {}.llm
+            UNION ALL
+            SELECT session_id, timestamp
+            FROM {}.product
+        )
+        GROUP BY
+            session_id
+    )
+    GROUP BY
+        session_date
+    ORDER BY
+        session_date
+
     """.format(db_name, db_name)
-    result = clickhouse_client.query(dates_sql)
-    result_dict = [date for date in result.result_rows]
+    result = clickhouse_client.query(asdpd_sql)
+    result_dict = {str(date): count for date, count in result.result_rows}
     return result_dict
 
 # Get churned sessions

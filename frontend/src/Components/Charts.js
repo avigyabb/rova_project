@@ -182,15 +182,15 @@ const Charts = () => {
      <div className='home-sidebar'>
        <p onClick={() => changeView('homepage')}>Homepage</p>
        <button onClick={() => changeView('categories')}>Categories</button>
-       <button onClick={() => changeView('kpis')}>KPIs</button>
-       <button onClick={() => changeView('sequences')}>Sequences</button>
+       {/* <button onClick={() => changeView('kpis')}>KPIs</button>
+       <button onClick={() => changeView('sequences')}>Sequences</button> */}
        <button onClick={() => changeView('graphs')}>Graphs</button>
      </div>
      <div>
        {currentView === 'homepage' && <Homepage />}
        {currentView === 'categories' && <Category/>}
-       {currentView === 'kpis' && <KeyMetricCard />}
-       {currentView === 'sequences' && <Sequences />}
+       {/* {currentView === 'kpis' && <KeyMetricCard />}
+       {currentView === 'sequences' && <Sequences />} */}
        {currentView === "graphs" && <Graphs />}
      </div>
    </div>
