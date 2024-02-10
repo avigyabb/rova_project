@@ -174,7 +174,7 @@ const Category = () => {
       
       const TopicTable = () => {
         return (
-          <table>
+          <table style={{ width: '1100px' }}>
             <thead>
               <tr>
                 <th className="w-60">Category</th>
