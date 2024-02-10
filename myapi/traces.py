@@ -41,7 +41,6 @@ def embed_all_traces():
 
   # Group by 'trace_id' and apply the function to each group
   traces_df = df.groupby('trace_id').apply(parse_trace).to_frame(name='trace_to_text')
-  # Convert the result into a DataFrame
   embeds = embeddings_model.embed_documents(traces_df['trace_to_text'])
   traces_df['embeds'] = [np.array(e) for e in embeds]
 
