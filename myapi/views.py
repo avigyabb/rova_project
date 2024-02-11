@@ -18,8 +18,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 
-traces_df = embed_all_traces()
-
 # Appends the newest event to the df
 def add_most_recent_event():
     sql = """

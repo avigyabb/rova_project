@@ -5,6 +5,12 @@ import clickhouse_connect
 import pandas as pd
 import numpy as np
 import os
+from .traces import embed_all_traces
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
+from categories.models import Category
+from categories.views import assign_session_ids_to_category
+import json
 
 ## Constants ##
 embeddings_model = OpenAIEmbeddings(
@@ -116,5 +122,65 @@ def embed_llm_events():
     llm_df['embeds'] = [np.array(e) for e in embeds]
     return llm_df
 
+def query_gpt(
+    client,
+    msg_arr,
+    model="gpt-4-turbo-preview",
+    temperature=0.0,
+    max_tokens=512,
+    json_output=False,
+):
+    response_format = {"type": "json_object"} if json_output else {"type": "text"}
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=msg_arr,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        response_format=response_format,
+        n=1,
+        stop=None,
+    )
+
+    if json_output:
+        return json.loads(response.choices[0].message.content)
+    else:
+        return response.choices[0].message.content
+    
+def prompt_to_generate_clusters(sentence):
+    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
+                     a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                    {'name': 'category_name', 'description': 'category_description'}."
+    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
+    return msgs
+
+def autosuggest_categories(df):
+    if(Category.objects.count() == 0):
+        #sessions_df = embed_all_sessions()
+        embeddings = np.array(df["embeds"].tolist()) 
+        # Clustering with K-Means
+        kmeans = KMeans(n_clusters=2, random_state=0).fit(embeddings)
+        # Assign cluster labels to DataFrame
+        df['cluster_label'] = kmeans.labels_
+        # Calculate the distance between each point and the centroid of its cluster
+        centroids = kmeans.cluster_centers_
+        distances = cdist(embeddings, centroids, 'euclidean')
+        # The distance for each point to its cluster centroid
+        df['distance_to_centroid'] = np.min(distances, axis=1)
+        # Find the closest row to each cluster's centroid
+        closest_rows = df.loc[df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
+        for row in closest_rows.iterrows():
+            prompt = prompt_to_generate_clusters(row)
+            answer = query_gpt(client, prompt, json_output=True)
+            modded_name = answer['name'] +' (suggested)'
+            new_category = Category(name=modded_name, description=answer['description'], user_id=0)
+            new_category.save()
+            assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
+
 # Store the embeddings for all llm_events
 llm_df = embed_llm_events()
+traces_df = embed_all_traces(df, embeddings_model)
+autosuggest_categories(llm_df)
+
+# auto suggest
+# 

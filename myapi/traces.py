@@ -37,7 +37,7 @@ def parse_session(group):
     template += prompt
   return template
 
-def embed_all_traces():
+def embed_all_traces(df, embeddings_model):
 
   # Group by 'trace_id' and apply the function to each group
   result_series = df.groupby('trace_id').apply(parse_trace)
@@ -47,7 +47,7 @@ def embed_all_traces():
 
   return traces_df
 
-def embed_all_sessions():
+def embed_all_sessions(df, embeddings_model):
 
   # Now, you can group by 'session_id' and then 'group_id'
   result_series = df.groupby(['session_id']).apply(parse_session)

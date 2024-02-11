@@ -4,7 +4,6 @@ from .consts import *
 from .traces import *
 import random
 
-
 def query_gpt(
     client,
     msg_arr,
@@ -161,3 +160,4 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     }
     new_prompt = [system_prompt, user_prompt]
     return new_prompt
+
