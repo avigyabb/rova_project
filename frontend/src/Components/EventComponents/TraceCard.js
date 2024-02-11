@@ -8,6 +8,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import React, { useState, useEffect } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import axios from 'axios';
+import ProductCard from './ProductCard';
 
 const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelectedTrace }) => {
   const [traceSummary, setTraceSummary] = useState("");
@@ -40,6 +41,25 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
     };
     fetchData();
   }, [selectedEvent]);
+
+  // Define some basic styles for the card
+  const styles = {
+    card: {
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      padding: '20px',
+      margin: '10px 0',
+      backgroundColor: '#f9f9f9',
+      height: '20%',
+      width: '100%',
+    },
+    title: {
+      color: '#333',
+    },
+    info: {
+      marginBottom: '10px',
+    },
+  };
 
   return (
     <div className="right-column">
@@ -191,7 +211,8 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
         )}
         {selectedEvent.table_source == "product" && (
           <div className="event-metadata-content">
-            <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre>
+            {/* <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre> */}
+            <ProductCard styles={styles} eventData={selectedEvent} />
           </div>
         )}
     </div>
