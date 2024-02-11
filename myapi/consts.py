@@ -25,7 +25,7 @@ def new_clickhouse_client():
         username="default",
         password="V8fBb2R_ZmW4i",
     )
-    clickhouse_client.command('USE rova_dev')
+    clickhouse_client.command('USE buster_dev')
     return clickhouse_client
 
 clickhouse_client = new_clickhouse_client()
@@ -33,7 +33,7 @@ clickhouse_client = new_clickhouse_client()
 options_clickhouse_client = new_clickhouse_client()
 filters_clickhouse_client = new_clickhouse_client()
 
-db_name = "rova_dev"
+db_name = "buster_dev"
 
 rova_client = rova_client.Rova(db_name)
 
