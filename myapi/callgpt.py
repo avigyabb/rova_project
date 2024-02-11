@@ -151,7 +151,7 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
         filtered = df[df["session_id"] == int(id)].sort_values(by="timestamp")
         user_prompt_raw = parse_session(filtered)
         user_prompt += "Sample #{}: \n".format(indx + 1) + user_prompt_raw + "\n"
-    user_prompt = {"role": "user", "content": user_prompt_raw}
+    user_prompt = {"role": "user", "content": user_prompt}
     system_prompt = {
         "role": "system",
         "content": "You are a product analyst observing logs of user interactions with a LLM-based app. Analyze the following sample sessions from a category of all sessions which follow \

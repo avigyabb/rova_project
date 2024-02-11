@@ -2,6 +2,7 @@
 from .consts import *
 from .traces import *
 from .callgpt import explain_session_by_kpis, query_gpt
+from .metrics import get_churned_sessions
 from keymetrics.models import KeyMetricTable, SessionKeyMetric
 from django.db.models import Count
 import numpy as np
@@ -76,7 +77,13 @@ def delete_keymetric(index):
 
     
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
-def find_sessions_with_kpis(df, event_names, in_order=False):
+def find_sessions_with_kpis(df, raw_event_names, in_order=False):
+    churn_flag = False
+    event_names = raw_event_names
+    if('churn' in raw_event_names):
+        event_names.remove('churn')
+        churn_flag = True
+
     # If "trace" is in event_names, we'll look for any 'llm' event type as well.
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     check_for_llm = 'trace' in event_names
@@ -104,9 +111,11 @@ def find_sessions_with_kpis(df, event_names, in_order=False):
         else:
             # Check if the session contains all event_names, order doesn't matter.
             return all(name in events for name in event_names)
-
+    if(churn_flag):
+        churned_sessions = get_churned_sessions(df, "0 days 00:00:00")
     # Group by session_id and apply the check_sequence function, then filter groups that return True.
     valid_sessions = filtered_df.groupby('session_id').filter(check_sequence)
+    valid_sessions = set(valid_sessions['session_id'].unique().tolist())
     
     # Return the unique session_ids of the valid sessions.
-    return valid_sessions['session_id'].unique().tolist()
+    return valid_sessions.intersection(churned_sessions)
