@@ -16,9 +16,11 @@ const Category = () => {
     const fetchData = async () =>  {
       setIsLoading(true);
         try {
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
-          console.log(response);
-          setCategoryList(response.data.categories);
+          // const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          const categories_response = await axios.get(process.env.REACT_APP_API_URL + 'categories/get-user-categories/');
+          console.log(categories_response.data);
+          // setCategoryList(response.data.categories);
+          setCategoryList(categories_response.data);
         } catch (error) {
           console.error(error);
         } finally {
@@ -37,18 +39,7 @@ const Category = () => {
 
     const handleEdit = () => {
         setEditMode(!editMode);
-    };
-
-    // console.log("render")
-    // const handleInputChange = (e) => {
-    //     // const { name, value } = e.target;
-    //     // setNewCategory((prevCategory) => ({
-    //     //     ...prevCategory,
-    //     //     [e.target.name]: e.target.value,
-    //     // }));
-    //     console.log(newCategoryName);
-    //     setNewCategoryName(e.target.value);
-    // };   
+    }; 
 
     const handleSaveNewCategory = async () => {
         // Save new category logic here
@@ -63,7 +54,8 @@ const Category = () => {
             path: ''
         }
         try {
-          const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-category/', newCategory);
+          // const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-category/', newCategory);
+          const response = await axios.post(process.env.REACT_APP_API_URL + 'categories/post-user-category/', newCategory);
           console.log(response);
         } catch (error) {
           console.error(error);
@@ -82,12 +74,13 @@ const Category = () => {
     }
 
     const categories = categoryList.map(category => ({
-        name: category.name,
-        description: category.description,
-        volume: category.num_events, // Example volume
-        trend: category.trend, // Example trend
-        path: "" // Example path
-        })); 
+        id: category.pk, // primary key
+        name: category.fields.name,
+        description: category.fields.description,
+        volume: category.fields.volume,
+        trend: category.fields.trend,
+        path: category.fields.path
+    })); 
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -112,15 +105,15 @@ const Category = () => {
           index: index
         };
         try {
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'delete-user-category/', { params });
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'categories/delete-user-category/', { params });
         } catch (error) {
           console.error(error);
         } finally {
-          setCategoryList(prevCategories => prevCategories.filter((_, idx) => idx !== categories.length - index - 1));
+          fetchData();
         }
       }
       
-      const TableRow = ({ category, index }) => (
+      const TableRow = ({ category }) => (
         <tr>
           <td><p className="inline-block categ-name">{category.name}</p></td>
           <td>{category.description}</td>
@@ -133,7 +126,7 @@ const Category = () => {
             </div>
           </td>
           <td style={{border: "none"}}>
-            {editMode && <RemoveCircleIcon onClick={() => removeCategory(index)}/>}
+            {editMode && <RemoveCircleIcon onClick={() => removeCategory(category.id)}/>}
           </td>
         </tr>
       );
@@ -187,7 +180,7 @@ const Category = () => {
             <tbody>
             {showNewCategoryRow && <NewTableRow/>}
               {categories.slice().reverse().map((category, index) => (
-                <TableRow key={index} category={category} index={index}/>
+                <TableRow key={index} category={category}/>
               ))}
             </tbody>
           </table>

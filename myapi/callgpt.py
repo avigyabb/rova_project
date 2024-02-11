@@ -4,6 +4,7 @@ from .consts import *
 from .traces import *
 import random
 
+
 def query_gpt(
     client,
     msg_arr,
@@ -75,9 +76,9 @@ def build_sessions_sql_prompt(user_query):
                      SELECT session_id FROM {}.product \n \
                      ) \n \
                      LIMIT 50 \n \
-                     Only output SQL code without backticks, and do not include the semicolon. \n\n'.format(db_name, db_name,
-                                                                                                            db_name, db_name,
-                                                                                                            db_name, db_name)
+                     Only output SQL code without backticks, and do not include the semicolon. \n\n'.format(
+        db_name, db_name, db_name, db_name, db_name, db_name
+    )
 
     tables = 'Only use the following tables: \n\n \
               CREATE TABLE {}.llm ( \n \
@@ -110,7 +111,9 @@ def build_sessions_sql_prompt(user_query):
               2022-06-16 16:00:00 "chat_send" 1 3 1 \n \
               2022-06-15 16:00:01 "share_dashboard" 2 4 1 \n \
               2022-02-16 16:00:02 "download_dashboard" 6 7 2 \n \
-              */\n\n'.format(db_name, db_name)
+              */\n\n'.format(
+        db_name, db_name
+    )
 
     user_prompt = "Question: " + user_query + "\nSQLQuery: "
 
@@ -120,33 +123,35 @@ def build_sessions_sql_prompt(user_query):
     ]
     return messages
 
+
 def explain_trace(df, trace_id):
-  
-  filtered = df[df['trace_id'] == int(trace_id)]
 
-  user_prompt_raw = parse_trace(filtered)
-  user_prompt = {'role':'user', 'content':user_prompt_raw}
-  system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app.Analyze the following function-call trace triggered by a user's interaction with an LLM-based app. \
-                   Provide a summary of the entire interaction, summarizing all steps. Then highlight specific point of interest, for example if the content of the otuput does not answer the user's question or command"}
+    filtered = df[df["trace_id"] == int(trace_id)]
 
-  new_prompt = [system_prompt, user_prompt]
-  
-  return new_prompt 
+    new_prompt = [system_prompt, user_prompt]
+
+    return new_prompt
+
 
 def explain_session_by_kpis(df, keymetrics, kpi, k=5):
-    matches = [d for d in keymetrics if d.get('name') == kpi]
-    if(len(matches) > 0):
+    matches = [d for d in keymetrics if d.get("name") == kpi]
+    if len(matches) > 0:
         matches = matches[0]
     else:
         return False
-    session_ids = random.sample(matches['session_ids'], k)
+    session_ids = random.sample(matches["session_ids"], k)
     user_prompt = ""
-    for indx, id in enumerate(session_ids): # for each session_ids:
-        filtered = df[df['session_id'] == int(id)].sort_values(by='timestamp')
+    for indx, id in enumerate(session_ids):  # for each session_ids:
+        filtered = df[df["session_id"] == int(id)].sort_values(by="timestamp")
         user_prompt_raw = parse_session(filtered)
-        user_prompt += "Sample #{}: \n".format(indx+1) + user_prompt_raw + "\n"  
-    user_prompt = {'role':'user', 'content':user_prompt_raw}
-    system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app. Analyze the following sample sessions from a category of all sessions which follow \
-                                                this sequence of steps: {} \n then provide 1 sentence analysis of the similarities in types of questions users are asking who follow this behavior/sequence of steps".format(kpi)}
+        user_prompt += "Sample #{}: \n".format(indx + 1) + user_prompt_raw + "\n"
+    user_prompt = {"role": "user", "content": user_prompt_raw}
+    system_prompt = {
+        "role": "system",
+        "content": "You are a product analyst observing logs of user interactions with a LLM-based app. Analyze the following sample sessions from a category of all sessions which follow \
+                                                this sequence of steps: {} \n then provide 1 sentence analysis of the similarities in types of questions users are asking who follow this behavior/sequence of steps".format(
+            kpi
+        ),
+    }
     new_prompt = [system_prompt, user_prompt]
     return new_prompt
