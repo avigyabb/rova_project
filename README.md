@@ -11,6 +11,8 @@ git push main
 Debug = False
 Change rova_dev to buster_dev
 consts.py (line 28)
+npm start (frontend)
+remember to put slash at end of url
 
 Things to convert to models
 traces_df

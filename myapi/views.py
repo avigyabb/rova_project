@@ -117,6 +117,8 @@ def get_user(request):
     print("loc2")
     print(len(result.result_rows))
     # dataframe of all events of user ordered by timestamp
+    if (len(result.result_rows) == 0):
+        return Response({"info": []})
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
     )

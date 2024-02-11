@@ -95,6 +95,7 @@ const Sessions = () => {
           excluded_signals : JSON.stringify(excludedSignals),
           engagement_time : engagementTime,
         }
+        console.log(process.env.REACT_APP_API_URL);
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
         setSessions(response.data.sessions);
       } catch (error) {
@@ -112,7 +113,10 @@ const Sessions = () => {
     const getCategoryOptions = async() => {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "categories/get-user-categories")
-        setCategoryOptionsArrayData(response.data.map((category) => [category.fields.name]))
+        if (response.data) {
+          console.log(response.data);
+          setCategoryOptionsArrayData(response.data.map((category) => [category.fields.name]))
+        }
       } catch (error) {
         console.error(error);
       }
@@ -124,7 +128,9 @@ const Sessions = () => {
     const getSignalOptions = async() => {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
-        setSignalOptionsArrayData(response.data.options);
+        if (response.data.options) {
+          setSignalOptionsArrayData(response.data.options);
+        }
       } catch (error) {
         console.error(error);
       }
