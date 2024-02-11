@@ -161,3 +161,35 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     new_prompt = [system_prompt, user_prompt]
     return new_prompt
 
+
+def prompt_to_generate_clusters(sentence):
+    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
+                     a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                    {'name': 'category_name', 'description': 'category_description'}."
+    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
+    return msgs
+
+# def autosuggest_categories(df):
+#     if(Category.objects.count() == 0):
+#         #sessions_df = embed_all_sessions()
+#         embeddings = np.array(df["embeds"].tolist()) 
+#         # Clustering with K-Means
+#         kmeans = KMeans(n_clusters=2, random_state=0).fit(embeddings)
+#         # Assign cluster labels to DataFrame
+#         df['cluster_label'] = kmeans.labels_
+#         # Calculate the distance between each point and the centroid of its cluster
+#         centroids = kmeans.cluster_centers_
+#         distances = cdist(embeddings, centroids, 'euclidean')
+#         # The distance for each point to its cluster centroid
+#         df['distance_to_centroid'] = np.min(distances, axis=1)
+#         # Find the closest row to each cluster's centroid
+#         closest_rows = df.loc[df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
+#         for row in closest_rows.iterrows():
+#             prompt = prompt_to_generate_clusters(row)
+#             answer = query_gpt(client, prompt, json_output=True)
+#             modded_name = answer['name'] +' (suggested)'
+#             new_category = Category(name=modded_name, description=answer['description'], user_id=0)
+#             new_category.save()
+#             assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
+
+
