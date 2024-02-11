@@ -7,6 +7,10 @@ import './WebNavbar.css'
 
 const WebNavbar = () => {
 
+    const email = "founders@rovaai.com";
+    const subject = encodeURIComponent("Join Waitlist");
+    const body = encodeURIComponent("First Name:\nLast Name:\n\nCompany:\nRole:\n\nAdditional Info:");
+
     // Setting mobile nav
     const [click, setClick] = useState(false)
     const handleClick = () => setClick(!click)
@@ -33,7 +37,9 @@ const WebNavbar = () => {
                     {/* <a href='/' className='web-logo'>
                         <img src={logo} alt='logo' style={{ width: '100px', height: '70px' }} />
                     </a> */}
-                    <p className="mr-auto ml-5 font-bold text-4xl text-white"> rova </p>
+                    <Link to={`/`}>
+                        <p className="mr-auto ml-5 font-bold text-4xl text-white"> rova </p>
+                    </Link>
                 </div>
                 <div className='web-hamburger' onClick={handleClick}>
                     {click ? (<FaTimes size={30} style={{ color: '#ffffff' }} />)
@@ -42,21 +48,21 @@ const WebNavbar = () => {
                 </div>
                 <ul className={click ? "nav-menu active" : "nav-menu"}>
                     <li className='nav-item'>
-                        <a href='/' onClick={closeMenu}>
+                        <a href={`mailto:${email}?subject=${subject}&body=${body}`} onClick={closeMenu}>
                             <span class="label-down">Book Demo</span>
                             <span class="label-down">Book Demo</span>
                         </a>
                     </li>
-                    <li className='nav-item'>
+                    {/* <li className='nav-item'>
                         <a href='/' onClick={closeMenu}>
                             <span class="label-down">Get Started</span>
                             <span class="label-down">Get Started</span>
                         </a>
-                    </li>
+                    </li> */}
                     <li className='nav-item'>
                         <Link to={`/login`} onClick={closeMenu}>
-                            <span class="label-down">Log In</span>
-                            <span class="label-down">Log In</span>
+                            <span class="label-down">Early Access</span>
+                            <span class="label-down">Early Access</span>
                         </Link>
                     </li>
                 </ul>

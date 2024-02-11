@@ -4,6 +4,10 @@ import WebNavbar from './WebNavbar'
 import yc from './images/yc_logo.webp'
 
 const Hero = () => {
+    const email = "founders@rovaai.com";
+    const subject = encodeURIComponent("Join Waitlist");
+    const body = encodeURIComponent("First Name:\nLast Name:\n\nCompany:\nRole:\n\nAdditional Info:");
+
     return (
         <>
         < WebNavbar />
@@ -14,10 +18,10 @@ const Hero = () => {
                     <p>Combine product analytics with LLM observability to understand how chat sessions impact KPIs like user drop-off, conversion, and retention.</p>
                     <div className='buttons'>
                         <div class="container">
-                            <div class="button2">
+                            <a class="button2" href={`mailto:${email}?subject=${subject}&body=${body}`}>
                                 <span class="label-up">Join The Waitlist</span>
                                 <span class="label-up">Join the Waitlist</span>
-                            </div>
+                            </a>
                         </div>
                     </div>
                     <div className='backedby'>

@@ -16,9 +16,11 @@ const Category = () => {
     const fetchData = async () =>  {
       setIsLoading(true);
         try {
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
-          console.log(response);
-          setCategoryList(response.data.categories);
+          // const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          const categories_response = await axios.get(process.env.REACT_APP_API_URL + 'categories/get-user-categories/');
+          console.log(categories_response.data);
+          // setCategoryList(response.data.categories);
+          setCategoryList(categories_response.data);
         } catch (error) {
           console.error(error);
         } finally {
@@ -63,7 +65,8 @@ const Category = () => {
             path: ''
         }
         try {
-          const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-category/', newCategory);
+          // const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-category/', newCategory);
+          const response = await axios.post(process.env.REACT_APP_API_URL + 'categories/post-user-category/', newCategory);
           console.log(response);
         } catch (error) {
           console.error(error);
@@ -82,10 +85,12 @@ const Category = () => {
     }
 
     const categories = categoryList.map(category => ({
-        name: category.name,
-        description: category.description,
-        volume: category.num_events, // Example volume
-        trend: category.trend, // Example trend
+        name: category.fields.name,
+        description: category.fields.description,
+        // volume: category.num_events, // Example volume
+        volume: '',
+        // trend: category.trend, // Example trend
+        trend: '',
         path: "" // Example path
         })); 
     
