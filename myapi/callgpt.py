@@ -139,7 +139,8 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
         matches = matches[0]
     else:
         return False
-    session_ids = random.sample(matches["session_ids"], k)
+    samp_amt = min(len(matches['session_ids']), k)
+    session_ids = random.sample(matches['session_ids'], samp_amt)
     user_prompt = ""
     for indx, id in enumerate(session_ids):  # for each session_ids:
         filtered = df[df["session_id"] == int(id)].sort_values(by="timestamp")

@@ -21,5 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("myapi.urls")),
-    path("categories/", include("categories.urls")),
+    path("categories/", include("categories.urls")),,
+    path('keymetrics/', include('keymetrics.urls'))
 ]

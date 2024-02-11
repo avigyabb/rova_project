@@ -2,22 +2,52 @@
 from .consts import *
 from .traces import *
 from .callgpt import explain_session_by_kpis, query_gpt
+from keymetrics.models import KeyMetricTable, SessionKeyMetric
+from django.db.models import Count
 import numpy as np
 import random
+from django.db.models import Count
 
 keymetrics = [{"name": "NAME", "description": "DESCRIPTION", "importance": 0,"session_ids": [], "num_events": 0}]
 
+#Function to construct the overall representation
+def get_keymetrics_overview():
+    # Fetch all KeyMetric instances
+    keymetrics_query = KeyMetricTable.objects.all()
+    keymetrics_data = []
+    for keymetric in keymetrics_query:
+        # Fetch the session IDs related to the current KeyMetric
+        session_ids = list(SessionKeyMetric.objects.filter(keymetric_id=keymetric.id).values_list('session_id', flat=True))
+        # The num_events is the count of session IDs for the current KeyMetric
+        num_events = len(session_ids)
+        # Construct the dictionary for the current KeyMetric
+        keymetric_dict = {
+            "name": keymetric.name,
+            "description": keymetric.description,
+            "importance": keymetric.importance,
+            "session_ids": session_ids,
+            "num_events": num_events,
+            "analysis":keymetric.summary
+        }
+        keymetrics_data.append(keymetric_dict)
+    return keymetrics_data
+
+
 # Add a new category
 def add_keymetric(name, description, importance):
-    if(name not in [k['name'] for k in keymetrics]):
+    if(not KeyMetricTable.objects.filter(name=name).exists()):
+        new_keymetric = KeyMetricTable(name=name, description=description, importance=importance, user_id=0, summary="")
+        new_keymetric.save()
         steps = name.split(',')
         formatted = [s.strip() for s in steps]
-        new_keymetric = {"name": name, "description": description, "session_ids": [], "num_events": 0}
-        new_keymetric["session_ids"] = find_sessions_with_kpis(df, formatted, True)
-        new_keymetric["importance"] = importance
-        new_keymetric["num_events"] = len(new_keymetric['session_ids'])
-        keymetrics.append(new_keymetric)
+
+        session_to_keymetric = find_sessions_with_kpis(df, formatted, True)
+        keymetric_objs_to_add = [SessionKeyMetric(session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
+        SessionKeyMetric.objects.bulk_create(keymetric_objs_to_add)
+
+        keymetrics = get_keymetrics_overview()
         messages = explain_session_by_kpis(df, keymetrics, name)
+        summary = ""
         if(messages):
             summary = query_gpt(
                 client,
@@ -27,16 +57,26 @@ def add_keymetric(name, description, importance):
                 temperature=0,
                 json_output=False,
             )
-        keymetrics[-1]['analysis'] = summary
+        else:
+            summary = "No matching sessions found!"
+        new_keymetric.summary = summary
+        new_keymetric.save()
+        
 
 # Get all keymetrics
 def get_keymetrics():
+    keymetrics = get_keymetrics_overview()
     return keymetrics
 
 # function to delete a keymetric from the list
 def delete_keymetric(index):
-    print("index",index)
-    keymetrics.pop(len(keymetrics) - int(index) - 1) # when displaying categories index is reversed
+    keymetrics = get_keymetrics()
+    index_to_delete = len(keymetrics) - int(index) - 1
+    name = keymetrics[index_to_delete]['name']
+    KeyMetricTable.objects.filter(name=name).delete()
+    SessionKeyMetric.objects.filter(keymetric_name=name).delete()
+
+    
 
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, event_names, in_order=False):

@@ -203,7 +203,7 @@ const KeyMetricCard = () => {
         </tr>
       );
 
-      const importanceArray = ["Low", "Medium", "High"];
+      const importanceArray = ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"];
 
       const NewTableRow = () => (
         <tr>
@@ -239,7 +239,7 @@ const KeyMetricCard = () => {
                 <th className="w-60">Event</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th className='w-48'>Importance</th>
+                <th className='w-48'>Interaction Quality</th>
               </tr>
             </thead>
             <tbody>

@@ -24,6 +24,7 @@ SECRET_KEY = "django-insecure-cregy+byp5ma2i+&ad&duv625--oz=uy_(2bxo7fqwfc5m4%qa
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -42,7 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "myapi.apps.MyapiConfig",  # why do you need to do .apps.MYapiConfig - Avi
+    "myapi",
+    "keymetrics",  # why do you need to do .apps.MYapiConfig - Avi
     "accounts",
     "categories",
 ]
