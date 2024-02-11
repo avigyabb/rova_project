@@ -172,17 +172,17 @@ const Charts = () => {
     );
   };
  // State to track the current view
- const [currentView, setCurrentView] = useState('categories'); // default view
+ const [currentView, setCurrentView] = useState('homepage'); // default view
 
  // Function to change the current view
  const changeView = (view) => setCurrentView(view);
 
  return (
    <div className='charts-container flex'>
-     <div className='px-5 home-sidebar' >
-       {/* <p onClick={() => changeView('homepage')}>Homepage</p> */}
+     <div className='home-sidebar' >
+       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('homepage')}>Home</button>
        <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('categories')}>Categories</button>
-       {<button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('kpis')}>KPIs</button>}
+       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('kpis')}>KPIs</button>
        {/* <button onClick={() => changeView('sequences')}>Sequences</button> */}
        <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('graphs')}>Graphs</button>
      </div>
