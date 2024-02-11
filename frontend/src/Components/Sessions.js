@@ -147,17 +147,17 @@ const Sessions = () => {
           <div className='sql-col'>
             <div className='sql-header' style={{background: '#00161C'}}> Filters </div>
             <div className='filters mb-6'> 
-              <p className='mb-2'> Categories: </p>
+              <p className='mb-2'> Topics: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
               </div>
-              <p className='mt-3 mb-2'> Signals: </p>
+              <p className='mt-3 mb-2'> Events: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
               </div>
-              <p className='mt-3 mb-3'> Engagement: </p>
+              <p className='mt-3 mb-4'> Engagement: </p>
               <div>
                 <TextField
                   id="outlined-number"
@@ -189,7 +189,7 @@ const Sessions = () => {
             )}
           </div>
           {(!isLoading && Object.keys(sessions).length > 0) && (
-            <div className='sessions-list'>
+            <div className='sessions-list mt-2'>
               <h1> {Object.keys(sessions).length} results </h1>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 

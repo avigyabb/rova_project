@@ -9,6 +9,8 @@ When pushing to prod:
 pip freeze > requirements.txt
 git push main
 Debug = False
+Change rova_dev to buster_dev
+consts.py (line 28)
 
 Things to convert to models
 traces_df

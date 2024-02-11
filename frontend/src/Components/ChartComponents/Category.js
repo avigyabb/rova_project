@@ -168,7 +168,7 @@ const Category = () => {
       
       const TopicTable = () => {
         return (
-          <table>
+          <table style={{ width: '100%' }}>
             <thead>
               <tr>
                 <th style={{ width: "17%" }}> Topic </th>
@@ -189,7 +189,8 @@ const Category = () => {
 
       return (
         <div className='charts-content'>
-          <div className='flex' style={{ width: "75%"}}>
+          {/* something wrong with below style */}
+          <div className='flex' style={{ width: "80%"}}>
             <p className='text-4xl mb-7'>Topic Insights</p>
             {!showNewCategoryRow && !editMode ? (
               <>
@@ -201,7 +202,7 @@ const Category = () => {
             ) : null}
           </div>
           <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "75%"}}>
-          <TopicTable />
+            <TopicTable />
           </div>
         </div>
       );
