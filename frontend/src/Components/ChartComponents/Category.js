@@ -168,7 +168,7 @@ const Category = () => {
       
       const TopicTable = () => {
         return (
-          <table style={{ width: "100%" }}>
+          <table>
             <thead>
               <tr>
                 <th style={{ width: "17%" }}> Topic </th>
@@ -200,7 +200,9 @@ const Category = () => {
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
+          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "75%"}}>
           <TopicTable />
+          </div>
         </div>
       );
   };

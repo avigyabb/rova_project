@@ -13,7 +13,7 @@ const Login = () => {
         console.log(process.env.REACT_APP_AUTH_HEADER)
         if (event.target.value === process.env.REACT_APP_AUTH_HEADER) {
             // window.location.href = `/${process.env.REACT_APP_AUTH_HEADER}/sessions`;
-            navigate(`${process.env.REACT_APP_AUTH_HEADER}/charts`);
+            navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`);
         }
     };
 

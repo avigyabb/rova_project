@@ -337,7 +337,9 @@ const KeyMetricCard = () => {
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
-          <TopicTable />
+          <div style={{ width: keymetricList.length > 0 || showNewCategoryRow ? "100%" : "85%"}}>
+            <TopicTable />
+          </div>
           <div className='flex mt-10'>
             <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
               <Bar data={chartData} options={chartOptions} />

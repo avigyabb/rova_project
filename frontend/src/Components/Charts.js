@@ -155,7 +155,7 @@ const Charts = () => {
   );
   
  // State to track the current view
- const [currentView, setCurrentView] = useState('homepage'); // default view
+ const [currentView, setCurrentView] = useState('kpis'); // default view
 
  // Function to change the current view
  const changeView = (view) => setCurrentView(view);
@@ -182,7 +182,7 @@ return (
       </div>
      </div>
      <div className='homepage-overall-content'>
-       {currentView === 'homepage' && <Homepage />}
+       {currentView === 'homepage' && <Settings />}
        {currentView === 'categories' && <Category/>}
        {currentView === 'kpis' && <KeyMetricCard />}
        {/* currentView === 'sequences' && <Sequences />} */}

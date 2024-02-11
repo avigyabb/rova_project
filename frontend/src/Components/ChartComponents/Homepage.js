@@ -73,18 +73,24 @@ const Homepage = ({ sessionIds }) => {
   }
 
   return (
-    <div className="sessions-container" style={{ width: '130%' }}>
-      {sessions.map((session) => (
-        <ModifiedSessionCard
-          key={session.sessionId}
-          sessionId={session.sessionId}
-          userId={session.userId}
-          timestamp={session.timestamp}
-          tags={session.tags}
-          summary={session.summary}
-        />
-      ))}
+    <>
+    <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! </h1>
+    <div className='charts-content'>
+      <p> Here are your important sessions: </p>
+      <div className="sessions-container">
+        {sessions.map((session) => (
+          <ModifiedSessionCard
+            key={session.sessionId}
+            sessionId={session.sessionId}
+            userId={session.userId}
+            timestamp={session.timestamp}
+            tags={session.tags}
+            summary={session.summary}
+          />
+        ))}
+      </div>
     </div>
+    </>
   );
 };
 
