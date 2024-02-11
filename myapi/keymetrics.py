@@ -60,6 +60,14 @@ def add_keymetric(name, description, importance):
             summary = "No matching sessions found!"
         new_keymetric.summary = summary
         new_keymetric.save()
+
+def add_keymetric_for_new_session(session_id):
+    for keymetric in KeyMetricTable.objects.all():
+        raw_names = keymetric.name.split(',')
+        steps = [s.strip() for s in raw_names]
+        belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, session_id=session_id)
+        if(belongs_to_keymetric and not SessionKeyMetric.objects.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
+            SessionKeyMetric.objects.create(session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
         
 
 # Get all keymetrics
@@ -77,7 +85,7 @@ def delete_keymetric(index):
 
     
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
-def find_sessions_with_kpis(df, raw_event_names, in_order=False):
+def find_sessions_with_kpis(df, raw_event_names, in_order=False, session_id=None):
     churn_flag = False
     event_names = raw_event_names
     if('churn' in raw_event_names):
@@ -114,8 +122,14 @@ def find_sessions_with_kpis(df, raw_event_names, in_order=False):
     if(churn_flag):
         churned_sessions = get_churned_sessions(df, "0 days 00:00:00")
     # Group by session_id and apply the check_sequence function, then filter groups that return True.
-    valid_sessions = filtered_df.groupby('session_id').filter(check_sequence)
+    if(session_id is not None):
+        valid_sessions = filtered_df[filtered_df['session_id'] == session_id].filter(check_sequence)
+    else:
+        valid_sessions = filtered_df.groupby('session_id').filter(check_sequence)
     valid_sessions = set(valid_sessions['session_id'].unique().tolist())
     
     # Return the unique session_ids of the valid sessions.
-    return valid_sessions.intersection(churned_sessions)
+    if(churn_flag):
+        return valid_sessions.intersection(churned_sessions)
+    else:
+        return valid_sessions

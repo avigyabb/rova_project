@@ -1,4 +1,4 @@
-import rova_client  # this is the clickhouse client
+from rova_client import Rova
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 import clickhouse_connect
@@ -35,7 +35,7 @@ filters_clickhouse_client = new_clickhouse_client()
 
 db_name = "rova_dev"
 
-rova_client = rova_client.Rova(db_name)
+rova_client = Rova(db_name)
 
 # Returns sql query to join dbs
 combined_table_sql = """
