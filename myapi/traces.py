@@ -37,15 +37,37 @@ def parse_session(group):
     template += prompt
   return template
 
-def embed_all_traces(df, embeddings_model):
+def embed_all_traces(df, embeddings_model, traces_df=None, new_trace=None):
+
 
   # Group by 'trace_id' and apply the function to each group
   if len(df) == 0:
     return []
-  result_series = df.groupby('trace_id').apply(parse_trace)
-  traces_df = result_series.reset_index(name='trace_to_text')
-  embeds = embeddings_model.embed_documents(traces_df['trace_to_text'])
-  traces_df['embeds'] = [np.array(e) for e in embeds]
+  
+  if(new_trace is not None):
+             # Assume new_trace is a dictionary with keys 'trace_id' and 'trace_to_text'
+        filtered = df[df['trace_id'] == new_trace]
+        new_trace_dict = {'trace_id': new_trace, 'trace_to_text': parse_trace(filtered)}
+        new_trace_df = pd.DataFrame([new_trace])
+        
+        # Compute embeddings for the new trace
+        embeds = embeddings_model.embed_documents(new_trace_df['trace_to_text'])
+        new_trace_df['embeds'] = [np.array(e) for e in embeds]
+        
+        # Append the new row to the existing DataFrame
+        # Ensure the original DataFrame has the same structure
+        if 'embeds' not in traces_df.columns:
+            traces_df['embeds'] = np.nan  # Initialize the column if it doesn't exist
+            traces_df = traces_df.astype({'embeds': 'object'})  # Ensure the 'embeds' column is of type object
+        
+        # Append new_trace_df to df
+        traces_df = pd.concat([traces_df, new_trace_df], ignore_index=True)
+  else:
+    # Group by 'trace_id' and apply the function to each group
+    result_series = df.groupby('trace_id').apply(parse_trace)
+    traces_df = result_series.reset_index(name='trace_to_text')
+    embeds = embeddings_model.embed_documents(traces_df['trace_to_text'])
+    traces_df['embeds'] = [np.array(e) for e in embeds]
 
   return traces_df
 
