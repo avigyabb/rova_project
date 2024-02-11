@@ -8,8 +8,6 @@ import numpy as np
 import random
 from django.db.models import Count
 
-keymetrics = [{"name": "NAME", "description": "DESCRIPTION", "importance": 0,"session_ids": [], "num_events": 0}]
-
 #Function to construct the overall representation
 def get_keymetrics_overview():
     # Fetch all KeyMetric instances
@@ -77,7 +75,6 @@ def delete_keymetric(index):
     SessionKeyMetric.objects.filter(keymetric_name=name).delete()
 
     
-
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, event_names, in_order=False):
     # If "trace" is in event_names, we'll look for any 'llm' event type as well.

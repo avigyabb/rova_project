@@ -174,7 +174,7 @@ const Category = () => {
                 <th className="w-60">Category</th>
                 <th className="w-96">Description</th>
                 <th className="w-30">Volume</th>
-                <th className='w-48'>Trend (coming soon)</th>
+                <th className='w-48'>Trends</th>
               </tr>
             </thead>
             <tbody>

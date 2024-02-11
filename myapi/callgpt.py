@@ -125,12 +125,17 @@ def build_sessions_sql_prompt(user_query):
 
 
 def explain_trace(df, trace_id):
+  
+  filtered = df[df['trace_id'] == int(trace_id)]
 
-    filtered = df[df["trace_id"] == int(trace_id)]
+  user_prompt_raw = parse_trace(filtered)
+  user_prompt = {'role':'user', 'content':user_prompt_raw}
+  system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app.Analyze the following function-call trace triggered by a user's interaction with an LLM-based app. \
+                   Provide a summary of the entire interaction, summarizing all steps. Then highlight specific point of interest, for example if the content of the otuput does not answer the user's question or command"}
 
-    new_prompt = [system_prompt, user_prompt]
-
-    return new_prompt
+  new_prompt = [system_prompt, user_prompt]
+  
+  return new_prompt 
 
 
 def explain_session_by_kpis(df, keymetrics, kpi, k=5):
