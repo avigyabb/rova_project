@@ -1,7 +1,8 @@
 .sessions-container {
     max-height: 800px; /* Adjust based on your needs */
     overflow-y: auto;
-    margin-left: 3%
+    margin-left: 3%;
+    margin-top:2%;
   }
   
   .session-card {
