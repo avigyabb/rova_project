@@ -29,8 +29,8 @@ const Sessions = () => {
           sql: sqlBox
         };
         console.log(process.env.REACT_APP_API_URL + 'get-sessions/'); // dont delete for now
-        const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
-        setSessions(response.data.sessions);
+        //const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
+        //setSessions(response.data.sessions);
       } catch (error) {
         console.error(error);
       } finally {
@@ -77,7 +77,12 @@ const Sessions = () => {
 
   const engagementTimeOnBlur = (event) => {
     setEngagementTime(event.target.value);
-  }
+  }  
+  
+  const categoryOptionsArray = [];
+  const [categoryOptionsArrayData, setCategoryOptionsArrayData] = useState([]);
+  const signalOptionsArray = [];
+  const [signalOptionsArrayData, setSignalOptionsArrayData] = useState([]);
 
   useEffect(() => {
     const applyFilters = async() => {
@@ -91,33 +96,48 @@ const Sessions = () => {
           engagement_time : engagementTime,
         }
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
-        console.log(response.data.sessions)
         setSessions(response.data.sessions);
-        setIsLoading(false);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     }
     applyFilters();
   }, [includedCategories, excludedCategories, includedSignals, excludedSignals, engagementTime]);
 
-  const optionsArray = [];
-  const [optionsArrayData, setOptionsArrayData] = useState([]);
+
 
   useEffect(() => {
-    const getOptions = async() => {
+    const getCategoryOptions = async() => {
       try {
-        const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
-        setOptionsArrayData(response.data.options);
+        const response = await axios.get(process.env.REACT_APP_API_URL + "categories/get-user-categories")
+        setCategoryOptionsArrayData(response.data.map((category) => [category.fields.name]))
       } catch (error) {
         console.error(error);
       }
     };
-    getOptions();
+    getCategoryOptions();
   }, []);
 
-  optionsArrayData.forEach((option) =>
-    optionsArray.push(option[0])
+  useEffect(() => {
+    const getSignalOptions = async() => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
+        setSignalOptionsArrayData(response.data.options);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getSignalOptions();
+  }, []);
+
+  categoryOptionsArrayData.forEach((option) =>
+    categoryOptionsArray.push(option[0])
+  )
+
+  signalOptionsArrayData.forEach((option) =>
+    signalOptionsArray.push(option[0])
   )
 
   return (
@@ -129,13 +149,13 @@ const Sessions = () => {
             <div className='filters mb-6'> 
               <p className='mb-2'> Categories: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {optionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {optionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
               </div>
               <p className='mt-3 mb-2'> Signals: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {optionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {optionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
               </div>
               <p className='mt-3 mb-3'> Engagement: </p>
               <div>
@@ -170,6 +190,7 @@ const Sessions = () => {
           </div>
           {(!isLoading && Object.keys(sessions).length > 0) && (
             <div className='sessions-list'>
+              <h1> {Object.keys(sessions).length} results </h1>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 
                   key={session_id} 

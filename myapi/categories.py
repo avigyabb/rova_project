@@ -3,6 +3,7 @@ from .callgpt import *
 from .consts import *
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from categories.views import *
 
 # Stores the user-defined categories and distinct event ids that correspond to it
 categories = [{"name": "NAME", "description": "DESCRIPTION", "session_ids": [], "num_events": 0, "trend": []}]
@@ -121,4 +122,5 @@ def get_session_ids_given_filters(included_categories, excluded_categories, incl
     df = pd.DataFrame(data = result.result_rows, columns = result.column_names)
     if len(df) == 0:
         return []
-    return df["session_id"].unique().tolist()
+    session_ids = df["session_id"].tolist()
+    return filter_session_ids_given_categories(session_ids, included_categories, excluded_categories)

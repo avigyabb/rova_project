@@ -65,3 +65,25 @@ def delete_user_category(request):
 
 def delete_category_sessions(category_id):
     SessionCategory.objects.filter(category_id=category_id).delete()
+
+
+def filter_session_ids_given_categories(session_ids, included_categories, excluded_categories):
+    included_category_ids = []
+    for category in included_categories:
+        included_category_ids.append(Category.objects.get(name = category).pk)
+    excluded_category_ids = []
+    for category in excluded_categories:
+        excluded_category_ids.append(Category.objects.get(name = category).pk)
+    filtered_session_ids = []
+    for session_id in session_ids:
+        session_category_ids = [session_category.category_id for session_category in SessionCategory.objects.filter(session_id = session_id)]
+        include = False if len (included_category_ids) > 0 else True
+        for session_category_id in session_category_ids:
+            if session_category_id in excluded_category_ids:
+                include = False
+                break
+            elif session_category_id in included_category_ids:
+                include = True
+        if include:
+            filtered_session_ids.append(session_id)
+    return filtered_session_ids
