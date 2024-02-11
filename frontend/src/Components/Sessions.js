@@ -69,12 +69,19 @@ const Sessions = () => {
     }
   };
 
-  const engagementTimeOnChange = (event) => {
+  const engagementTimeOnKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      setEngagementTime(event.target.value);
+    }
+  }
+
+  const engagementTimeOnBlur = (event) => {
     setEngagementTime(event.target.value);
   }
 
   useEffect(() => {
     const applyFilters = async() => {
+      setIsLoading(true);
       try {
         const params = {
           included_categories : JSON.stringify(includedCategories),
@@ -86,6 +93,7 @@ const Sessions = () => {
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
         console.log(response.data.sessions)
         setSessions(response.data.sessions);
+        setIsLoading(false);
       } catch (error) {
         console.error(error);
       }
@@ -121,13 +129,13 @@ const Sessions = () => {
             <div className='filters mb-6'> 
               <p className='mb-2'> Categories: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {optionsArray}/>
-                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {optionsArray}/>
+                <SessionFiltersNew label="Categories Include:" setFilters = {setIncludedCategories} options = {optionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Categories Exclude:" setFilters = {setExcludedCategories} options = {optionsArray} isLoading = {isLoading}/>
               </div>
               <p className='mt-3 mb-2'> Signals: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {optionsArray}/>
-                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {optionsArray}/>
+                <SessionFiltersNew label="Signals Include:" setFilters = {setIncludedSignals} options = {optionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Signals Exclude:" setFilters = {setExcludedSignals} options = {optionsArray} isLoading = {isLoading}/>
               </div>
               <p className='mt-3 mb-3'> Engagement: </p>
               <div>
@@ -138,7 +146,9 @@ const Sessions = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  onChange={engagementTimeOnChange}
+                  disabled={isLoading}
+                  onKeyPress={engagementTimeOnKeyPress}
+                  onBlur={engagementTimeOnBlur}
                 />
               </div>
             </div>
@@ -158,7 +168,7 @@ const Sessions = () => {
               </div>
             )}
           </div>
-          { (!isLoading && Object.keys(sessions).length > 0) ? (
+          {(!isLoading && Object.keys(sessions).length > 0) && (
             <div className='sessions-list'>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 
@@ -169,9 +179,15 @@ const Sessions = () => {
                 />
               ))}
             </div>
-          ) : (
+          )}
+          {isLoading && (
             <div className="sessions-list flex justify-center items-center">
               <CircularProgress style={{ color: '#FFA189' }}/>
+            </div>
+          )}
+          {!isLoading && Object.keys(sessions).length == 0 && (
+            <div className="sessions-list flex justify-center items-center">
+              No Sessions Found. 
             </div>
           )}
         </div>

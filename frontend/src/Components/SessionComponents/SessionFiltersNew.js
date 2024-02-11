@@ -21,7 +21,7 @@ const names = [
   'Kelly Snyder',
 ];
 
-export default function MultipleSelectChip({ label, setFilters, options }) {
+export default function MultipleSelectChip({ label, setFilters, options, isLoading }) {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
 
@@ -33,8 +33,10 @@ export default function MultipleSelectChip({ label, setFilters, options }) {
     //   // On autofill we get a stringified value.
     //   typeof value === 'string' ? value.split(',') : value,
     // );
-    setPersonName(event.target.value)
-    setFilters(event.target.value);
+    if (!isLoading) {
+      setPersonName(event.target.value)
+      setFilters(event.target.value);
+    }
   };
 
   return (
@@ -44,6 +46,7 @@ export default function MultipleSelectChip({ label, setFilters, options }) {
           multiple
           value={personName}
           onChange={handleChange}
+          disabled = {isLoading}
           input={<OutlinedInput id="select-multiple-chip" label={label} />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

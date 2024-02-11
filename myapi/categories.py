@@ -74,57 +74,49 @@ def update_categories_with_new_event(row):
 def get_session_ids_given_filters(included_categories, excluded_categories, included_signals, excluded_signals, engagement_time):
     sql_query = (
         """
-        SELECT session_id, user_id, MAX(timestamp) AS last_timestamp
+        SELECT session_id
         FROM CombinedData AS t1
         """
-    )
+    )    
+    engagement_time_filter = engagement_time != "" and int(engagement_time) > 0
+    if engagement_time_filter:
+        sql_query += (
+            # get only the most recent event for each user
+            """
+            JOIN (
+                SELECT user_id, MAX(timestamp) AS max_timestamp_for_user
+                FROM CombinedData
+                GROUP BY user_id
+                ) AS t2 ON t1.user_id = t2.user_id AND t1.timestamp = t2.max_timestamp_for_user
+                WHERE t2.max_timestamp_for_user < now() - INTERVAL {} DAY
+            """
+        ).format(engagement_time)
     if len(included_signals) > 0:
+        start = "AND" if engagement_time_filter else "WHERE"
         sql_query += (
             """
-            WHERE session_id IN (
+            {} session_id IN (
                 SELECT session_id
-                FROM CombinedData AS t2
-                WHERE t2.event_name IN ("""
+                FROM CombinedData AS t3
+                WHERE t3.event_name IN ("""
                 + ", ".join([f"'{included_signal}'" for included_signal in included_signals])
                 + """)
                 )
             """
-        )
-        if len(excluded_signals) > 0:
-            sql_query += (
-                """    
-                AND session_id NOT IN (
-                    SELECT session_id
-                    FROM CombinedData AS t3
-                    WHERE t3.event_name IN ("""
-                    + ", ".join([f"'{excluded_signal}'" for excluded_signal in excluded_signals])
-                    + """)
-                    )
-                """
-            )   
-    elif len(excluded_signals) > 0:
+        ).format(start)
+    if len(excluded_signals) > 0:
+        start = "AND" if (engagement_time_filter or len(included_signals) > 0) else "WHERE"
         sql_query += (
-            """
-            WHERE session_id NOT IN (
+            """    
+            {} session_id NOT IN (
                 SELECT session_id
-                FROM CombinedData AS t2
-                WHERE t2.event_name IN ("""
-                + ", ".join([f"'{excluded_signal}'" for excluded_signal in excluded_signals]) 
+                FROM CombinedData AS t4
+                WHERE t4.event_name IN ("""
+                + ", ".join([f"'{excluded_signal}'" for excluded_signal in excluded_signals])
                 + """)
                 )
             """
-        ) 
-    if int(engagement_time) > 0:
-        sql_query += (
-            """
-            HAVING DATEADD(day, {}, last_timestamp) <= CURRENT_TIME()
-            """
-        )
-    sql_query += (
-        """
-        GROUP BY session_id, user_id
-        """
-    )
+        ).format(start)
     result = filters_clickhouse_client.query(combined_table_sql + sql_query)
     df = pd.DataFrame(data = result.result_rows, columns = result.column_names)
     if len(df) == 0:
