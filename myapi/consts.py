@@ -17,6 +17,8 @@ embeddings_model = OpenAIEmbeddings(
 os.environ["OPENAI_API_KEY"] = "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"
 client = OpenAI()
 
+db_name = "rova_dev"
+
 # setup clickhouse client
 def new_clickhouse_client():
     clickhouse_client = clickhouse_connect.get_client(
@@ -25,15 +27,13 @@ def new_clickhouse_client():
         username="default",
         password="V8fBb2R_ZmW4i",
     )
-    clickhouse_client.command('USE buster_dev')
+    clickhouse_client.command('USE {}'.format(db_name))
     return clickhouse_client
 
 clickhouse_client = new_clickhouse_client()
 
 options_clickhouse_client = new_clickhouse_client()
 filters_clickhouse_client = new_clickhouse_client()
-
-db_name = "buster_dev"
 
 rova_client = Rova(db_name)
 
