@@ -42,7 +42,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "myapi.apps.MyapiConfig",
+    "myapi",
+    "keymetrics",  # why do you need to do .apps.MYapiConfig - Avi
+    "accounts",
+    "categories",
 ]
 
 MIDDLEWARE = [

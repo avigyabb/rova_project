@@ -5,9 +5,62 @@ import BorderClearIcon from '@mui/icons-material/BorderClear';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import SchemaIcon from '@mui/icons-material/Schema';
 import ErrorIcon from '@mui/icons-material/Error';
+import React, { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import axios from 'axios';
+import ProductCard from './ProductCard';
 
 const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelectedTrace }) => {
-  console.log(selectedEvent)
+  const [traceSummary, setTraceSummary] = useState("");
+  const [similarTraces, setSimilarTraces] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  console.log(selectedEvent);
+
+  var trace_id = -1
+  if(selectedEvent['event_name'] === 'LLM Trace') {
+    trace_id = selectedEvent['events'][0]['trace_id']
+  }
+  useEffect(() => {
+    const fetchData = async () =>  {
+      setIsLoading(true);
+      try {
+        const params = {
+          trace_id: trace_id
+        }
+        const summary = await axios.get(process.env.REACT_APP_API_URL + 'get-summary/', {params});
+        const similar_traces = await axios.get(process.env.REACT_APP_API_URL + 'get-similar-traces/', {params});
+        setTraceSummary(summary.data.summary);
+        setSimilarTraces(similar_traces.data.similar_traces)
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+        console.log(similarTraces)
+      }
+    };
+    fetchData();
+  }, [selectedEvent]);
+
+  // Define some basic styles for the card
+  const styles = {
+    card: {
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      padding: '20px',
+      margin: '10px 0',
+      backgroundColor: '#f9f9f9',
+      height: '20%',
+      width: '100%',
+    },
+    title: {
+      color: '#333',
+    },
+    info: {
+      marginBottom: '10px',
+    },
+  };
+
   return (
     <div className="right-column">
       <div className='event-metadata-navbar flex items-center'>
@@ -42,13 +95,40 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                   <div className='input-text-header mt-5' style={{backgroundColor: 'gray'}}> INPUT </div>
                   <textarea
                     className='input-text'
-                    value={JSON.stringify(selectedTrace.input_content)}
+                    value={selectedTrace.input_content}
+                    style={{fontSize: 'small'}}
                   />
                   
-                  <div className='input-text mt-3' style={{borderRadius: '10px', border: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red'}}>
-                    <p className='text-sm mb-2'> OUTPUT </p>
-                    {JSON.stringify(selectedTrace.input_content)}
+                  <div 
+                    className='input-text-header mt-3' 
+                    style={{
+                      borderTop: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderLeft: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderRight: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderBottom: 'none',
+                      color: 'gray'
+                    }}> 
+                    OUTPUT 
                   </div>
+                  <textarea
+                    className='input-text'
+                    value={selectedTrace.output_content}
+                    style={{
+                      borderBottom: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderLeft: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderRight: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red', 
+                      borderTop: 'none',
+                      fontSize: 'small',
+                    }}
+                  />
+
+                  {/* <div className='input-text mt-3' style={{borderRadius: '10px', border: selectedTrace.error_status === "none" ? '2px solid lightgreen' : '2px solid red'}}>
+                    <p className='text-sm mb-2'> OUTPUT </p>
+                    <textarea
+                      className = 'input-text' style = {{border : 'none'}}
+                      value = {selectedTrace.output_content}
+                    />
+                  </div> */}
                   <div className='flex items-end'>
                     <p className='metric-label mt-2 ml-2'> STATUS </p>
                     <p className='ml-2 text-sm'> {JSON.stringify(selectedTrace.error_status)} </p>
@@ -84,14 +164,45 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
                       <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
                     </div>
                     <div>
-                      {/* not correct */}
                       <p className='metric-label'> END TIME </p>
-                      <p className='text-sm'>  {new Date(selectedEvent.events[0].timestamp).toLocaleString()} </p>
+                      <p className='text-sm'>  {
+                        new Date(new Date(selectedEvent.events[selectedEvent.events.length - 1].timestamp).getTime() + parseFloat(selectedEvent.events[selectedEvent.events.length - 1].latency) * 1000).toLocaleString()
+                      } </p>
                     </div>
                   </div>
 
                   <p className='metric-label mt-10'> SESSION ID </p>
-                  <p className='text-sm'>  {JSON.stringify(selectedEvent.events[0].session_id)} </p>
+                  <p className='text-sm mb-5'>  {JSON.stringify(selectedEvent.events[0].session_id)} </p>
+                  {isLoading ? (
+                    <div className="flex justify-center items-center">
+                      <CircularProgress style={{ color: '#FFA189' }}/>
+                    </div>
+                  ) : (
+                  <div>
+                    {/* Trace Summary */}
+                    <div className='input-text-header mt-5' style={{backgroundColor: 'black'}}> Trace Summary </div>
+                    <div className='input-text mb-5'>
+                      <p className='text-sm'> {traceSummary} </p>
+                    </div>
+                    {/* Similar Traces Section */}
+                    <div className="similar-traces-section mt-3">
+                      <h2 className="text-lg mb-2 font-semibold">Similar Traces</h2>
+                      {Object.keys(similarTraces).length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {Object.entries(similarTraces).map(([traceId, similarity]) => (
+                            <div key={traceId} className="card bg-white shadow-lg rounded-lg p-4">
+                              <h3 className="text-md font-semibold"> {traceId}</h3>
+                              <p className="text-sm">Similarity: {similarity.toFixed(2)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>No similar traces found.</p>
+                      )}
+                    </div>
+                  </div>
+                  )}
+
                 </div>
               )
               }
@@ -100,7 +211,8 @@ const TraceCard = ({ selectedEvent, selectedTrace, setSelectedEvent, setSelected
         )}
         {selectedEvent.table_source == "product" && (
           <div className="event-metadata-content">
-            <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre>
+            {/* <pre> {JSON.stringify(selectedEvent || {}, null, 2)} </pre> */}
+            <ProductCard styles={styles} eventData={selectedEvent} />
           </div>
         )}
     </div>

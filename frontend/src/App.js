@@ -22,7 +22,7 @@ const AppContent = () => {
 
   return (
     <ThemeProvider theme={customTheme}>
-      <div>
+      <div style={{ height: '100vh' }}>
         {shouldShowNavbar && <Navbar />}
         <Routes>
           <Route exact path={`${process.env.REACT_APP_AUTH_HEADER}`} element={<Flows />} />

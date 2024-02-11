@@ -1,9 +1,13 @@
 from collections import defaultdict
 import pandas as pd
 import numpy as np
-import sklearn.cluster
+import sklearn
+
 import json
 from .callgpt import *
+from .consts import *
+from .traces import * 
+
 
 # Grab all questions from file
 def questions_from_file(path):
@@ -14,7 +18,6 @@ def questions_from_file(path):
     df = pd.DataFrame(questions)
     sentences = list(df["query"])
     return sentences
-
 
 # Get cluster assignments using OpenAI's embedding model
 def get_assignments(embeddings_model, sentences, n_clusters=5):

@@ -1,38 +1,37 @@
 import pandas as pd
 import json
-import os
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from openai import OpenAI
-from langchain_openai import OpenAIEmbeddings
-import clickhouse_connect
 
 from .sessions import *
 from .topk import *
 from .flows import *
 from .metrics import *
+from .consts import *
+from .categories import *
+from .callgpt import *
+from .traces import *
+from .keymetrics import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
-import rova_client  # this is the clickhouse client
 
-embeddings_model = OpenAIEmbeddings(
-    openai_api_key="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"
-)
-os.environ["OPENAI_API_KEY"] = "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"
-client = OpenAI()
-
-# setup clickhouse client
-clickhouse_client = clickhouse_connect.get_client(
-    host="tbbhwu2ql2.us-east-2.aws.clickhouse.cloud",
-    port=8443,
-    username="default",
-    password="V8fBb2R_ZmW4i",
-)
-rova_client = rova_client.Rova("buster_dev", )
-
+# Appends the newest event to the df
+def add_most_recent_event():
+    sql = """
+        SELECT
+            *
+        FROM
+            CombinedData
+        ORDER BY timestamp DESC
+        LIMIT 1
+        """
+    result = clickhouse_client.query(combined_table_sql + sql)
+    new_row = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    df.append(new_row.iloc[0], ignore_index=True)
+    update_categories_with_new_event(new_row.iloc[0])
 
 @csrf_exempt
 @require_POST
@@ -42,28 +41,12 @@ def track_event(request):
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
         # print(data)  # Example to print the data received
+        add_most_recent_event()
         return JsonResponse(
             {"status": "success", "message": "Event tracked successfully."}
         )
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
-
-
-def load_df_once():
-    sql = """
-        SELECT
-            *
-        FROM
-            CombinedData
-        """
-    result = clickhouse_client.query(combined_table_sql + sql)
-    df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
-    if len(df) != 0:
-        df = df.sort_values(by=["timestamp"])
-    return df
-
-
-df = load_df_once()
 
 
 # Simple function to test CS communication
@@ -97,7 +80,7 @@ def get_sessions_at_step(request):
     num_steps = request.GET.get("num_steps")
     event_name = request.GET.get("event_name")
     session_ids = get_session_ids_given_step(
-        paths, int(step_num), int(num_steps), event_name
+        get_all_paths(paths), int(step_num), int(num_steps), event_name
     )
     sessions = get_session_data_from_ids(clickhouse_client, session_ids)
     return Response({"sessions": sessions})
@@ -131,6 +114,8 @@ def get_user(request):
             WHERE user_id = '{request.GET.get("userId")}'
             """
     result = clickhouse_client.query(combined_table_sql + sql_query)
+    print("loc2")
+    print(len(result.result_rows))
     # dataframe of all events of user ordered by timestamp
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names).sort_values(
         by=["timestamp"]
@@ -161,6 +146,28 @@ def df_to_user_events(df):
                     and filtered_row["error_status"] != ""
                 ):
                     buffer_dict["error_ocurred"] = True
+
+                try:
+                    input_dict = json.loads(filtered_row["input_content"])
+                    input_dict = input_dict[0]
+                    filtered_row["input_content"] = ""
+                    for key in input_dict:
+                        filtered_row["input_content"] += (
+                            key + ": " + input_dict[key] + "\n"
+                        )
+                except Exception:
+                    pass
+
+                try:
+                    output_dict = json.loads(filtered_row["output_content"])
+                    filtered_row["output_content"] = ""
+                    for key in output_dict:
+                        filtered_row["output_content"] += (
+                            key + ": " + output_dict[key] + "\n"
+                        )
+                except Exception:
+                    pass
+
                 event_dict = {
                     k: None if pd.isna(v) else v
                     for k, v in filtered_row.to_dict().items()
@@ -198,15 +205,15 @@ def get_metrics(request):
     dau = get_dau(clickhouse_client)
     acpd = get_acpd(clickhouse_client)
     alpd = get_alpd(clickhouse_client)
-    dates = get_dates(clickhouse_client)
+    asdpd = get_asdpd(clickhouse_client)
     return Response(
         {
             "lines": [
                 ("Daily Active Users", dau),
-                ("Average Cost Per Day", acpd),
+                ("Average Cost per Day", acpd),
                 ("Average Latency per Day", alpd),
+                ("Average Session Length per Day", asdpd),
             ],
-            "dates":dates
         }
     )
 
@@ -238,8 +245,87 @@ def get_percentages(request):
 def get_options(request):
     sql_query = """
       SELECT DISTINCT event_name
-      FROM buster_dev.product
-    """
-    options = clickhouse_client.query(sql_query).result_rows
-    options.append("LLM Trace")
+      FROM {}.product
+    """.format(
+        db_name
+    )
+    options = options_clickhouse_client.query(sql_query).result_rows
     return Response({"options": options})
+
+
+@api_view(["GET"])
+def get_user_categories(request):
+    categories = get_categories()
+    return Response({"categories": categories})
+
+@api_view(["GET"])
+def get_user_keymetrics(request):
+    keymetrics = get_keymetrics()
+    return Response({"keymetrics": keymetrics})
+
+
+@api_view(["GET"])
+def get_summary(request):
+    trace_id = request.GET.get("trace_id")
+    messages = explain_trace(df, trace_id)
+    summary = query_gpt(
+        client,
+        messages,
+        model="gpt-3.5-turbo-0125",
+        max_tokens=100,
+        temperature=0,
+        json_output=False,
+    )
+    return Response({"summary": summary})
+
+@api_view(["GET"])
+def get_similar_traces(request):
+    trace_id = int(request.GET.get("trace_id"))
+    similar = find_similar(trace_id, traces_df)
+    print(similar)
+    return Response({"similar_traces": similar})
+
+
+@api_view(["POST"])
+def post_user_category(request):
+    user_id = request.data.get("name")
+    category = request.data.get("description")
+    add_category(user_id, category)
+    return Response({"message": "Category added successfully"})
+
+@api_view(["POST"])
+def post_user_keymetric(request):
+    user_id = request.data.get("name")
+    category = request.data.get("description")
+    importance = request.data.get("importance")
+    add_keymetric(user_id, category, importance)
+    return Response({"message": "Category added successfully"})
+
+
+@api_view(["GET"])
+def delete_user_category(request):
+    index = request.GET.get("index")
+    delete_category(index)
+    return Response({"message": "Category deleted successfully"})
+
+@api_view(["GET"])
+def delete_user_keymetric(request):
+    index = request.GET.get("index")
+    delete_keymetric(index)
+    return Response({"message": "Category deleted successfully"})
+
+
+@api_view(["GET"])
+def get_filtered_sessions(request):
+    included_categories = json.loads(request.GET.get("included_categories"))
+    excluded_categories = json.loads(request.GET.get("excluded_categories"))
+    included_signals = json.loads(request.GET.get("included_signals"))
+    excluded_signals = json.loads(request.GET.get("excluded_signals"))
+    engagement_time = request.GET.get("engagement_time")
+    
+    session_ids = get_session_ids_given_filters(included_categories, excluded_categories,
+                                                included_signals, excluded_signals,
+                                                engagement_time)
+    if session_ids == []:
+        return Response({"sessions" : {}})
+    return Response({"sessions" : get_session_data_from_ids(clickhouse_client, session_ids)})

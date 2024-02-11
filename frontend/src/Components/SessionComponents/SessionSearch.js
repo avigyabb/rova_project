@@ -8,8 +8,30 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
 import '../../styles/SessionSearch.css';
+import SessionFilters from './SessionFilters';
 
 const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
+
+  const [showFilters, setShowFilters] = useState(false); // State variable for showing/hiding filters
+  const [selectedFilters, setSelectedFilters] = useState({
+    topics: {
+      'Topic 1': false,
+      'Topic 2': false,
+      'Topic 3': false
+    },
+    kpis: {
+      'KPI 1': false
+    },
+    users: {
+      'User 1': false,
+      'User 2': false
+    },
+  });
+
+  // Function to toggle the display of filters
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
     
   // Update handleSearch to store the entered query in state
   const handleSearch = (event) => {
@@ -47,6 +69,7 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             ),
             endAdornment: (
               <InputAdornment position="end">
+                {/* <IconButton onClick={toggleFilters}> */}
                 <IconButton>
                   <FilterListIcon />
                 </IconButton>
@@ -54,6 +77,12 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             ),
           }}
         />
+        {showFilters && (
+        <SessionFilters
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+        />
+      )}
     </div>
   );
 };

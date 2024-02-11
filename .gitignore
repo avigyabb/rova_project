@@ -1,3 +1,4 @@
 node_modules
-myapi/__pycache__/urls.cpython-312.pyc
-myapi/__pycache__/views.cpython-312.pyc
+myapi/__pycache__/*.cpython-312.pyc
+myapi/__pycache__/*.cpython-39.pyc
+rova_demo/__pycache__/*.cpython-39.pyc

@@ -10,6 +10,7 @@ const Login = () => {
     const navigate = useNavigate();
     const handleLoginChange = (event) => {
         // Update the sqlQuery state with the new value from the textarea
+        console.log(process.env.REACT_APP_AUTH_HEADER)
         if (event.target.value === process.env.REACT_APP_AUTH_HEADER) {
             // window.location.href = `/${process.env.REACT_APP_AUTH_HEADER}/sessions`;
             navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`);

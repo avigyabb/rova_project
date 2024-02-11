@@ -7,6 +7,7 @@ import EventCard from './EventComponents/EventCard';
 import TraceCard from './EventComponents/TraceCard';
 
 import { CircularProgress } from '@mui/material';
+import GetAppIcon from '@mui/icons-material/GetApp';
 
 
 const EventsTrace = () => {
@@ -17,6 +18,10 @@ const EventsTrace = () => {
     const location = useLocation();
     const { userId, sessionId } = location.state || {}; // Get the passed state
     const [sessionIdState, setSessionIdState] = useState(sessionId);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [selectedTrace, setSelectedTrace] = useState(null);
+    const [selectMode, setSelectMode] = useState(false);
+    const [selectedTraces, setSelectedTraces] = useState([]);
 
     useEffect(() => {
 
@@ -28,6 +33,7 @@ const EventsTrace = () => {
             sessionId: sessionIdState,
           };
           const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
+          console.log(response.data.info)
           setData(response.data.info);
         } catch (error) {
           console.error(error);
@@ -37,9 +43,6 @@ const EventsTrace = () => {
       };
       fetchData();
     }, [sessionIdState]);
-
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [selectedTrace, setSelectedTrace] = useState(null);
 
     // Conditional rendering based on isLoading
     if (isLoading) {
@@ -52,9 +55,72 @@ const EventsTrace = () => {
 
     const seeAllUserEvents = () => {
       setSessionIdState(-1);
+      setSelectedTraces([]);
     };
 
     if (!userId) return <div>No user data</div>;
+
+    const handleSelectBtn= () => {
+      setSelectMode(prevMode => !prevMode);
+      if (selectMode) {
+        setSelectedTraces([]);
+      }
+    }
+
+    const handleEventSelect = (event) => {
+      console.log(event)
+      if (selectMode && event.table_source === "llm") {
+        if (!selectedTraces.includes(event)) {
+          setSelectedTraces(prevItems => [...prevItems, event]);
+        } else {
+          console.log("ran")
+          console.log(selectedTraces.indexOf(event))
+          setSelectedTraces(prevItems => prevItems.filter(item => item !== event));
+        }
+      } else if (!selectMode) {
+        setSelectedEvent(event);
+      }
+    }
+
+    function arrayToCSV() {
+      // Assuming all objects have the same keys, use the keys from the first object for the header row
+      const csvRows = [];
+      // const headers = Object.keys(selectedTraces[0]);
+      const headers = ["timestamp", "trace_id","event_name", "input_content", "output_content"]
+      csvRows.push(headers.join(',')); // Create the header row
+    
+      // Add each object's values as a row
+      for (const row of selectedTraces) {
+        // const values = headers.map(header => {
+        //   const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
+        //   return `"${escaped}"`; // Wrap values in double quotes
+        // });
+        // csvRows.push(values.join(','));
+
+        for (const traceStep of row.events) {
+          const values = headers.map(header => {
+            const escaped = ('' + traceStep[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
+            return `"${escaped}"`; // Wrap values in double quotes
+          });
+          csvRows.push(values.join(','));
+        }
+      }
+    
+      const csvString = csvRows.join('\n');
+
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'exported_traces.csv');
+      document.body.appendChild(link); // Required for Firefox
+      link.click();
+      document.body.removeChild(link); // Clean up
+    }
+
+    console.log(selectMode);
+    console.log(selectedTraces);
+
 
     return (
       <div className="event-list-container">
@@ -90,17 +156,34 @@ const EventsTrace = () => {
                 Events Feed
               </h1>
             )}
-            <button className='ml-auto mr-5'> Select </button>
-            <button className='mr-5'> Filter </button>
-            <button> Export </button>
+            {!selectMode && (
+              <>
+              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Select </button>
+              <button className='mr-5'> Filter </button>
+              </>
+            )}
+            {selectMode && (
+              <>
+              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
+              {selectedTraces.length > 0 && 
+                <div className='export-btn flex items-center'>
+                  <GetAppIcon className='mr-2'/>
+                  <button onClick={arrayToCSV}> Export </button>
+                </div>
+              }
+              </>
+            )}
+            
           </div>
           <div className="event-list">
             {userData.map((event, index) => (
               <EventCard
                 key={index}
                 event={event}
-                onSelect={setSelectedEvent}
+                onSelect={handleEventSelect}
                 isSelected={selectedEvent && selectedEvent === event}
+                isSelectedInMode={selectedTraces.includes(event)}
+                selectMode={selectMode}
               />
             ))}
             {sessionIdState >= 0 && <button class = "button_see_all_user_events text-sm ml-5" onClick={seeAllUserEvents}> See all of {userId}'s events </button>}

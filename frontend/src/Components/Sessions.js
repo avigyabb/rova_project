@@ -2,14 +2,23 @@ import React, { useState, useEffect } from 'react';
 import SessionCard from "./SessionComponents/SessionCard";
 import axios from 'axios';
 import '../styles/SessionSearch.css';
+import '../styles/Sessions.css';
 
 import SessionSearch from './SessionComponents/SessionSearch';
+import SessionFiltersNew from './SessionComponents/SessionFiltersNew';
 import CircularProgress from '@mui/material/CircularProgress';
+import { TextField } from '@mui/material';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM buster_dev.llm\nUNION DISTINCT\nSELECT session_id FROM buster_dev.product\n)\nLIMIT 50\n`);
+  const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM rova_dev.llm\nUNION DISTINCT\nSELECT session_id FROM rova_dev.product\n)\nLIMIT 50\n`);
+  
+  const [includedCategories, setIncludedCategories] = useState([]);
+  const [excludedCategories, setExcludedCategories] = useState([]);  
+  const [includedSignals, setIncludedSignals] = useState([]);
+  const [excludedSignals, setExcludedSignals] = useState([]);
+  const [engagementTime, setEngagementTime] = useState(0);
 
   useEffect(() => {
 
@@ -19,9 +28,9 @@ const Sessions = () => {
         const params = {
           sql: sqlBox
         };
-        console.log(process.env.REACT_APP_API_URL + 'get-sessions/');
-        const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
-        setSessions(response.data.sessions);
+        console.log(process.env.REACT_APP_API_URL + 'get-sessions/'); // dont delete for now
+        //const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
+        //setSessions(response.data.sessions);
       } catch (error) {
         console.error(error);
       } finally {
@@ -60,11 +69,109 @@ const Sessions = () => {
     }
   };
 
+  const engagementTimeOnKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      setEngagementTime(event.target.value);
+    }
+  }
+
+  const engagementTimeOnBlur = (event) => {
+    setEngagementTime(event.target.value);
+  }  
+  
+  const categoryOptionsArray = [];
+  const [categoryOptionsArrayData, setCategoryOptionsArrayData] = useState([]);
+  const signalOptionsArray = [];
+  const [signalOptionsArrayData, setSignalOptionsArrayData] = useState([]);
+
+  useEffect(() => {
+    const applyFilters = async() => {
+      setIsLoading(true);
+      try {
+        const params = {
+          included_categories : JSON.stringify(includedCategories),
+          excluded_categories : JSON.stringify(excludedCategories),
+          included_signals : JSON.stringify(includedSignals),
+          excluded_signals : JSON.stringify(excludedSignals),
+          engagement_time : engagementTime,
+        }
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
+        setSessions(response.data.sessions);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    applyFilters();
+  }, [includedCategories, excludedCategories, includedSignals, excludedSignals, engagementTime]);
+
+
+
+  useEffect(() => {
+    const getCategoryOptions = async() => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + "categories/get-user-categories")
+        setCategoryOptionsArrayData(response.data.map((category) => [category.fields.name]))
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getCategoryOptions();
+  }, []);
+
+  useEffect(() => {
+    const getSignalOptions = async() => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
+        setSignalOptionsArrayData(response.data.options);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getSignalOptions();
+  }, []);
+
+  categoryOptionsArrayData.forEach((option) =>
+    categoryOptionsArray.push(option[0])
+  )
+
+  signalOptionsArrayData.forEach((option) =>
+    signalOptionsArray.push(option[0])
+  )
+
   return (
     <div className="flex flex-col items-center h-screen">
       <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading} setSqlBox={setSqlBox}/>
         <div className='main-content flex'>
           <div className='sql-col'>
+            <div className='sql-header' style={{background: '#00161C'}}> Filters </div>
+            <div className='filters mb-6'> 
+              <p className='mb-2'> Topics: </p>
+              <div className='flex justify-between'>
+                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+              </div>
+              <p className='mt-3 mb-2'> Events: </p>
+              <div className='flex justify-between'>
+                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+              </div>
+              <p className='mt-3 mb-4'> Engagement: </p>
+              <div>
+                <TextField
+                  id="outlined-number"
+                  label="Days since last session"
+                  type="number"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  disabled={isLoading}
+                  onKeyPress={engagementTimeOnKeyPress}
+                  onBlur={engagementTimeOnBlur}
+                />
+              </div>
+            </div>
             <div className='sql-header'> sql (cmd + enter to run) </div>
             {sqlBox ? (
               <textarea
@@ -81,20 +188,27 @@ const Sessions = () => {
               </div>
             )}
           </div>
-          { !isLoading ? (
-            <div className='sessions-list'>
+          {(!isLoading && Object.keys(sessions).length > 0) && (
+            <div className='sessions-list mt-2'>
+              <h1> {Object.keys(sessions).length} results </h1>
               {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
                 <SessionCard 
-                key={session_id} 
-                sessionId={session_id} // Pass the session count here
-                userId={user_id}
-                timestamp={earliest_timestamp}
+                  key={session_id} 
+                  sessionId={session_id} // Pass the session count here
+                  userId={user_id}
+                  timestamp={earliest_timestamp}
                 />
               ))}
             </div>
-          ) : (
+          )}
+          {isLoading && (
             <div className="sessions-list flex justify-center items-center">
               <CircularProgress style={{ color: '#FFA189' }}/>
+            </div>
+          )}
+          {!isLoading && Object.keys(sessions).length == 0 && (
+            <div className="sessions-list flex justify-center items-center">
+              No Sessions Found. 
             </div>
           )}
         </div>

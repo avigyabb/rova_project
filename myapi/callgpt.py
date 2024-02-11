@@ -1,6 +1,8 @@
 # Asks ChatGPT to identify topics
 import json
-
+from .consts import *
+from .traces import *
+import random
 
 def query_gpt(
     client,
@@ -53,7 +55,7 @@ def build_topics_prompt(samples):
 def build_sessions_sql_prompt(user_query):
     system_prompt = 'You are a ClickHouse expert. Given an input question, create a syntactically \
                      correct SQL query which returns the rows specified by the question. \
-                     There are two tables you have access to to query from: 1) buster_dev.llm and 2) buster_dev.product.\n \
+                     There are two tables you have access to to query from: 1) {}.llm and 2) {}.product.\n \
                      Unless the user specifies in the question a specific number of examples to obtain, \
                      query for at most 50 results using the LIMIT clause as per SQLite. \n \
                      Pay attention to use only the column names you can see in the tables below. Be careful \
@@ -61,22 +63,24 @@ def build_sessions_sql_prompt(user_query):
                      Rows with the same session_id belong to the same session. When filtering for specific values, make sure you\n \
                      wrap the identifiers in single quotes. \n \
                      Create subqueries whenever possible, especially for UNIONs. For example: \n \
-                     SELECT DISTINCT session_id FROM buster_dev.llm \n \
+                     SELECT DISTINCT session_id FROM {}.llm \n \
                      UNION \n \
-                     SELECT DISTINCT session_id FROM buster_dev.product" \n \
+                     SELECT DISTINCT session_id FROM {}.product" \n \
                      LIMIT 50; \n \
                      Should be: \n \
                      SELECT * \n \
                      FROM ( \n \
-                     SELECT session_id FROM buster_dev.llm \n \
+                     SELECT session_id FROM {}.llm \n \
                      UNION DISTINCT \n \
-                     SELECT session_id FROM buster_dev.product \n \
+                     SELECT session_id FROM {}.product \n \
                      ) \n \
                      LIMIT 50 \n \
-                     Only output SQL code without backticks, and do not include the semicolon. \n\n'
+                     Only output SQL code without backticks, and do not include the semicolon. \n\n'.format(
+        db_name, db_name, db_name, db_name, db_name, db_name
+    )
 
     tables = 'Only use the following tables: \n\n \
-              CREATE TABLE "buster_dev.llm" ( \n \
+              CREATE TABLE {}.llm ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
@@ -94,7 +98,7 @@ def build_sessions_sql_prompt(user_query):
               "chat_id" UInt32, \n\n \
               /* \n \
               */\n\n \
-              CREATE TABLE "buster_dev.product" ( \n \
+              CREATE TABLE {}.product ( \n \
               "timestamp" DATETIME, \n \
               "event_name" STRING, \n \
               "user_id" UInt32, \n \
@@ -106,7 +110,9 @@ def build_sessions_sql_prompt(user_query):
               2022-06-16 16:00:00 "chat_send" 1 3 1 \n \
               2022-06-15 16:00:01 "share_dashboard" 2 4 1 \n \
               2022-02-16 16:00:02 "download_dashboard" 6 7 2 \n \
-              */\n\n'
+              */\n\n'.format(
+        db_name, db_name
+    )
 
     user_prompt = "Question: " + user_query + "\nSQLQuery: "
 
@@ -115,3 +121,75 @@ def build_sessions_sql_prompt(user_query):
         {"role": "user", "content": user_prompt},
     ]
     return messages
+
+
+def explain_trace(df, trace_id):
+  
+  filtered = df[df['trace_id'] == int(trace_id)]
+
+  user_prompt_raw = parse_trace(filtered)
+  user_prompt = {'role':'user', 'content':user_prompt_raw}
+  system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app.Analyze the following function-call trace triggered by a user's interaction with an LLM-based app. \
+                   Provide a summary of the entire interaction, summarizing all steps. Then highlight specific point of interest, for example if the content of the otuput does not answer the user's question or command"}
+
+  new_prompt = [system_prompt, user_prompt]
+  
+  return new_prompt 
+
+
+def explain_session_by_kpis(df, keymetrics, kpi, k=5):
+    matches = [d for d in keymetrics if d.get("name") == kpi]
+    if len(matches) > 0:
+        matches = matches[0]
+    else:
+        return False
+    samp_amt = min(len(matches['session_ids']), k)
+    session_ids = random.sample(matches['session_ids'], samp_amt)
+    user_prompt = ""
+    for indx, id in enumerate(session_ids):  # for each session_ids:
+        filtered = df[df["session_id"] == int(id)].sort_values(by="timestamp")
+        user_prompt_raw = parse_session(filtered)
+        user_prompt += "Sample #{}: \n".format(indx + 1) + user_prompt_raw + "\n"
+    user_prompt = {"role": "user", "content": user_prompt}
+    system_prompt = {
+        "role": "system",
+        "content": "You are a product analyst observing logs of user interactions with a LLM-based app. Analyze the following sample sessions from a category of all sessions which follow \
+                                                this sequence of steps: {} \n then provide 1 sentence analysis of the similarities in types of questions users are asking who follow this behavior/sequence of steps".format(
+            kpi
+        ),
+    }
+    new_prompt = [system_prompt, user_prompt]
+    return new_prompt
+
+
+def prompt_to_generate_clusters(sentence):
+    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
+                     a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                    {'name': 'category_name', 'description': 'category_description'}."
+    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
+    return msgs
+
+# def autosuggest_categories(df):
+#     if(Category.objects.count() == 0):
+#         #sessions_df = embed_all_sessions()
+#         embeddings = np.array(df["embeds"].tolist()) 
+#         # Clustering with K-Means
+#         kmeans = KMeans(n_clusters=2, random_state=0).fit(embeddings)
+#         # Assign cluster labels to DataFrame
+#         df['cluster_label'] = kmeans.labels_
+#         # Calculate the distance between each point and the centroid of its cluster
+#         centroids = kmeans.cluster_centers_
+#         distances = cdist(embeddings, centroids, 'euclidean')
+#         # The distance for each point to its cluster centroid
+#         df['distance_to_centroid'] = np.min(distances, axis=1)
+#         # Find the closest row to each cluster's centroid
+#         closest_rows = df.loc[df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
+#         for row in closest_rows.iterrows():
+#             prompt = prompt_to_generate_clusters(row)
+#             answer = query_gpt(client, prompt, json_output=True)
+#             modded_name = answer['name'] +' (suggested)'
+#             new_category = Category(name=modded_name, description=answer['description'], user_id=0)
+#             new_category.save()
+#             assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
+
+

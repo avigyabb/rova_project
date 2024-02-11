@@ -1,0 +1,51 @@
+.event-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Change to column to stack elements vertically */
+    margin-bottom: 10px;
+  }
+  
+  .dropdown-container {
+    position: relative; /* For absolute positioning of the delete icon */
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between; /* Adjust based on your layout */
+    align-items: center;
+    width: 100%; /* Adjust as necessary */
+  }
+  
+  .rounded-dropdown {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    width: calc(100% - 24px); /* Adjust width if necessary */
+  }
+  
+  .arrow-container {
+    margin-top: 5px; /* Space between dropdown and arrow */
+  }
+  
+  .arrow {
+    font-size: 24px;
+  }
+  
+  .delete-icon {
+    width: 24px; /* Icon size */
+    height: 24px; /* Icon size */
+    cursor: pointer;
+    fill: #333; /* Icon color */
+    position: absolute; /* Position inside the dropdown container */
+    right: 10px; /* Distance from right */
+  }
+
+  .charts-content{
+    overflow: hidden;
+    overflow-y:auto;
+    height: 85%;
+  }
+  
+  /* Ensure additional styles for buttons and layout are updated for vertical stacking */
+  

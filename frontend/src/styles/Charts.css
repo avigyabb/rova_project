@@ -1,0 +1,99 @@
+.charts-container {
+    height: 100vh;
+    margin-top: -1.25rem;
+}
+
+.home-sidebar {
+    background-color: #f3f4f6;
+    height: 92%;
+    width: 15%;
+}
+
+.home-sidebar p {
+    font-size: large;
+    margin-top: 15%;
+    margin-bottom: 10%;
+    color: gray;
+    margin-left: 9%;
+}
+
+.home-sidebar p:hover {
+    cursor: pointer;
+}
+
+.home-sidebar .link {
+    padding-top: 7%;
+    padding-bottom: 7%;
+    width: 100%;
+    text-align: left;
+}
+
+.home-sidebar .link:hover {
+    background-color: rgba(255, 161, 137, 0.3);
+    cursor: pointer;
+    transition-duration: 0.5s;
+    padding-left: 6%;
+}
+
+.charts-content {
+    margin-left: 5%;
+    margin-top: 3%;
+    width: 90%;
+}
+
+.charts-content td, th {
+    font-size: small;
+    padding: 10px;
+    border: 1.5px solid rgb(201, 201, 201);
+}
+
+.charts-content thead th {
+    font-size: small;
+    height: 40px;
+    vertical-align: bottom;
+    text-align: left;
+    color: gray;
+}
+
+.categ-name {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+.add-btn {
+    background-color: rgba(255, 161, 137, 0.3);
+    color: #FF8263;
+    border: 2px solid #FF8263;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.save-btn {
+    background-color: rgba(255, 161, 137, 0.3);
+    color: #FF8263;
+    border: 2px solid #FF8263;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.charts-content input {
+    padding: 10px;
+}
+
+.charts-content textarea {
+    padding: 10px;
+}
+
+.charts-content input:focus {
+    outline: none;
+}
+
+.charts-content textarea:focus {
+    outline: none;
+}
+
+.homepage-overall-content {
+    width: 85%;
+}
