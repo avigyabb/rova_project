@@ -280,7 +280,6 @@ def get_summary(request):
     )
     return Response({"summary": summary})
 
-
 @api_view(["GET"])
 def get_similar_traces(request):
     trace_id = int(request.GET.get("trace_id"))

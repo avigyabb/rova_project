@@ -1,7 +1,6 @@
 from .consts import *
 from langchain.prompts import PromptTemplate
 from sklearn.metrics.pairwise import cosine_similarity
-from .callgpt import *
 import numpy as np
 import pandas as pd
 

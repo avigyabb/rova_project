@@ -20,5 +20,6 @@ urlpatterns = [
     path("post-user-category/", views.post_user_category, name="post_user_category"),
     path("post-user-keymetric/", views.post_user_keymetric, name="post_user_keymetric"),
     path("delete-user-category/", views.delete_user_category, name="delete_user_category"),
-    path("get-filtered-sessions/", views.get_filtered_sessions, name = "get_filtered_sessions")
+    path("delete-user-keymetric/", views.delete_user_keymetric, name="delete_user_keymetric"),
+    path("get-filtered-sessions/", views.get_filtered_sessions, name = "get_filtered_sessions"),
 ]

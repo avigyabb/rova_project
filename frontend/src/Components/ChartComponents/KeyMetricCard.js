@@ -20,8 +20,8 @@ const KeyMetricCard = () => {
       setIsLoading(true);
         try {
           const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-keymetrics/');
-          console.log(response);
           setKeyMetricList(response.data.keymetrics);
+          console.log(response.data.keymetrics)
         } catch (error) {
           console.error(error);
         } finally {
@@ -274,10 +274,53 @@ const KeyMetricCard = () => {
       scales: {
         y: {
           beginAtZero: true
+        },
+        x: {
+          display: false
         }
       },
       maintainAspectRatio: false, // Adjust aspect ratio here
       aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
+    };
+    const FlipCard = ({ name, analysis }) => {
+      const [isFlipped, setIsFlipped] = useState(false);
+    
+      const flipCard = () => {
+        setIsFlipped(!isFlipped);
+      };
+    
+      return (
+        <div className="m-2">
+          <div
+            className={`w-48 h-48 transition-transform duration-500 ease-linear
+                        transform perspective-1000 ${isFlipped ? 'rotate-y-180' : ''}
+                        shadow-lg cursor-pointer rounded-lg overflow-hidden relative`}
+            onClick={flipCard}
+          >
+            <div className={`absolute inset-0 flex items-center justify-center p-2 ${isFlipped ? 'bg-orange-100' : 'bg-orange-200'}`}>
+              {isFlipped ? (
+                <div className="text-center text-white-900 overflow-auto text-xs h-full">{analysis}</div>
+              ) : (
+                <div className="text-center text-xs text-white-700">{name}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+     
+    
+    const Categories = ({ categories }) => {
+      // Skip the first element using slice
+      const itemsToDisplay = categories.slice(1);
+    
+      return (
+        <div className="flex flex-wrap justify-center">
+          {itemsToDisplay.map((category, index) => (
+            <FlipCard key={index} name={category.name} analysis={category.analysis} />
+          ))}
+        </div>
+      );
     };
 
       return (
@@ -294,8 +337,13 @@ const KeyMetricCard = () => {
             ) : null}
           </div>
           <TopicTable />
+          <div className='flex mt-10'>
           <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
             <Bar data={chartData} options={chartOptions} />
+          </div>
+          <div className='flex-1'>
+            <Categories categories={keymetricList} />
+          </div>
           </div>
         </div>
       );

@@ -1,19 +1,33 @@
 
-from .callgpt import *
 from .consts import *
+from .traces import *
+from .callgpt import explain_session_by_kpis, query_gpt
 import numpy as np
+import random
 
 keymetrics = [{"name": "NAME", "description": "DESCRIPTION", "importance": 0,"session_ids": [], "num_events": 0}]
 
 # Add a new category
 def add_keymetric(name, description, importance):
-    steps = name.split(',')
-    formatted = [s.strip() for s in steps]
-    new_keymetric = {"name": name, "description": description, "session_ids": [], "num_events": 0}
-    new_keymetric["session_ids"] = find_sessions_with_kpis(df, formatted, False)
-    new_keymetric["importance"] = importance
-    new_keymetric["num_events"] = len(new_keymetric['session_ids'])
-    keymetrics.append(new_keymetric)
+    if(name not in [k['name'] for k in keymetrics]):
+        steps = name.split(',')
+        formatted = [s.strip() for s in steps]
+        new_keymetric = {"name": name, "description": description, "session_ids": [], "num_events": 0}
+        new_keymetric["session_ids"] = find_sessions_with_kpis(df, formatted, True)
+        new_keymetric["importance"] = importance
+        new_keymetric["num_events"] = len(new_keymetric['session_ids'])
+        keymetrics.append(new_keymetric)
+        messages = explain_session_by_kpis(df, keymetrics, name)
+        if(messages):
+            summary = query_gpt(
+                client,
+                messages,
+                model="gpt-3.5-turbo-0125",
+                max_tokens=100,
+                temperature=0,
+                json_output=False,
+            )
+        keymetrics[-1]['analysis'] = summary
 
 # Get all keymetrics
 def get_keymetrics():

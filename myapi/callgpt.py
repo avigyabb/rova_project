@@ -1,8 +1,8 @@
 # Asks ChatGPT to identify topics
 import json
 from .consts import *
-from .traces import parse_trace
-from langchain.prompts import PromptTemplate
+from .traces import *
+import random
 
 def query_gpt(
     client,
@@ -132,3 +132,21 @@ def explain_trace(df, trace_id):
   new_prompt = [system_prompt, user_prompt]
   
   return new_prompt 
+
+def explain_session_by_kpis(df, keymetrics, kpi, k=5):
+    matches = [d for d in keymetrics if d.get('name') == kpi]
+    if(len(matches) > 0):
+        matches = matches[0]
+    else:
+        return False
+    session_ids = random.sample(matches['session_ids'], k)
+    user_prompt = ""
+    for indx, id in enumerate(session_ids): # for each session_ids:
+        filtered = df[df['session_id'] == int(id)].sort_values(by='timestamp')
+        user_prompt_raw = parse_session(filtered)
+        user_prompt += "Sample #{}: \n".format(indx+1) + user_prompt_raw + "\n"  
+    user_prompt = {'role':'user', 'content':user_prompt_raw}
+    system_prompt = {'role': 'system', 'content':"You are a product analyst observing logs of user interactions with a LLM-based app. Analyze the following sample sessions from a category of all sessions which follow \
+                                                this sequence of steps: {} \n then provide 1 sentence analysis of the similarities in types of questions users are asking who follow this behavior/sequence of steps".format(kpi)}
+    new_prompt = [system_prompt, user_prompt]
+    return new_prompt
