@@ -254,11 +254,11 @@ const KeyMetricCard = () => {
 
           // Prepare data for chart
       const chartData = {
-        labels: keymetrics.slice(1).map(metric => metric.name),
+        labels: keymetrics.map(metric => metric.name),
         datasets: [
           {
             label: 'Volume',
-            data: keymetrics.slice(1).map(metric => metric.volume),
+            data: keymetrics.map(metric => metric.volume),
             backgroundColor: 'rgba(255, 161, 137, 1.0)',
           },
         ],
@@ -312,7 +312,7 @@ const KeyMetricCard = () => {
     
     const Categories = ({ categories }) => {
       // Skip the first element using slice
-      const itemsToDisplay = categories.slice(1);
+      const itemsToDisplay = categories;
     
       return (
         <div className="flex flex-wrap justify-center">
