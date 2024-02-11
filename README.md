@@ -8,6 +8,7 @@ npm start
 When pushing to prod:
 pip freeze > requirements.txt
 git push main
+Debug = False
 
 Things to convert to models
 traces_df

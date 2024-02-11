@@ -140,27 +140,27 @@ const Category = () => {
                     name="name"
                     // value={newCategoryName}
                     // onChange={handleInputChange}
-                    placeholder="Enter category"
+                    placeholder="enter topic"
                 />
             </td>
             <td style={{padding: "0"}}>
                 <textarea
                     id="newCategoryDescription"
                     row="2"
-                    cols="55"
+                    cols="50"
                     type="text"
                     name="description"
                     // value={newCategory.description}
                     // onChange={handleInputChange}
-                    placeholder="Enter description"
+                    placeholder="enter description"
                 />
             </td>
             <td>-</td>
             <td>-</td>
-            <td style={{border: "none"}}>
-              <button className="save-btn" style={{verticalAlign: "middle"}} onClick={handleSaveNewCategory}>Save</button>
+            <td style={{ border: "none", paddingLeft: "1%", width: "6%"}}>
+              <button className="save-btn" style={{verticalAlign: "middle"}} onClick={handleSaveNewCategory}> Save </button>
             </td>
-            <td style={{border: "none"}}>
+            <td style={{ border: "none" }}>
               <button style={{verticalAlign: "middle"}} onClick={handleAddNewCategory}>Cancel</button>
             </td>
         </tr>
@@ -168,13 +168,13 @@ const Category = () => {
       
       const TopicTable = () => {
         return (
-          <table style={{ width: '1100px' }}>
+          <table style={{ width: "100%" }}>
             <thead>
               <tr>
-                <th className="w-60">Category</th>
-                <th className="w-96">Description</th>
-                <th className="w-30">Volume</th>
-                <th className='w-48'>Trends</th>
+                <th style={{ width: "17%" }}> Topic </th>
+                <th style={{ width: "32%" }}>Description</th>
+                <th style={{ width: "6%" }}>Volume</th>
+                <th style={{ width: "20%" }}>Trends</th>
               </tr>
             </thead>
             <tbody>
@@ -189,8 +189,8 @@ const Category = () => {
 
       return (
         <div className='charts-content'>
-          <div className='flex'>
-            <p className='text-4xl mb-7'>Category Insights</p>
+          <div className='flex' style={{ width: "75%"}}>
+            <p className='text-4xl mb-7'>Topic Insights</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>

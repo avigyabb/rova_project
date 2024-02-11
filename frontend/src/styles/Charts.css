@@ -5,33 +5,40 @@
 
 .home-sidebar {
     background-color: #f3f4f6;
-    height: 100%;
+    height: 92%;
     width: 15%;
-    padding: 2%;
 }
 
 .home-sidebar p {
-    font-weight: 1000;
-    font-size: larger;
-    margin-bottom: 20%;
+    font-size: large;
+    margin-top: 15%;
+    margin-bottom: 10%;
+    color: gray;
+    margin-left: 9%;
 }
 
-.home-sidebar button {
-    padding: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-.home-sidebar button:hover {
-    background-color: rgba(255, 161, 137, 0.3);
-    border-radius: 10px;
+.home-sidebar p:hover {
     cursor: pointer;
-    transition-duration: 1s;
+}
+
+.home-sidebar .link {
+    padding-top: 7%;
+    padding-bottom: 7%;
+    width: 100%;
+    text-align: left;
+}
+
+.home-sidebar .link:hover {
+    background-color: rgba(255, 161, 137, 0.3);
+    cursor: pointer;
+    transition-duration: 0.5s;
+    padding-left: 6%;
 }
 
 .charts-content {
     margin-left: 5%;
     margin-top: 3%;
+    width: 90%;
 }
 
 .charts-content td, th {
@@ -86,6 +93,7 @@
 .charts-content textarea:focus {
     outline: none;
 }
-/* .homepage-overall-content {
 
-} */
+.homepage-overall-content {
+    width: 85%;
+}

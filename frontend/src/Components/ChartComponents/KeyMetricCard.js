@@ -223,7 +223,7 @@ const KeyMetricCard = () => {
             </td>
             <td>-</td>
             <td><Dropdown options={importanceArray} id={"newKeyMetricImportance"}/></td>
-            <td style={{border: "none"}}>
+            <td style={{ border: "none", paddingLeft: "1%", width: "6%"}}>
               <button className="save-btn" style={{verticalAlign: "middle"}} onClick={handleSaveNewKeyMetric}>Save</button>
             </td>
             <td style={{border: "none"}}>
@@ -234,13 +234,13 @@ const KeyMetricCard = () => {
       
       const TopicTable = () => {
         return (
-          <table style={{ width: '1100px' }}>
+          <table style={{ width: '100%' }}>
             <thead>
               <tr>
-                <th className="w-60">Event</th>
-                <th className="w-96">Description</th>
-                <th className="w-30">Volume</th>
-                <th className='w-48'>Interaction Quality</th>
+                <th style={{ width: "30%" }}>Event</th>
+                <th style={{ width: "35%" }}>Description</th>
+                <th style={{ width: "6%" }}>Volume</th>
+                <th style={{ width: "14%" }}>Interaction Quality</th>
               </tr>
             </thead>
             <tbody>
@@ -326,7 +326,7 @@ const KeyMetricCard = () => {
 
       return (
         <div className='charts-content'>
-          <div className='flex'>
+          <div className='flex' style={{ width: '85%'}}>
             <p className='text-4xl mb-7'>Key Performance Indicators</p>
             {!showNewCategoryRow && !editMode ? (
               <>
@@ -339,12 +339,12 @@ const KeyMetricCard = () => {
           </div>
           <TopicTable />
           <div className='flex mt-10'>
-          <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
-            <Bar data={chartData} options={chartOptions} />
-          </div>
-          <div className='flex-1'>
-            <Categories categories={keymetricList} />
-          </div>
+            <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
+              <Bar data={chartData} options={chartOptions} />
+            </div>
+            <div className='flex-1'>
+              <Categories categories={keymetricList} />
+            </div>
           </div>
         </div>
       );

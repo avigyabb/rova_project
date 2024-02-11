@@ -5,9 +5,14 @@ import Sequences from './ChartComponents/Sequences';
 import Category from './ChartComponents/Category';
 import Graphs from './ChartComponents/Graphs';
 import Homepage from './ChartComponents/Homepage';
+import Settings from './ChartComponents/Settings';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
+import TopicIcon from '@mui/icons-material/Topic';
+import StarsIcon from '@mui/icons-material/Stars';
+import InsightsIcon from '@mui/icons-material/Insights';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -149,42 +154,32 @@ const Charts = () => {
     </tr>
   );
   
-  const TopicTable = () => {
-    console.log(categories.map((category, index) => (
-      <TableRow key={index} category={category} />
-    )))
-    return (
-      <table>
-        <thead>
-          <tr>
-            <th className="w-60">Category</th>
-            <th className="w-96">Description</th>
-            <th className="w-30">Volume</th>
-            <th>Trend</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category, index) => (
-            <TableRow key={index} category={category} />
-          ))}
-        </tbody>
-      </table>
-    );
-  };
  // State to track the current view
  const [currentView, setCurrentView] = useState('homepage'); // default view
 
  // Function to change the current view
  const changeView = (view) => setCurrentView(view);
 
- return (
-   <div className='charts-container flex'>
-     <div className='home-sidebar' >
-       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('homepage')}>Inisghts</button>
-       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('categories')}>Categories</button>
-       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('kpis')}>KPIs</button>
-       {/* <button onClick={() => changeView('sequences')}>Sequences</button> */}
-       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('graphs')}>Graphs</button>
+return (
+  <div className='charts-container flex'>
+    <div className='home-sidebar flex flex-col' >
+      <p onClick={() => changeView('homepage')}>Homepage</p>
+      <div className='link flex' onClick={() => changeView('categories')}>
+        <TopicIcon className='mr-4 ml-5'/>
+        <button className="text-lg"> Topics </button>
+      </div>
+      <div className='link flex' onClick={() => changeView('kpis')}>
+        <StarsIcon className='mr-4 ml-5'/>
+        <button className="text-lg">KPIs</button>
+      </div>
+      <div className='link flex' onClick={() => changeView('graphs')}>
+        <InsightsIcon className='mr-4 ml-5'/>
+        <button className="text-lg" >Graphs</button>
+      </div>
+      <div className='link flex mt-auto' onClick={() => changeView('settings')}>
+        <SettingsIcon className='mr-2 ml-3'/>
+        <button className="text-sm"> Settings </button>
+      </div>
      </div>
      <div className='homepage-overall-content'>
        {currentView === 'homepage' && <Homepage />}
@@ -192,6 +187,7 @@ const Charts = () => {
        {currentView === 'kpis' && <KeyMetricCard />}
        {/* currentView === 'sequences' && <Sequences />} */}
        {currentView === "graphs" && <Graphs />}
+       {currentView === "settings" && <Settings />}
      </div>
    </div>
  );
