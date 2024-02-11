@@ -180,7 +180,7 @@ const Charts = () => {
  return (
    <div className='charts-container flex'>
      <div className='home-sidebar' >
-       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('homepage')}>Home</button>
+       <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('homepage')}>Inisghts</button>
        <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('categories')}>Categories</button>
        <button className="text-xl font-bold text-black rounded-lg hover:bg-blue-700 transition-colors" onClick={() => changeView('kpis')}>KPIs</button>
        {/* <button onClick={() => changeView('sequences')}>Sequences</button> */}
