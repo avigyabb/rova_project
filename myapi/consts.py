@@ -111,6 +111,8 @@ df = load_df_once()
 # Creates embeddings for all llm events
 def embed_llm_events():
     # Grab the llm events
+    if len(df) == 0:
+        return []
     llm_df = df[df['event_type'] == 'llm']
     llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
                         '\n Input: ' + llm_df['input_content'] + \

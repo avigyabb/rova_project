@@ -40,6 +40,8 @@ def parse_session(group):
 def embed_all_traces(df, embeddings_model):
 
   # Group by 'trace_id' and apply the function to each group
+  if len(df) == 0:
+    return []
   result_series = df.groupby('trace_id').apply(parse_trace)
   traces_df = result_series.reset_index(name='trace_to_text')
   embeds = embeddings_model.embed_documents(traces_df['trace_to_text'])
