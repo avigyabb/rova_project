@@ -168,7 +168,7 @@ const EventsTrace = () => {
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
             {sessionIdState >= 0 ? (
               <>
-                <h1 className='ml-5 mr-16 mb-1 text-xl'>
+                <h1 className='ml-5 mb-1 text-xl' style={{marginRight: '5%'}}>
                   Session {sessionId} Events
                 </h1>
                 {index > 0 && <button className='nav-btn mr-4' onClick={handleClickPrev}> <ArrowLeftIcon/>Prev Session</button>}
