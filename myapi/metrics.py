@@ -4,6 +4,7 @@ import numpy as np
 from .consts import *
 from datetime import timedelta
 import datetime 
+import pandas as pd
 
 # Return the df corresponding to a JSON file
 def get_df_from_json(path):
@@ -101,20 +102,29 @@ def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
     # Ensure timestamp is in datetime format
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    # Sort the DataFrame by 'sessions' and then by 'timestamp' to ensure the order
+    # Sort the DataFrame by 'session_id' and then by 'timestamp' to ensure the order
     df = df.sort_values(by=['session_id', 'timestamp'])
     prev_max_timestamp = None
     churned_sessions = []
-    for session_id, group in df.groupby('session_id'):
-        # Check if there is a previous group to compare with
+    # Get today's datetime for comparison with the most recent group
+    today_datetime = pd.to_datetime(datetime.datetime.now())
+    
+    for i, (session_id, group) in enumerate(df.groupby('session_id')):
+        # Check if the current group is the last one
+        is_last_group = i == len(df.groupby('session_id')) - 1
         if prev_max_timestamp is not None:
-            # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
-            time_diff = group['timestamp'].min() - prev_max_timestamp
+            if is_last_group:
+                # For the last group, calculate the timedelta as today's datetime minus the max datetime of the group
+                time_diff = today_datetime - group['timestamp'].max()
+            else:
+                # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
+                time_diff = group['timestamp'].min() - prev_max_timestamp
+            
             # If the time difference is greater than the specified timedelta, add the session to the list
             if time_diff > timedelta_datetime:
                 churned_sessions.append(session_id)
 
         # Update the prev_max_timestamp with the max timestamp of the current group
         prev_max_timestamp = group['timestamp'].max()
-      
+
     return set(churned_sessions)
