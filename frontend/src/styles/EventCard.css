@@ -45,3 +45,16 @@
 .event-card.selectedInMode {
   background-color: #DBECF6;
 }
+
+.nav-btn {
+  background-color: #e7f2f8;
+  padding: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 10px;
+}
+
+.nav-btn:hover {
+  background-color: #c7d9e3;
+  transition-duration: 0.5s;
+}

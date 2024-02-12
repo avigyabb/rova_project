@@ -15,30 +15,32 @@ const Sessions = () => {
   const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM rova_dev.llm\nUNION DISTINCT\nSELECT session_id FROM rova_dev.product\n)\nLIMIT 50\n`);
   
   const [includedCategories, setIncludedCategories] = useState([]);
-  const [excludedCategories, setExcludedCategories] = useState([]);  
+  const [excludedCategories, setExcludedCategories] = useState([]);
   const [includedSignals, setIncludedSignals] = useState([]);
   const [excludedSignals, setExcludedSignals] = useState([]);
   const [engagementTime, setEngagementTime] = useState(0);
 
-  useEffect(() => {
+  // console.log(excludedCategories)
 
-    const fetchData = async () =>  {
-      setIsLoading(true);
-      try {
-        const params = {
-          sql: sqlBox
-        };
-        console.log(process.env.REACT_APP_API_URL + 'get-sessions/'); // dont delete for now
-        //const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
-        //setSessions(response.data.sessions);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  // useEffect(() => {
+
+  //   const fetchData = async () =>  {
+  //     setIsLoading(true);
+  //     try {
+  //       const params = {
+  //         sql: sqlBox
+  //       };
+  //       console.log(process.env.REACT_APP_API_URL + 'get-sessions/'); // dont delete for now
+  //       //const response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions/', { params });
+  //       //setSessions(response.data.sessions);
+  //     } catch (error) {
+  //       console.error(error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   const handleSqlChange = (event) => {
     // Update the sqlQuery state with the new value from the textarea
@@ -97,6 +99,7 @@ const Sessions = () => {
         }
         console.log(process.env.REACT_APP_API_URL);
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
+        console.log(response.data.sessions)
         setSessions(response.data.sessions);
       } catch (error) {
         console.error(error);
@@ -155,13 +158,13 @@ const Sessions = () => {
             <div className='filters mb-6'> 
               <p className='mb-2'> Topics: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} />
+                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} />
               </div>
               <p className='mt-3 mb-2'> Events: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
-                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading}/>
+                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading} />
+                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading} />
               </div>
               <p className='mt-3 mb-4'> Engagement: </p>
               <div>
@@ -197,12 +200,14 @@ const Sessions = () => {
           {(!isLoading && Object.keys(sessions).length > 0) && (
             <div className='sessions-list mt-2'>
               <h1> {Object.keys(sessions).length} results </h1>
-              {sessions.map(({ session_id, user_id, earliest_timestamp }) => (
+              {sessions.map(({ session_id, user_id, earliest_timestamp }, index) => (
                 <SessionCard 
                   key={session_id} 
                   sessionId={session_id} // Pass the session count here
                   userId={user_id}
                   timestamp={earliest_timestamp}
+                  index={index}
+                  sessionList={sessions}
                 />
               ))}
             </div>

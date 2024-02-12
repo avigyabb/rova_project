@@ -8,19 +8,6 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 
-const names = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
-];
-
 export default function MultipleSelectChip({ label, setFilters, options, isLoading }) {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState([]);
@@ -57,10 +44,7 @@ export default function MultipleSelectChip({ label, setFilters, options, isLoadi
           )}
         >
           {options.map((name) => (
-            <MenuItem
-              key={name}
-              value={name}
-            >
+            <MenuItem key={name} value={name}>
               {name}
             </MenuItem>
           ))}

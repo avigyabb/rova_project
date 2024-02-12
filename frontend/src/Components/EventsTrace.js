@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from  'axios';
 import "../styles/EventTrace.css";
 
@@ -7,6 +7,8 @@ import EventCard from './EventComponents/EventCard';
 import TraceCard from './EventComponents/TraceCard';
 
 import { CircularProgress } from '@mui/material';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import GetAppIcon from '@mui/icons-material/GetApp';
 
 
@@ -16,12 +18,16 @@ const EventsTrace = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const location = useLocation();
-    const { userId, sessionId } = location.state || {}; // Get the passed state
+    const { userId, sessionId, index, sessionList } = location.state || {}; // Get the passed state
     const [sessionIdState, setSessionIdState] = useState(sessionId);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
     const [selectMode, setSelectMode] = useState(false);
     const [selectedTraces, setSelectedTraces] = useState([]);
+
+    const navigate = useNavigate();
+
+    console.log(location.state)
 
     useEffect(() => {
 
@@ -118,8 +124,23 @@ const EventsTrace = () => {
       document.body.removeChild(link); // Clean up
     }
 
-    console.log(selectMode);
-    console.log(selectedTraces);
+    const handleClickNext = () => {
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index + 1].user_id}`, { state: { 
+        userId: sessionList[index + 1].user_id, 
+        sessionId: sessionList[index + 1].session_id, 
+        index: index + 1, 
+        sessionList 
+      } });
+    };
+
+    const handleClickPrev = () => {
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index - 1].user_id}`, { state: { 
+        userId: sessionList[index - 1].user_id, 
+        sessionId: sessionList[index - 1].session_id, 
+        index: index - 1, 
+        sessionList 
+      } });
+    };
 
 
     return (
@@ -146,9 +167,13 @@ const EventsTrace = () => {
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
             {sessionIdState >= 0 ? (
-              <h1 className='ml-5 mb-1 text-xl'>
-                Session {sessionId} Events
-              </h1>
+              <>
+                <h1 className='ml-5 mr-16 mb-1 text-xl'>
+                  Session {sessionId} Events
+                </h1>
+                {index > 0 && <button className='nav-btn mr-4' onClick={handleClickPrev}> <ArrowLeftIcon/>Prev Session</button>}
+                {index < sessionList.length - 1 && <button className='nav-btn' onClick={handleClickNext}> Next Session<ArrowRightIcon/></button>}
+              </>
             ) : (
               <h1 className = 'ml-5 mb-1 text-xl'>
                 Events Feed

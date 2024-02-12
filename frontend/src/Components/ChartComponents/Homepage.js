@@ -31,17 +31,6 @@ const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary }) =>
   );
 };
 
-const generateFakeSessions = () => {
-  const sessionIds = ['session1', 'session2', 'session3', 'session4', 'session5', 'session6'];
-  return sessionIds.map((id, index) => ({
-    sessionId: id,
-    userId: `user${index + 1}`,
-    timestamp: new Date().toISOString(),
-    tags: [`tag1-${index}`, `tag2-${index}`],
-    summary: `This is a summary for session ${id}. It contains some details about the session's purpose and outcomes.`
-  }));
-};
-
 const Homepage = ({ sessionIds }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
