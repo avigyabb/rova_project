@@ -13,6 +13,7 @@ import TopicIcon from '@mui/icons-material/Topic';
 import StarsIcon from '@mui/icons-material/Stars';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -163,7 +164,11 @@ const Charts = () => {
 return (
   <div className='charts-container flex'>
     <div className='home-sidebar flex flex-col' >
-      <p onClick={() => changeView('homepage')}>Homepage</p>
+      <p onClick={() => changeView('homepage')}> Dashboard </p>
+      <div className='link flex' onClick={() => changeView('homepage')}>
+        <DynamicFeedIcon className='mr-4 ml-5'/>
+        <button className="text-lg"> Feed </button>
+      </div>
       <div className='link flex' onClick={() => changeView('categories')}>
         <TopicIcon className='mr-4 ml-5'/>
         <button className="text-lg"> Topics </button>

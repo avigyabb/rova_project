@@ -47,12 +47,12 @@ def score_sessions_based_on_kpis(n):
     session_score_pairs.sort(key=lambda x: x[1])
 
     worst_ids = [session_id for session_id, score in session_score_pairs[:n]]
-    return worst_ids
+    return worst_ids, session_score_dict
 
 # Returns a list of session ID, score pairs sorted by score in ascending order
 def score_and_return_sessions():
 
-    worst_ids = score_sessions_based_on_kpis(n=5)
+    worst_ids, scores_map = score_sessions_based_on_kpis(n=5)
     worst_sessions = SessionKeyMetric.objects.filter(session_id__in=worst_ids)
     session_score_dict = defaultdict(tree)
     
@@ -66,6 +66,7 @@ def score_and_return_sessions():
             session_score_dict[session_metric.session_id]['summary'] = explain_session(filtered)
             session_score_dict[session_metric.session_id]['user_id'] = filtered.iloc[0]['user_id']
             session_score_dict[session_metric.session_id]['timestamp'] = filtered.iloc[0]['timestamp']
+            session_score_dict[session_metric.session_id]['score'] = scores_map[session_metric.session_id]
             session_score_dict[session_metric.session_id]['tags'] = []
         session_score_dict[session_metric.session_id]['tags'].append(key_metric.name)
 

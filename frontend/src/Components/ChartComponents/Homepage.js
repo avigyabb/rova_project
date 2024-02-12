@@ -73,7 +73,8 @@ const Homepage = ({ sessionIds }) => {
       <p className='header-text text-gray-500'> Here are your important sessions, based on your topics and KPIs: </p>
       <div className='insights-content'>
         {loading ? (
-          <div className="sessions-container flex justify-center items-center mt-64">
+          <div className="sessions-container flex flex-col justify-center items-center mt-56">
+            <p className='mb-8 text-gray-500'> Surfacing important user sessions...</p>
             <CircularProgress style={{ color: '#FFA189' }}/>
           </div>
         ) : (

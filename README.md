@@ -12,7 +12,9 @@ Debug = False
 Change rova_dev to buster_dev
 consts.py (line 28)
 npm start (frontend)
+comment out env local
 remember to put slash at end of url
+
 
 Things to convert to models
 traces_df
