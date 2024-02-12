@@ -6,10 +6,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 import '../../styles/Homepage.css';
 import { useNavigate } from 'react-router';
 
-const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary }) => {
+const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary, sessionList, index }) => {
   const navigate = useNavigate();
   const handleClick = () => {
-      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${userId}`, { state: { userId, sessionId } });
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${userId}`, { state: { userId, sessionId, sessionList, index } });
   };
 
   return (
@@ -42,8 +42,8 @@ const Homepage = ({ sessionIds }) => {
         setLoading(true);
         const response = await axios.get(process.env.REACT_APP_API_URL + 'get-surfaced-sessions/'); // Replace API_ENDPOINT with your actual API endpoin
         console.log(response.data.sessions);
-        const sid = "2"
-        console.log(response.data.sessions["2"].user_id);
+        // const sid = "2"
+        // console.log(response.data.sessions["2"].user_id);
         //setSessions(responses.map(response => response.data));
         // const fakeSessions = generateFakeSessions(sessionIds);
         setSessions(response.data.sessions);
@@ -68,7 +68,7 @@ const Homepage = ({ sessionIds }) => {
           </div>
         ) : (
           <div className="sessions-container">
-            {Object.keys(sessions).map((session_id) => (
+            {Object.keys(sessions).map((session_id, index) => (
               <ModifiedSessionCard
                 key={session_id}
                 sessionId={session_id}
@@ -76,6 +76,8 @@ const Homepage = ({ sessionIds }) => {
                 timestamp={sessions[session_id].timestamp}
                 tags={sessions[session_id].tags}
                 summary={sessions[session_id].summary}
+                index={index}
+                sessionList={sessions}
               />
             ))}
           </div>

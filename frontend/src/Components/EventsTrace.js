@@ -19,6 +19,7 @@ const EventsTrace = () => {
 
     const location = useLocation();
     const { userId, sessionId, index, sessionList } = location.state || {}; // Get the passed state
+    console.log(sessionId)
     const [sessionIdState, setSessionIdState] = useState(sessionId);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
@@ -26,6 +27,12 @@ const EventsTrace = () => {
     const [selectedTraces, setSelectedTraces] = useState([]);
 
     const navigate = useNavigate();
+
+    console.log(sessionIdState)
+    // fix this, create a better fix
+    if (sessionId !== sessionIdState){
+      setSessionIdState(sessionId);
+    }
 
     console.log(location.state)
 
@@ -60,6 +67,7 @@ const EventsTrace = () => {
     }
 
     const seeAllUserEvents = () => {
+      location.state.sessionId = -1;
       setSessionIdState(-1);
       setSelectedTraces([]);
     };

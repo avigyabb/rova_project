@@ -71,7 +71,7 @@ function Flows() {
     const handleHover = () => {
       setLabel(percentage);
       setSize(10);
-      setColor("lightblue");
+      setColor("#FF9B82");
       setZIndex(1);
     };
 
