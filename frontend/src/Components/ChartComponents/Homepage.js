@@ -1,35 +1,33 @@
 // Import React and necessary hooks
 import '../../styles/SessionCard.css';
-import React, { useState, useEffect, useNavigate } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import '../../styles/Homepage.css';
+import { useNavigate } from 'react-router';
 
 const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary }) => {
-  // Function to handle card click (assuming navigation logic remains the same)
-  // const navigate = useNavigate();
-  // const handleClick = () => {
-  //   navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${userId}`, { state: { userId, sessionId } });
-  // };
+  const navigate = useNavigate();
+  const handleClick = () => {
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${userId}`, { state: { userId, sessionId } });
+  };
 
   return (
-    <div className="session-card">
-      <div className="session-info">
-        <div className="session-name">Session: {sessionId}</div>
-        <div className="session-timestamp">Time: {timestamp}</div>
-      </div>
-      <div className="session-user">
-        <div className="user-id">User: {userId}</div>
-      </div>
-      <div className="session-summary">
-        <p>{summary}</p>
-      </div>
-      <div className="session-tags">
+    <div className="insights-card flex flex-col" onClick={handleClick}>
+      <div className="session-tags flex">
+        <div className="text-md"> 👤 {userId} </div>
+        <div className="text-sm insights-session self-end ml-3"> session {sessionId} </div>
+        <div className='ml-5'>
         {tags.map((tag, index) => (
           <span key={index} className="tag">{tag}</span>
         ))}
+        </div>
+        <div className="user-updated ml-auto">{timestamp}</div>
       </div>
-    </div>
+      <div className='insights-card-content flex'>
+          <p className='text-gray-500'> {summary} </p>
+      </div>
+   </div>
   );
 };
 
@@ -46,51 +44,54 @@ const generateFakeSessions = () => {
 
 const Homepage = ({ sessionIds }) => {
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Mocking a fetch sessions details function
     const fetchSessions = async () => {
       try {
-        setLoading(false);
-        // const responses = await Promise.all(sessionIds.map(id =>
-        //   axios.get(`API_ENDPOINT/sessions/${id}`) // Replace API_ENDPOINT with your actual API endpoint
-        // ));
+        setLoading(true);
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'get-surfaced-sessions/'); // Replace API_ENDPOINT with your actual API endpoin
+        console.log(response.data.sessions);
+        const sid = "2"
+        console.log(response.data.sessions["2"].user_id);
         //setSessions(responses.map(response => response.data));
-        const fakeSessions = generateFakeSessions(sessionIds);
-        setSessions(fakeSessions);
+        // const fakeSessions = generateFakeSessions(sessionIds);
+        setSessions(response.data.sessions);
       } catch (error) {
         console.error("Failed to fetch sessions", error);
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     fetchSessions();
   }, []);
 
-  if (loading) {
-    return <CircularProgress />;
-  }
-
   return (
-    <>
-    <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! </h1>
-    <div className='charts-content'>
-      <p> Here are your important sessions: </p>
-      <div className="sessions-container">
-        {sessions.map((session) => (
-          <ModifiedSessionCard
-            key={session.sessionId}
-            sessionId={session.sessionId}
-            userId={session.userId}
-            timestamp={session.timestamp}
-            tags={session.tags}
-            summary={session.summary}
-          />
-        ))}
+    <div className='homepage'>
+      <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! 🎉</h1>
+      <p className='header-text text-gray-500'> Here are your important sessions, based on your topics and KPIs: </p>
+      <div className='insights-content'>
+        {loading ? (
+          <div className="sessions-container flex justify-center items-center mt-64">
+            <CircularProgress style={{ color: '#FFA189' }}/>
+          </div>
+        ) : (
+          <div className="sessions-container">
+            {Object.keys(sessions).map((session_id) => (
+              <ModifiedSessionCard
+                key={session_id}
+                sessionId={session_id}
+                userId={sessions[session_id].user_id}
+                timestamp={sessions[session_id].timestamp}
+                tags={sessions[session_id].tags}
+                summary={sessions[session_id].summary}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
-    </>
   );
 };
 

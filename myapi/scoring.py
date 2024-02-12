@@ -64,6 +64,7 @@ def score_and_return_sessions():
         if(session_metric.session_id not in session_score_dict):
             filtered = df[df['session_id'] == session_metric.session_id]
             session_score_dict[session_metric.session_id]['summary'] = explain_session(filtered)
+            session_score_dict[session_metric.session_id]['user_id'] = filtered.iloc[0]['user_id']
             session_score_dict[session_metric.session_id]['timestamp'] = filtered.iloc[0]['timestamp']
             session_score_dict[session_metric.session_id]['tags'] = []
         session_score_dict[session_metric.session_id]['tags'].append(key_metric.name)

@@ -13,10 +13,10 @@ const SessionCard = ({ sessionId, userId, timestamp }) => {
     return (
       <div className="user-card" onClick={handleClick}>
         <div className="user-info">
-          <div className="user-name">User: {userId}</div>
+          <div className="user-name">👤 {userId}</div>
         </div>
         <div className="session-info">
-          <div className="user-name">Session {sessionId}</div>
+          <div className="user-name">⏲️ Session {sessionId}</div>
         </div>
         <div className="user-meta">
           <div className="user-updated">Time: {timestamp}</div>

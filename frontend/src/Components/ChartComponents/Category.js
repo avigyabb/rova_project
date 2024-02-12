@@ -191,7 +191,7 @@ const Category = () => {
         <div className='charts-content'>
           {/* something wrong with below style */}
           <div className='flex' style={{ width: "80%"}}>
-            <p className='text-4xl mb-7'>Topic Insights</p>
+            <p className='text-4xl mb-7'>Topic Insights 🗂️</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
