@@ -162,12 +162,22 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     return new_prompt
 
 
-def prompt_to_generate_clusters(sentence):
-    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
-                     a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
-                    {'name': 'category_name', 'description': 'category_description'}."
+def prompt_to_generate_clusters(sentence, flag=0):
+    if(flag):
+        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
+                        the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
+    else:
+        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
+                        a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                        {'name': 'category_name', 'description': 'category_description'}."
     msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
     return msgs
+
+def explain_session(filtered):
+    user_prompt_raw = parse_session(filtered)
+    msgs = prompt_to_generate_clusters(user_prompt_raw, 1)
+    summary = query_gpt(client, msgs, json_output=False)
+    return summary
 
 # def autosuggest_categories(df):
 #     if(Category.objects.count() == 0):

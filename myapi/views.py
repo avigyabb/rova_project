@@ -12,6 +12,7 @@ from .categories import *
 from .callgpt import *
 from .traces import *
 from .keymetrics import *
+from .scoring import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -337,3 +338,8 @@ def get_filtered_sessions(request):
     if session_ids == []:
         return Response({"sessions" : {}})
     return Response({"sessions" : get_session_data_from_ids(clickhouse_client, session_ids)})
+
+@api_view(["GET"])
+def get_surfaced_sessions(request):
+    sessions_obj = score_and_return_sessions()
+    return Response({"sessions" : sessions_obj})

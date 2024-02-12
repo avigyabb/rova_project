@@ -34,4 +34,5 @@ urlpatterns = [
         views.get_filtered_sessions,
         name="get_filtered_sessions",
     ),
+    path("get-surfaced-sessions/", views.get_surfaced_sessions, name="get_surfaced_sessions"),
 ]

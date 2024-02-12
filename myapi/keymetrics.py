@@ -3,12 +3,11 @@ from .consts import *
 from .traces import *
 from .callgpt import explain_session_by_kpis, query_gpt
 from .metrics import get_churned_sessions
-from .scoring import score_sessions_based_on_kpis
+from .scoring import score_and_return_sessions
 from keymetrics.models import KeyMetricTable, SessionKeyMetric
 from django.db.models import Count
 import numpy as np
 import random
-from django.db.models import Count
 
 #Function to construct the overall representation
 def get_keymetrics_overview():
@@ -69,7 +68,6 @@ def add_keymetric_for_new_session(session_id):
         belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, session_id=session_id)
         if(belongs_to_keymetric and not SessionKeyMetric.objects.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
             SessionKeyMetric.objects.create(session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
-    print(score_sessions_based_on_kpis())
 
 # Get all keymetrics
 def get_keymetrics():
