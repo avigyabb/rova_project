@@ -28,3 +28,5 @@ python manage.py makemigrations - save the changes
 python manage.py migrate - apply the changes
 add to admin file of the app
 (might have to delete migrations file)
+
+If flows seems broken, try running python manage.py runserver again.

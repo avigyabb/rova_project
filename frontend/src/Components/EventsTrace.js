@@ -143,8 +143,6 @@ const EventsTrace = () => {
                 {/* <p>Email: {sessionData.email}</p> */}
               </div>
             </div>
-            {/* need to get rid of this */}
-            <p className='mt-2'>Session ID: {sessionId}</p>
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
             {sessionIdState >= 0 ? (
