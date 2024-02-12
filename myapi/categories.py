@@ -38,13 +38,14 @@ def delete_category(index):
     categories.pop(len(categories) - int(index) - 1) # when displaying categories index is reversed
 
 # Embed the category description and add all session ids
-def assign_session_ids_to_category(category, similarity_threshold=0.66):
+def assign_session_ids_to_category(category, similarity_threshold=0.99):
     # Embed the category description
     category_embedding = np.array(embeddings_model.embed_documents([category["description"]]))[0]
     category_embedding = category_embedding.reshape(1, -1)
 
     # Find similarity between the category description and the llm events
     llm_df[category['name']] = cosine_similarity(category_embedding, list(llm_df['embeds'])).flatten()
+    print(llm_df[category['name']])
     llm_df[category['name']] = llm_df[category['name']] > similarity_threshold
 
     # Find all session ids that have a similarity above the threshold

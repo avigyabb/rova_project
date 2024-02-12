@@ -34,7 +34,7 @@ def post_user_category(request):
 
 
 # Embed the category description and add all session ids
-def assign_session_ids_to_category(category_name, category_description, category_id, similarity_threshold=0.66):
+def assign_session_ids_to_category(category_name, category_description, category_id, similarity_threshold=0.74):
     # Embed the category description
     category_embedding = np.array(embeddings_model.embed_documents([category_description]))[0]
     category_embedding = category_embedding.reshape(1, -1)

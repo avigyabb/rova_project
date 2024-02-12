@@ -190,7 +190,7 @@ const Category = () => {
       return (
         <div className='charts-content'>
           {/* something wrong with below style */}
-          <div className='flex' style={{ width: "80%"}}>
+          <div className='flex' style={{ width: "75%"}}>
             <p className='text-4xl mb-7'>Topic Insights 🗂️</p>
             {!showNewCategoryRow && !editMode ? (
               <>
