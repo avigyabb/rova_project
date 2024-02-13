@@ -33,7 +33,7 @@ def autosuggest_categories():
         sessions_df = embed_all_sessions(df, embeddings_model)
         embeddings = np.array(sessions_df["embeds"].tolist()) 
         # Clustering with K-Means
-        kmeans = KMeans(n_clusters=3, random_state=0).fit(embeddings)
+        kmeans = KMeans(n_clusters=10, random_state=0).fit(embeddings)
         # Assign cluster labels to DataFrame
         sessions_df['cluster_label'] = kmeans.labels_
         # Calculate the distance between each point and the centroid of its cluster
@@ -43,7 +43,7 @@ def autosuggest_categories():
         sessions_df['distance_to_centroid'] = np.min(distances, axis=1)
         # Find the closest row to each cluster's centroid
         closest_rows = sessions_df.loc[sessions_df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
-        for row in closest_rows.iterrows():
+        for row in closest_rows.iterrows()[0:1]:
             prompt = prompt_to_generate_clusters(row, 0)
             answer = query_gpt(client, prompt, json_output=True)
             modded_name = answer['name'] +' (suggested)'
