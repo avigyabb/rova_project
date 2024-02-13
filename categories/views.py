@@ -6,31 +6,9 @@ from myapi.consts import *
 import json
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-
-@api_view(["GET"])
-def category_list(request):
-    categories = Category.objects.all().order_by("date")
-    data = serializers.serialize("json", categories)
-    data = json.loads(data)
-    for index, category in enumerate(data):
-        category["fields"]["volume"] = volume_for_category(category["pk"])
-        category["fields"]["trend"] = "-"  # not done
-        category["fields"]["path"] = "-"  # not done
-    return Response(data, content_type="application/json")
-
-
-def volume_for_category(category_id):
-    return SessionCategory.objects.filter(category_id=category_id).count()
-
-
-@api_view(["POST"])
-def post_user_category(request):
-    name = request.data.get("name")
-    description = request.data.get("description")
-    new_category = Category(name=name, description=description, user_id=0)
-    new_category.save()
-    assign_session_ids_to_category(name, description, new_category.pk)
-    return Response({"success": "Category created successfully."})
+from myapi.callgpt import *
+from myapi.consts import *
+from myapi.traces import *
 
 
 # Embed the category description and add all session ids
@@ -50,6 +28,55 @@ def assign_session_ids_to_category(category_name, category_description, category
         session.save()
     return unique_session_ids
 
+def autosuggest_categories():
+    if(Category.objects.count() <= 0):
+        sessions_df = embed_all_sessions(df, embeddings_model)
+        embeddings = np.array(sessions_df["embeds"].tolist()) 
+        # Clustering with K-Means
+        kmeans = KMeans(n_clusters=3, random_state=0).fit(embeddings)
+        # Assign cluster labels to DataFrame
+        sessions_df['cluster_label'] = kmeans.labels_
+        # Calculate the distance between each point and the centroid of its cluster
+        centroids = kmeans.cluster_centers_
+        distances = cdist(embeddings, centroids, 'euclidean')
+        # The distance for each point to its cluster centroid
+        sessions_df['distance_to_centroid'] = np.min(distances, axis=1)
+        # Find the closest row to each cluster's centroid
+        closest_rows = sessions_df.loc[sessions_df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
+        for row in closest_rows.iterrows():
+            prompt = prompt_to_generate_clusters(row, 0)
+            answer = query_gpt(client, prompt, json_output=True)
+            modded_name = answer['name'] +' (suggested)'
+            new_category = Category(name=modded_name, description=answer['description'], user_id=0)
+            new_category.save()
+            assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
+
+@api_view(["GET"])
+def category_list(request):
+    categories = Category.objects.all().order_by("date")
+    data = serializers.serialize("json", categories)
+    data = json.loads(data)
+    for index, category in enumerate(data):
+        category["fields"]["volume"] = volume_for_category(category["pk"])
+        category["fields"]["trend"] = "-"  # not done
+        category["fields"]["path"] = "-"  # not done
+    autosuggest_categories()
+    return Response(data, content_type="application/json")
+
+
+def volume_for_category(category_id):
+    return SessionCategory.objects.filter(category_id=category_id).count()
+
+
+@api_view(["POST"])
+def post_user_category(request):
+    name = request.data.get("name")
+    description = request.data.get("description")
+    new_category = Category(name=name, description=description, user_id=0)
+    new_category.save()
+    assign_session_ids_to_category(name, description, new_category.pk)
+    return Response({"success": "Category created successfully."})
+
 
 @api_view(["GET"])
 def delete_user_category(request):
@@ -64,6 +91,7 @@ def delete_user_category(request):
 
 def delete_category_sessions(category_id):
     SessionCategory.objects.filter(category_id=category_id).delete()
+    autosuggest_categories()
 
 
 def filter_session_ids_given_categories(session_ids, included_categories, excluded_categories):
