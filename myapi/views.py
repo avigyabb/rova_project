@@ -307,7 +307,8 @@ def post_user_keymetric(request):
     user_id = request.data.get("name")
     category = request.data.get("description")
     importance = request.data.get("importance")
-    add_keymetric(user_id, category, importance)
+    period = request.data.get('period')
+    add_keymetric(user_id, category, importance, period)
     return Response({"message": "Category added successfully"})
 
 

@@ -7,6 +7,7 @@ import Modal from '@mui/material/Modal'; // Import the Modal component from MUI
 import Box from '@mui/material/Box'; // Import the Box component for modal styling
 import { Bar } from 'react-chartjs-2';
 import '../../styles/Charts.css';
+import { set } from 'date-fns';
 
 const KeyMetricCard = () => {
 
@@ -16,6 +17,7 @@ const KeyMetricCard = () => {
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [churnPeriod, setChurnPeriod] = useState('');
 
     const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
     const [modalContent, setModalContent] = useState(''); // State to hold the modal's content
@@ -69,14 +71,14 @@ const KeyMetricCard = () => {
             description: document.getElementById("newKeyMetricDescription").value,
             volume: '',
             importance: document.getElementById("newKeyMetricImportance").value,
-            path: ''
+            path: '',
+            period: churnPeriod
         }
         // Save new category logic here
         // For example, you can send an API request to save the new category
         // After successful save, update category list and reset new category state
         setShowNewCategoryRow(false);
         try {
-          console.log("NEW", newKeyMetric)
           const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-keymetric/', newKeyMetric);
           console.log(response);
         } catch (error) {
@@ -107,10 +109,10 @@ const KeyMetricCard = () => {
       );
     }
 
-    function MultiSelectDropdown({ options, id }) {
+    function MultiSelectDropdown({ options, id}) {
       // State to keep track of selected options and their order
-    
       // This function checks if the option is an array and returns the appropriate value
+
       const getOptionValue = (option) => {
         if (Array.isArray(option)) {
           // Assuming the first element of the array is the value we want
@@ -118,7 +120,7 @@ const KeyMetricCard = () => {
         }
         return option; // If it's not an array, return the string directly
       };
-    
+
       // Function to handle option toggle
       const toggleOption = (optionValue) => {
         const currentIndex = selectedOptions.findIndex((opt) => opt === optionValue);
@@ -151,6 +153,15 @@ const KeyMetricCard = () => {
                   style={{ marginRight: '8px' }}
                 />
                 <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
+                {optionValue === 'churn' && selectedOptions.includes('churn') && (
+                  <input
+                    type="text"
+                    placeholder="Churn Period (days)"
+                    value={churnPeriod}
+                    onChange={(e) => setChurnPeriod(e.target.value)}
+                    style={{ marginLeft: '8px' }}
+                  />
+              )}
               </div>
             );
           })}

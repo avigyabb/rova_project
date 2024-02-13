@@ -33,14 +33,14 @@ def get_keymetrics_overview():
 
 
 # Add a new category
-def add_keymetric(name, description, importance):
+def add_keymetric(name, description, importance, period=None):
     if(not KeyMetricTable.objects.filter(name=name).exists()):
         new_keymetric = KeyMetricTable(name=name, description=description, importance=importance, user_id=0, summary="")
         new_keymetric.save()
         steps = name.split(',')
         formatted = [s.strip() for s in steps]
 
-        session_to_keymetric = find_sessions_with_kpis(df, formatted, True)
+        session_to_keymetric = find_sessions_with_kpis(df, formatted, True, period)
         keymetric_objs_to_add = [SessionKeyMetric(session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
         SessionKeyMetric.objects.bulk_create(keymetric_objs_to_add)
 
@@ -65,7 +65,7 @@ def add_keymetric_for_new_session(session_id):
     for keymetric in KeyMetricTable.objects.all():
         raw_names = keymetric.name.split(',')
         steps = [s.strip() for s in raw_names]
-        belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, session_id=session_id)
+        belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, global_period, session_id=session_id)
         if(belongs_to_keymetric and not SessionKeyMetric.objects.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
             SessionKeyMetric.objects.create(session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
 
@@ -84,9 +84,12 @@ def delete_keymetric(index):
 
     
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
-def find_sessions_with_kpis(df, raw_event_names, in_order=False, session_id=None):
+def find_sessions_with_kpis(df, raw_event_names, in_order=False, period=None, session_id=None):
     churn_flag = False
     event_names = raw_event_names
+    
+    if(period is None):
+        period = global_period
     if('churn' in raw_event_names):
         event_names.remove('churn')
         churn_flag = True
@@ -94,11 +97,6 @@ def find_sessions_with_kpis(df, raw_event_names, in_order=False, session_id=None
     # If "trace" is in event_names, we'll look for any 'llm' event type as well.
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     check_for_llm = 'trace' in event_names
-    # if check_for_llm:
-    #     # Remove 'trace' from event_names and prepare to check for 'llm' events.
-    #     event_names = [e for e in event_names if e != 'trace']
-        
-    # Filter the DataFrame to only include rows with relevant event names or 'llm' event types.
     filtered_df = df[(df['event_name'].isin(event_names)) | (df['event_type'] == 'llm' if check_for_llm else False)]
     
     def check_sequence(group):
@@ -119,7 +117,7 @@ def find_sessions_with_kpis(df, raw_event_names, in_order=False, session_id=None
             # Check if the session contains all event_names, order doesn't matter.
             return all(name in events for name in event_names)
     if(churn_flag):
-        churned_sessions = get_churned_sessions(df, "0 days 00:00:00")
+        churned_sessions = get_churned_sessions(df, "{} days 00:00:00".format(period))
     # Group by session_id and apply the check_sequence function, then filter groups that return True.
     if(session_id is not None):
         valid_sessions = filtered_df[filtered_df['session_id'] == session_id].filter(check_sequence)

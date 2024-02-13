@@ -6,14 +6,6 @@ from keymetrics.models import KeyMetricTable, SessionKeyMetric
 from collections import defaultdict
 
 # Dictionary that maps importance texts to score
-importance_score_dict = {
-    "Very Negative": -1,
-    "Negative": -0.4,
-    "Neutral": 0,
-    "Positive": 0.4,
-    "Very Positive" : 1
-}
-
 def tree():
     return defaultdict(tree)
 

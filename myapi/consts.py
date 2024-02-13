@@ -18,6 +18,7 @@ os.environ["OPENAI_API_KEY"] = "sk-XurJgF5BTIjlXwZZcXH3T3BlbkFJ3RaxVfLawCcOG9B7J
 client = OpenAI()
 
 db_name = "rova_dev"
+global_period = 7 # 7 days churn
 
 # setup clickhouse client
 def new_clickhouse_client():
