@@ -221,8 +221,8 @@ const KeyMetricCard = () => {
       };
       
       const TableRow = ({ keymetric, index }) => (
-        <tr onClick={()=>handleRowClick(keymetricList[keymetricList.length - index - 1].analysis)}>
-          <td><p className="inline-block categ-name">{keymetric.name}</p></td>
+        <tr>
+          <td  onClick={()=>handleRowClick(keymetricList[keymetricList.length - index - 1].analysis)}><p className="inline-block categ-name">{keymetric.name}</p></td>
           <td>{keymetric.description}</td>
           <td>{keymetric.volume}</td>
           <td>{keymetric.importance}</td>
