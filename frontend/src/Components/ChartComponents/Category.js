@@ -3,6 +3,7 @@ import '../../styles/Charts.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { Bar } from 'react-chartjs-2';
 
 const Category = () => {
 
@@ -81,6 +82,36 @@ const Category = () => {
         trend: category.fields.trend,
         path: category.fields.path
     })); 
+
+    const chartData = {
+      labels: categories.map(metric => metric.name),
+      datasets: [
+        {
+          label: 'Volume',
+          data: categories.map(metric => metric.volume),
+          backgroundColor: 'rgba(255, 161, 137, 1.0)',
+        },
+      ],
+    };
+
+    const chartOptions = {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Volume by Event',
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        },
+        x: {
+          display: false
+        }
+      },
+      maintainAspectRatio: false, // Adjust aspect ratio here
+      aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
+    }; 
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -203,6 +234,11 @@ const Category = () => {
           </div>
           <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "75%"}}>
             <TopicTable />
+          </div>
+                    <div className='flex mt-10'>
+            <div className='chart-container' style={{ width: '90%', height: '400px', marginTop: '10px' }}>
+              <Bar data={chartData} options={chartOptions} />
+            </div>
           </div>
         </div>
       );
