@@ -14,6 +14,7 @@ const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary, sess
 
   return (
     <div className="insights-card flex flex-col" onClick={handleClick}>
+      <div style={{margin:'2%'}}>
       <div className="session-tags flex">
         <div className="text-md"> 👤 {userId} </div>
         <div className="text-sm insights-session self-end ml-3"> session {sessionId} </div>
@@ -25,7 +26,8 @@ const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary, sess
         <div className="user-updated ml-auto">{timestamp}</div>
       </div>
       <div className='insights-card-content flex'>
-          <p className='text-gray-500'> {summary} </p>
+          <p className='text-gray-500 text-sm'> {summary} </p>
+      </div>
       </div>
    </div>
   );
@@ -59,29 +61,31 @@ const Homepage = ({ sessionIds }) => {
   return (
     <div className='homepage'>
       <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! 🎉</h1>
-      <p className='header-text text-gray-500'> Here are your important sessions, based on your topics and KPIs: </p>
-      <div className='insights-content'>
-        {loading ? (
-          <div className="sessions-container flex flex-col justify-center items-center mt-56">
-            <p className='mb-8 text-gray-500'> Surfacing important user sessions...</p>
-            <CircularProgress style={{ color: '#FFA189' }}/>
-          </div>
-        ) : (
-          <div className="sessions-container">
-            {Object.keys(sessions).map((session_id, index) => (
-              <ModifiedSessionCard
-                key={session_id}
-                sessionId={session_id}
-                userId={sessions[session_id].user_id}
-                timestamp={sessions[session_id].timestamp}
-                tags={sessions[session_id].tags}
-                summary={sessions[session_id].summary}
-                index={index}
-                sessionList={sessions}
-              />
-            ))}
-          </div>
-        )}
+      <div style={{width:'30%', float:'right', marginRight:'5%', marginTop:'-3%'}}>
+        <p className='header-text text-gray-500 mb-2'> Here are your important sessions, based on your topics and KPIs: </p>
+        <div className='insights-content'>
+          {loading ? (
+            <div className="sessions-container flex flex-col justify-center items-center mt-56">
+              <p className='mb-8 text-gray-500'> Surfacing important user sessions...</p>
+              <CircularProgress style={{ color: '#FFA189' }}/>
+            </div>
+          ) : (
+            <div className="sessions-container">
+              {Object.keys(sessions).map((session_id, index) => (
+                <ModifiedSessionCard
+                  key={session_id}
+                  sessionId={session_id}
+                  userId={sessions[session_id].user_id}
+                  timestamp={sessions[session_id].timestamp}
+                  tags={sessions[session_id].tags}
+                  summary={sessions[session_id].summary}
+                  index={index}
+                  sessionList={sessions}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
