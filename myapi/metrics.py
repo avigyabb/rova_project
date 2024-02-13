@@ -107,7 +107,7 @@ def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
     prev_max_timestamp = None
     churned_sessions = []
     # Get today's datetime for comparison with the most recent group
-    today_datetime = pd.to_datetime(datetime.datetime.now())
+    today_datetime = pd.to_datetime(datetime.datetime.now()) + pd.Timedelta(days=40)
     
     for i, (session_id, group) in enumerate(df.groupby('session_id')):
         # Check if the current group is the last one
@@ -119,12 +119,10 @@ def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
             else:
                 # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
                 time_diff = group['timestamp'].min() - prev_max_timestamp
-            
             # If the time difference is greater than the specified timedelta, add the session to the list
             if time_diff > timedelta_datetime:
                 churned_sessions.append(session_id)
 
         # Update the prev_max_timestamp with the max timestamp of the current group
         prev_max_timestamp = group['timestamp'].max()
-
     return set(churned_sessions)

@@ -97,8 +97,10 @@ def find_sessions_with_kpis(df, raw_event_names, in_order=False, period=None, se
     # If "trace" is in event_names, we'll look for any 'llm' event type as well.
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     check_for_llm = 'trace' in event_names
-    filtered_df = df[(df['event_name'].isin(event_names)) | (df['event_type'] == 'llm' if check_for_llm else False)]
-    
+    if(event_names):
+        filtered_df = df[(df['event_name'].isin(event_names)) | (df['event_type'] == 'llm' if check_for_llm else False)]
+    else:
+        filtered_df = df
     def check_sequence(group):
         group = group.sort_values('timestamp')
         # Create a list of event names for the session, replacing 'llm' events with 'trace' if needed.
@@ -124,7 +126,6 @@ def find_sessions_with_kpis(df, raw_event_names, in_order=False, period=None, se
     else:
         valid_sessions = filtered_df.groupby('session_id').filter(check_sequence)
     valid_sessions = set(valid_sessions['session_id'].unique().tolist())
-    
     # Return the unique session_ids of the valid sessions.
     if(churn_flag):
         return valid_sessions.intersection(churned_sessions)
