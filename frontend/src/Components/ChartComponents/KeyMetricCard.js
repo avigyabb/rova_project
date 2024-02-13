@@ -3,6 +3,8 @@ import '../../styles/EventComponentsStyles/KeyMetricCard.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import Modal from '@mui/material/Modal'; // Import the Modal component from MUI
+import Box from '@mui/material/Box'; // Import the Box component for modal styling
 import { Bar } from 'react-chartjs-2';
 import '../../styles/Charts.css';
 
@@ -14,6 +16,9 @@ const KeyMetricCard = () => {
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState([]);
+
+    const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
+    const [modalContent, setModalContent] = useState(''); // State to hold the modal's content
 
     // Fetches the category data
     const fetchData = async () =>  {
@@ -191,9 +196,32 @@ const KeyMetricCard = () => {
           setKeyMetricList(prevList => prevList.filter((_, idx) => idx !== keymetrics.length - index - 1));
         }
       }
+
+      // Fetch data, other state management, and useEffect hooks remain the same...
+
+      // Function to open the modal with specific content
+      const handleRowClick = (description) => {
+        setModalContent(description); // Set the content to be displayed in the modal
+        setModalOpen(true); // Show the modal
+      };
+
+      // Function to close the modal
+      const handleCloseModal = () => setModalOpen(false);
+
+      // Modal style
+      const modalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        boxShadow: 24,
+        p: 4,
+      };
       
       const TableRow = ({ keymetric, index }) => (
-        <tr>
+        <tr onClick={()=>handleRowClick(keymetricList[index].analysis)}>
           <td><p className="inline-block categ-name">{keymetric.name}</p></td>
           <td>{keymetric.description}</td>
           <td>{keymetric.volume}</td>
@@ -282,47 +310,7 @@ const KeyMetricCard = () => {
       },
       maintainAspectRatio: false, // Adjust aspect ratio here
       aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
-    };
-    const FlipCard = ({ name, analysis }) => {
-      const [isFlipped, setIsFlipped] = useState(false);
-    
-      const flipCard = () => {
-        setIsFlipped(!isFlipped);
-      };
-    
-      return (
-        <div className="m-2">
-          <div
-            className={`w-48 h-48 transition-transform duration-500 ease-linear
-                        transform perspective-1000 ${isFlipped ? 'rotate-y-180' : ''}
-                        shadow-lg cursor-pointer rounded-lg overflow-hidden relative`}
-            onClick={flipCard}
-          >
-            <div className={`absolute inset-0 flex items-center justify-center p-2 ${isFlipped ? 'bg-orange-100' : 'bg-orange-200'}`}>
-              {isFlipped ? (
-                <div className="text-center text-white-900 overflow-auto text-xs h-full">{analysis}</div>
-              ) : (
-                <div className="text-center text-xs text-white-700">{name}</div>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    };
-     
-    
-    const Categories = ({ categories }) => {
-      // Skip the first element using slice
-      const itemsToDisplay = categories;
-    
-      return (
-        <div className="flex flex-wrap justify-center">
-          {itemsToDisplay.map((category, index) => (
-            <FlipCard key={index} name={category.name} analysis={category.analysis} />
-          ))}
-        </div>
-      );
-    };
+    };  
 
       return (
         <div className='charts-content'>
@@ -341,12 +329,20 @@ const KeyMetricCard = () => {
             <TopicTable />
           </div>
           <div className='flex mt-10'>
-            <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
+            <div className='chart-container' style={{ width: '90%', height: '400px', marginTop: '10px' }}>
               <Bar data={chartData} options={chartOptions} />
             </div>
-            <div className='flex-1'>
-              <Categories categories={keymetricList} />
-            </div>
+            <Modal
+              open={modalOpen}
+              onClose={handleCloseModal}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={modalStyle}>
+                <h2 id="modal-modal-title">Summary</h2>
+                <p id="modal-modal-description">{modalContent}</p>
+              </Box>
+            </Modal>
           </div>
         </div>
       );
