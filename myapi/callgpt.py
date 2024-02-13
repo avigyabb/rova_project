@@ -169,7 +169,7 @@ def prompt_to_generate_clusters(sentence, flag=0):
                         the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
     else:
         system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
-                        a category_name for sessions of this type and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                        a category_name for sessions that specifically identifies the topic of the user's question and 2) a description of this category. Your output should be a JSON formatted object of the form \
                         {'name': 'category_name', 'description': 'category_description'}."
     msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
     return msgs

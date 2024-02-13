@@ -43,14 +43,18 @@ def autosuggest_categories():
         sessions_df['distance_to_centroid'] = np.min(distances, axis=1)
         # Find the closest row to each cluster's centroid
         closest_rows = sessions_df.loc[sessions_df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
-        for row in closest_rows.iterrows()[0:1]:
-            prompt = prompt_to_generate_clusters(row, 0)
-            answer = query_gpt(client, prompt, json_output=True)
-            modded_name = answer['name'] +' (suggested)'
-            new_category = Category(name=modded_name, description=answer['description'], user_id=0)
-            new_category.save()
-            assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
-
+        count = 0
+        for row in closest_rows.iterrows():
+            if(count < 2):
+                prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
+                answer = query_gpt(client, prompt, json_output=True)
+                modded_name = answer['name'] +' (suggested)'
+                new_category = Category(name=modded_name, description=answer['description'], user_id=0)
+                new_category.save()
+                assign_session_ids_to_category(modded_name, answer['description'], new_category.pk)
+                count += 1
+            else:
+                break
 @api_view(["GET"])
 def category_list(request):
     categories = Category.objects.all().order_by("date")
