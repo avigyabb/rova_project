@@ -47,6 +47,7 @@ def autosuggest_categories():
         for row in closest_rows.iterrows():
             if(count < 2):
                 prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
+                print(prompt)
                 answer = query_gpt(client, prompt, json_output=True)
                 modded_name = answer['name'] +' (suggested)'
                 new_category = Category(name=modded_name, description=answer['description'], user_id=0)

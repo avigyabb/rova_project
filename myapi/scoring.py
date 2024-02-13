@@ -43,10 +43,8 @@ def score_sessions_based_on_kpis(n):
         session_score_dict[session_metric.session_id] += importance_score_dict[key_metric.importance]
 
     # Create a list of session ID, score pairs sorted by score in ascending order
-    session_score_pairs = list(session_score_dict.items())
-    session_score_pairs.sort(key=lambda x: x[1])
-
-    worst_ids = [session_id for session_id, score in session_score_pairs[:n]]
+    session_score_dict = {k: v for k, v in sorted(session_score_dict.items(), key=lambda item: item[1])}
+    worst_ids = list(session_score_dict.keys())[0:n]
     return worst_ids, session_score_dict
 
 # Returns a list of session ID, score pairs sorted by score in ascending order
