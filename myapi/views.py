@@ -23,6 +23,7 @@ import json
 
 from django.contrib.auth.models import User
 
+user = authenticate(username='skadaba', password='harvesttothemoon')
 
 # Appends the newest event to the df
 def add_most_recent_event():
@@ -272,8 +273,6 @@ def get_options(request):
 
 @api_view(["GET"])
 def get_user_keymetrics(request):
-    print(request.GET.get("username"), request.GET.get("password"))
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     keymetrics = get_keymetrics(user)
     return Response({"keymetrics": keymetrics})
 
@@ -296,7 +295,6 @@ def get_summary(request):
 def get_similar_traces(request):
     trace_id = int(request.GET.get("trace_id"))
     similar = find_similar(trace_id, traces_df)
-    print(similar)
     return Response({"similar_traces": similar})
 
 
@@ -309,11 +307,11 @@ def get_similar_traces(request):
 
 @api_view(["POST"])
 def post_user_keymetric(request):
-    user = authenticate(username=request.data.get('username'), password=request.data.get('password'))
     user_id = request.data.get("name")
     category = request.data.get("description")
     importance = request.data.get("importance")
     period = request.data.get('period')
+    print("USER: ", user)
     add_keymetric(user, user_id, category, importance, period)
     return Response({"message": "Category added successfully"})
 
@@ -326,7 +324,6 @@ def post_user_keymetric(request):
 
 @api_view(["GET"])
 def delete_user_keymetric(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     index = request.GET.get("index")
     delete_keymetric(user, index)
     return Response({"message": "Category deleted successfully"})
@@ -334,7 +331,6 @@ def delete_user_keymetric(request):
 
 @api_view(["GET"])
 def get_filtered_sessions(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     included_categories = json.loads(request.GET.get("included_categories"))
     excluded_categories = json.loads(request.GET.get("excluded_categories"))
     included_signals = json.loads(request.GET.get("included_signals"))
@@ -350,6 +346,5 @@ def get_filtered_sessions(request):
 
 @api_view(["GET"])
 def get_surfaced_sessions(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     sessions_obj = score_and_return_sessions(user)
     return Response({"sessions" : sessions_obj})

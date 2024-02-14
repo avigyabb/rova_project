@@ -12,7 +12,7 @@ from myapi.traces import *
 from django.contrib.auth import authenticate
 from myapi.scoring import *
 
-
+user = authenticate(username='skadaba', password='harvesttothemoon')
 # Embed the category description and add all session ids
 def assign_session_ids_to_category(user, category_name, category_description, category, similarity_threshold=0.74):
     # Embed the category description
@@ -62,7 +62,6 @@ def autosuggest_categories(user):
             
 @api_view(["GET"])
 def category_list(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     UserCategory = Category.objects.filter(user=user)
     categories = UserCategory.all().order_by("date")
     data = serializers.serialize("json", categories)
@@ -76,14 +75,12 @@ def category_list(request):
 
 
 def volume_for_category(user, category):
-    print("TEST: ", category)
     UserSessionCategory = SessionCategory.objects.filter(user=user)
     return UserSessionCategory.filter(category=category).count()
 
 
 @api_view(["POST"])
 def post_user_category(request):
-    user = authenticate(username=request.data.get('username'), password=request.data.get('password'))
     name = request.data.get("name")
     description = request.data.get("description")
     new_category = Category(name=name, description=description, user=user)
@@ -94,7 +91,6 @@ def post_user_category(request):
 
 @api_view(["GET"])
 def delete_user_category(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     index = request.GET.get("index")
     UserCategory = Category.objects.filter(user=user)
     category_to_delete = UserCategory.get(pk=index)
@@ -141,7 +137,6 @@ def filter_session_ids_given_categories(user, session_ids, included_categories, 
 
 @api_view(["GET"])
 def get_categories_ranking(request):
-    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     UserSessionCategory = SessionCategory.objects.filter(user=user)
     UserCategory = Category.objects.filter(user=user)
     _, session_score_dict, session_score_names = score_sessions_based_on_kpis(user, 1)
