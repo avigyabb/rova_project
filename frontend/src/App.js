@@ -9,12 +9,15 @@ import Sessions from "./Components/Sessions";
 import Paths from './Components/Paths';
 import Hero from './Components/Website/Hero';
 import Login from './Components/Website/Login';
+import axios from "axios";
 
 const customTheme = createTheme({
   typography: {
     fontFamily: 'PoppinsFont, sans-serif',
   },
 });
+
+axios.defaults.withCredentials = true;
 
 const AppContent = () => {
 

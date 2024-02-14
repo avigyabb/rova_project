@@ -64,6 +64,7 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True  # Consider narrowing this down in production
 CORS_ALLOW_CREDENTIALS = True  # Allows cookies to be included in cross-origin HTTP requests
 CORS_ORIGIN_ALLOW_ALL = True
+
 ROOT_URLCONF = "rova_demo.urls"
 
 TEMPLATES = [
@@ -145,7 +146,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        #'rest_framework.authentication.TokenAuthentication',  # Token Authentication
         'rest_framework.authentication.SessionAuthentication',  # Uncomment this line if you want to use session authentication along with token authentication
     ),
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    # Include any custom backends
+]

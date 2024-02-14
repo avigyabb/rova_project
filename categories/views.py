@@ -9,9 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from myapi.callgpt import *
 from myapi.consts import *
 from myapi.traces import *
-from django.contrib.auth import authenticate
 from myapi.scoring import *
-from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -53,7 +51,6 @@ def autosuggest_categories(user):
         for row in closest_rows.iterrows():
             if(count < 2):
                 prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
-                #print(prompt)
                 answer = query_gpt(client, prompt, json_output=True)
                 modded_name = answer['name'] + ' 🤖'
                 new_category = Category(user=user, name=modded_name, description=answer['description'])
@@ -65,7 +62,7 @@ def autosuggest_categories(user):
             
 @api_view(["GET"])
 def category_list(request):
-    UserCategory = Category.objects.filter(user_id=request.user)
+    UserCategory = Category.objects.filter(user=request.user)
     categories = UserCategory.all().order_by("date")
     data = serializers.serialize("json", categories)
     data = json.loads(data)
@@ -113,7 +110,6 @@ def delete_category_sessions(user, category):
 # Embeds the new event and assigns to relevant categories
 def update_categories_with_new_event(row):
     # TODO
-    print("fLKLKDSJFLlksflib")
     pass
 
 

@@ -34,8 +34,6 @@ def login_user(request):
     user = authenticate(request, username=data['username'], password=data['password'])
     if user is not None:
         login(request, user)
-        print("TEST", user)
-        print("TEST", request.session.session_key)
         return JsonResponse({'message': "Login successful", "status":status.HTTP_200_OK})
     else:
         # Return an 'invalid login' error message.
@@ -140,8 +138,6 @@ def get_user(request):
             WHERE user_id = '{request.GET.get("userId")}'
             """
     result = clickhouse_client.query(combined_table_sql + sql_query)
-    print("loc2")
-    print(len(result.result_rows))
     # dataframe of all events of user ordered by timestamp
     if (len(result.result_rows) == 0):
         return Response({"info": []})
