@@ -272,6 +272,7 @@ def get_options(request):
 
 @api_view(["GET"])
 def get_user_keymetrics(request):
+    print(request.GET.get("username"), request.GET.get("password"))
     user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     keymetrics = get_keymetrics(user)
     return Response({"keymetrics": keymetrics})

@@ -11,37 +11,8 @@ const Auth = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     // Example credentials (Warning: This is not secure!)
-    const credentials = {
-    username: username,
-    password: password
-    };
-
-    // Request interceptor to append username and password
-    axios.interceptors.request.use(config => {
-    // Append username and password to every request's parameters
-    const params = new URLSearchParams(config.params || {});
-    params.append('username', credentials.username);
-    params.append('password', credentials.password);
-    config.params = params;
-
-    // For POST requests, you might want to add them to the body instead
-    if (config.method === 'post') {
-        const bodyFormData = new FormData();
-        bodyFormData.append('username', credentials.username);
-        bodyFormData.append('password', credentials.password);
-        // Append existing form data if any
-        if (config.data) {
-        Object.keys(config.data).forEach(key => {
-            bodyFormData.append(key, config.data[key]);
-        });
-        }
-        config.data = bodyFormData;
-    }
-
-    return config;
-    }, error => {
-    return Promise.reject(error);
-    });
+    localStorage.setItem('password', password); // Store the token
+    localStorage.setItem('username', username); // Store the username securely
     navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`);
   };
 
