@@ -265,10 +265,10 @@ def get_options(request):
     return Response({"options": options})
 
 
-@api_view(["GET"])
-def get_user_categories(request):
-    categories = get_categories()
-    return Response({"categories": categories})
+# @api_view(["GET"])
+# def get_user_categories(request):
+#     categories = get_categories()
+#     return Response({"categories": categories})
 
 @api_view(["GET"])
 def get_user_keymetrics(request):
@@ -299,12 +299,12 @@ def get_similar_traces(request):
     return Response({"similar_traces": similar})
 
 
-@api_view(["POST"])
-def post_user_category(request):
-    user_id = request.data.get("name")
-    category = request.data.get("description")
-    add_category(user_id, category)
-    return Response({"message": "Category added successfully"})
+# @api_view(["POST"])
+# def post_user_category(request):
+#     user_id = request.data.get("name")
+#     category = request.data.get("description")
+#     add_category(user_id, category)
+#     return Response({"message": "Category added successfully"})
 
 @api_view(["POST"])
 def post_user_keymetric(request):
@@ -317,11 +317,11 @@ def post_user_keymetric(request):
     return Response({"message": "Category added successfully"})
 
 
-@api_view(["GET"])
-def delete_user_category(request):
-    index = request.GET.get("index")
-    delete_category(index)
-    return Response({"message": "Category deleted successfully"})
+# @api_view(["GET"])
+# def delete_user_category(request):
+#     index = request.GET.get("index")
+#     delete_category(index)
+#     return Response({"message": "Category deleted successfully"})
 
 @api_view(["GET"])
 def delete_user_keymetric(request):
