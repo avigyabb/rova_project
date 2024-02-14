@@ -10,6 +10,7 @@ from myapi.callgpt import *
 from myapi.consts import *
 from myapi.traces import *
 from django.contrib.auth import authenticate
+from myapi.scoring import *
 
 
 # Embed the category description and add all session ids
@@ -51,7 +52,7 @@ def autosuggest_categories(user):
                 prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
                 #print(prompt)
                 answer = query_gpt(client, prompt, json_output=True)
-                modded_name = answer['name'] +' (suggested)'
+                modded_name = answer['name'] + ' 🤖'
                 new_category = Category(user=user, name=modded_name, description=answer['description'])
                 new_category.save()
                 assign_session_ids_to_category(user, modded_name, answer['description'], new_category)
@@ -67,7 +68,7 @@ def category_list(request):
     data = serializers.serialize("json", categories)
     data = json.loads(data)
     for index, category in enumerate(data):
-        category["fields"]["volume"] = volume_for_category(user, category["pk"])
+        category["fields"]["volume"] = volume_for_category(user, category['pk'])
         category["fields"]["trend"] = "-"  # not done
         category["fields"]["path"] = "-"  # not done
     autosuggest_categories(user)
@@ -137,3 +138,34 @@ def filter_session_ids_given_categories(user, session_ids, included_categories, 
         if include:
             filtered_session_ids.append(session_id)
     return filtered_session_ids
+
+@api_view(["GET"])
+def get_categories_ranking(request):
+    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
+    UserSessionCategory = SessionCategory.objects.filter(user=user)
+    UserCategory = Category.objects.filter(user=user)
+    _, session_score_dict, session_score_names = score_sessions_based_on_kpis(user, 1)
+    category_count = defaultdict(int)
+    category_score = defaultdict(int)
+    category_volume = defaultdict(int)
+    category_score_names = defaultdict(set) # eventually we could order this by scores that have greatest freq
+
+    for row in UserSessionCategory.all():
+        if row.session_id in session_score_dict:
+            category_name = UserCategory.get(pk=row.category_id).name
+            category_count[category_name] += 1
+            category_score[category_name] += session_score_dict[row.session_id]
+            category_score_names[category_name] = category_score_names[category_name].union(session_score_names[row.session_id])
+            if row.session_id not in category_volume:
+                category_volume[category_name] = volume_for_category(user, row.category_id)
+    
+    for category_name in category_count:
+        category_score[category_name] = round(category_score[category_name] / category_count[category_name])
+
+    category_score = {k: v for k, v in sorted(category_score.items(), key=lambda item: item[1], reverse=True)}
+    return Response({
+        "category_score": category_score, 
+        "category_volume": category_volume,
+        "category_score_names": category_score_names
+    })
+        
