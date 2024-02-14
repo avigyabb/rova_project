@@ -3,20 +3,18 @@ from .consts import *
 from .traces import *
 from .callgpt import explain_session_by_kpis, query_gpt
 from .metrics import get_churned_sessions
-from .scoring import score_and_return_sessions
-from keymetrics.models import KeyMetricTable, SessionKeyMetric
-from django.db.models import Count
-import numpy as np
-import random
+from keymetrics.models import ListOfKPIs, SessionsToKPIs
 
 #Function to construct the overall representation
-def get_keymetrics_overview():
+def get_keymetrics_overview(user):
+    UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    UserSessionsToKPIs = SessionsToKPIs.objects.filter(user=user)
     # Fetch all KeyMetric instances
-    keymetrics_query = KeyMetricTable.objects.all()
+    keymetrics_query = UserListOfKPIs.all()
     keymetrics_data = []
     for keymetric in keymetrics_query:
         # Fetch the session IDs related to the current KeyMetric
-        session_ids = list(SessionKeyMetric.objects.filter(keymetric_id=keymetric.id).values_list('session_id', flat=True))
+        session_ids = list(UserSessionsToKPIs.filter(keymetric_id=keymetric.id).values_list('session_id', flat=True))
         # The num_events is the count of session IDs for the current KeyMetric
         num_events = len(session_ids)
         # Construct the dictionary for the current KeyMetric
@@ -33,18 +31,19 @@ def get_keymetrics_overview():
 
 
 # Add a new category
-def add_keymetric(name, description, importance, period=None):
-    if(not KeyMetricTable.objects.filter(name=name).exists()):
-        new_keymetric = KeyMetricTable(name=name, description=description, importance=importance, user_id=0, summary="")
+def add_keymetric(user, name, description, importance, period=None):
+    UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    if(not UserListOfKPIs.filter(name=name).exists()):
+        new_keymetric = ListOfKPIs(name=name, description=description, importance=importance, user=user, summary="")
         new_keymetric.save()
         steps = name.split(',')
         formatted = [s.strip() for s in steps]
 
         session_to_keymetric = find_sessions_with_kpis(df, formatted, True, period)
-        keymetric_objs_to_add = [SessionKeyMetric(session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
-        SessionKeyMetric.objects.bulk_create(keymetric_objs_to_add)
+        keymetric_objs_to_add = [SessionsToKPIs(session_id=session, user=user, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
+        SessionsToKPIs.objects.bulk_create(keymetric_objs_to_add)
 
-        keymetrics = get_keymetrics_overview()
+        keymetrics = get_keymetrics_overview(user)
         messages = explain_session_by_kpis(df, keymetrics, name)
         summary = ""
         if(messages):
@@ -61,26 +60,28 @@ def add_keymetric(name, description, importance, period=None):
         new_keymetric.summary = summary
         new_keymetric.save()
 
-def add_keymetric_for_new_session(session_id):
-    for keymetric in KeyMetricTable.objects.all():
+def add_keymetric_for_new_session(user, session_id):
+    UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    UserSessionsToKPIs = SessionsToKPIs.objects.filter(user=user)
+    for keymetric in UserListOfKPIs.all():
         raw_names = keymetric.name.split(',')
         steps = [s.strip() for s in raw_names]
         belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, global_period, session_id=session_id)
-        if(belongs_to_keymetric and not SessionKeyMetric.objects.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
-            SessionKeyMetric.objects.create(session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
+        if(belongs_to_keymetric and not UserSessionsToKPIs.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
+            SessionsToKPIs.objects.create(session_id=session_id, user=user, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
 
 # Get all keymetrics
-def get_keymetrics():
-    keymetrics = get_keymetrics_overview()
+def get_keymetrics(user):
+    keymetrics = get_keymetrics_overview(user)
     return keymetrics
 
 # function to delete a keymetric from the list
-def delete_keymetric(index):
-    keymetrics = get_keymetrics()
+def delete_keymetric(user, index):
+    keymetrics = get_keymetrics(user)
     index_to_delete = len(keymetrics) - int(index) - 1
     name = keymetrics[index_to_delete]['name']
-    KeyMetricTable.objects.filter(name=name).delete()
-    SessionKeyMetric.objects.filter(keymetric_name=name).delete()
+    ListOfKPIs.objects.filter(user=user, name=name).delete()
+    SessionsToKPIs.objects.filter(user=user, keymetric_name=name).delete()
 
     
 # given a list of events that are cared about (kpis), returns all sessions with all of those events

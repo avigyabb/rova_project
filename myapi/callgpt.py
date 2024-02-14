@@ -3,7 +3,6 @@ import json
 from .consts import *
 from .traces import *
 import random
-from categories.models import Category
 
 def query_gpt(
     client,

@@ -73,7 +73,7 @@ from categories.views import *
 
 #     llm_df.append(row, ignore_index=True)
 
-def get_session_ids_given_filters(included_categories, excluded_categories, included_signals, excluded_signals, engagement_time):
+def get_session_ids_given_filters(user, included_categories, excluded_categories, included_signals, excluded_signals, engagement_time):
     sql_query = (
         """
         SELECT session_id
@@ -124,4 +124,4 @@ def get_session_ids_given_filters(included_categories, excluded_categories, incl
     if len(df) == 0:
         return []
     session_ids = df["session_id"].tolist()
-    return filter_session_ids_given_categories(session_ids, included_categories, excluded_categories)
+    return filter_session_ids_given_categories(user, session_ids, included_categories, excluded_categories)

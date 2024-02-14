@@ -18,7 +18,11 @@ from categories.views import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib.auth import authenticate
 import json
+
+from django.contrib.auth.models import User
+
 
 # Appends the newest event to the df
 def add_most_recent_event():
@@ -268,7 +272,8 @@ def get_user_categories(request):
 
 @api_view(["GET"])
 def get_user_keymetrics(request):
-    keymetrics = get_keymetrics()
+    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
+    keymetrics = get_keymetrics(user)
     return Response({"keymetrics": keymetrics})
 
 
@@ -303,11 +308,12 @@ def post_user_category(request):
 
 @api_view(["POST"])
 def post_user_keymetric(request):
+    user = authenticate(username=request.data.get('username'), password=request.data.get('password'))
     user_id = request.data.get("name")
     category = request.data.get("description")
     importance = request.data.get("importance")
     period = request.data.get('period')
-    add_keymetric(user_id, category, importance, period)
+    add_keymetric(user, user_id, category, importance, period)
     return Response({"message": "Category added successfully"})
 
 
@@ -319,20 +325,22 @@ def delete_user_category(request):
 
 @api_view(["GET"])
 def delete_user_keymetric(request):
+    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     index = request.GET.get("index")
-    delete_keymetric(index)
+    delete_keymetric(user, index)
     return Response({"message": "Category deleted successfully"})
 
 
 @api_view(["GET"])
 def get_filtered_sessions(request):
+    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
     included_categories = json.loads(request.GET.get("included_categories"))
     excluded_categories = json.loads(request.GET.get("excluded_categories"))
     included_signals = json.loads(request.GET.get("included_signals"))
     excluded_signals = json.loads(request.GET.get("excluded_signals"))
     engagement_time = request.GET.get("engagement_time")
     
-    session_ids = get_session_ids_given_filters(included_categories, excluded_categories,
+    session_ids = get_session_ids_given_filters(user, included_categories, excluded_categories,
                                                 included_signals, excluded_signals,
                                                 engagement_time)
     if session_ids == []:
@@ -341,5 +349,6 @@ def get_filtered_sessions(request):
 
 @api_view(["GET"])
 def get_surfaced_sessions(request):
-    sessions_obj = score_and_return_sessions()
+    user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
+    sessions_obj = score_and_return_sessions(user)
     return Response({"sessions" : sessions_obj})

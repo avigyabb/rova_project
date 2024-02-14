@@ -2,7 +2,7 @@
 from .consts import *
 from .traces import *
 from .callgpt import *
-from keymetrics.models import KeyMetricTable, SessionKeyMetric
+from keymetrics.models import ListOfKPIs, SessionsToKPIs
 from collections import defaultdict
 
 # Dictionary that maps importance texts to score
@@ -18,19 +18,20 @@ importance_score_dict = {
 }
 
 # Returns a list of session ID, score pairs sorted by score in ascending order
-def score_sessions_based_on_kpis(n):
-
+def score_sessions_based_on_kpis(user, n):
+    UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    UserSessionsToKPIs = SessionsToKPIs.objects.filter(user=user)
     # Find all unique session IDs
-    unique_session_ids = SessionKeyMetric.objects.values_list('session_id', flat=True).distinct()
+    unique_session_ids = UserSessionsToKPIs.values_list('session_id', flat=True).distinct()
 
     # Create a dictionary mapping all sessions ids to 0 initial score
     session_score_dict = {session_id: 0 for session_id in unique_session_ids}
 
     # Loop over all KeyMetric instances
-    session_metrics_query = SessionKeyMetric.objects.all()
+    session_metrics_query = UserSessionsToKPIs.all()
     for session_metric in session_metrics_query:
         # Grab the associated KeyMetric
-        key_metric = KeyMetricTable.objects.get(id=session_metric.keymetric_id)
+        key_metric = UserListOfKPIs.get(id=session_metric.keymetric_id)
         # Add to the score
         session_score_dict[session_metric.session_id] += importance_score_dict[key_metric.importance]
 
@@ -40,16 +41,19 @@ def score_sessions_based_on_kpis(n):
     return worst_ids, session_score_dict
 
 # Returns a list of session ID, score pairs sorted by score in ascending order
-def score_and_return_sessions():
+def score_and_return_sessions(user):
 
-    worst_ids, scores_map = score_sessions_based_on_kpis(n=5)
-    worst_sessions = SessionKeyMetric.objects.filter(session_id__in=worst_ids)
+    UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    UserSessionsToKPIs = SessionsToKPIs.objects.filter(user=user)
+
+    worst_ids, scores_map = score_sessions_based_on_kpis(user, n=5)
+    worst_sessions = UserSessionsToKPIs.filter(session_id__in=worst_ids)
     session_score_dict = defaultdict(tree)
     
     for session_metric in worst_sessions:
 
         # Grab the associated KeyMetric
-        key_metric = KeyMetricTable.objects.get(id=session_metric.keymetric_id)
+        key_metric = UserListOfKPIs.get(id=session_metric.keymetric_id)
         # Add to the score
         if(session_metric.session_id not in session_score_dict):
             filtered = df[df['session_id'] == session_metric.session_id]
