@@ -56,6 +56,7 @@ def autosuggest_categories():
                 count += 1
             else:
                 break
+            
 @api_view(["GET"])
 def category_list(request):
     categories = Category.objects.all().order_by("date")
@@ -97,6 +98,12 @@ def delete_user_category(request):
 def delete_category_sessions(category_id):
     SessionCategory.objects.filter(category_id=category_id).delete()
     autosuggest_categories()
+
+# Embeds the new event and assigns to relevant categories
+def update_categories_with_new_event(row):
+    # TODO
+    print("fLKLKDSJFLlksflib")
+    pass
 
 
 def filter_session_ids_given_categories(session_ids, included_categories, excluded_categories):

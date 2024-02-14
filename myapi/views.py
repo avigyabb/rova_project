@@ -13,6 +13,7 @@ from .callgpt import *
 from .traces import *
 from .keymetrics import *
 from .scoring import *
+from categories.views import *
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -21,7 +22,6 @@ import json
 
 # Appends the newest event to the df
 def add_most_recent_event():
-    print("TEST")
     sql = """
         SELECT
             *
@@ -33,7 +33,6 @@ def add_most_recent_event():
     result = clickhouse_client.query(combined_table_sql + sql)
     new_row = pd.DataFrame(data=result.result_rows, columns=result.column_names)
     df.append(new_row.iloc[0], ignore_index=True)
-    print("TEST")
     update_categories_with_new_event(new_row.iloc[0])
     add_keymetric_for_new_session(df, new_row.iloc[0]['session_id'])
     if('trace_id' in new_row.columns and new_row.iloc[0]['trace_id'] is not None):
