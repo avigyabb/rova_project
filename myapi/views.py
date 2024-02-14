@@ -18,12 +18,28 @@ from categories.views import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.contrib.auth import authenticate
 import json
 
 from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from rest_framework import status
 
-user = authenticate(username='skadaba', password='harvesttothemoon')
+#user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
+
+@csrf_exempt
+@require_POST
+def login_user(request):
+    data = json.loads(request.body)
+    user = authenticate(request, username=data['username'], password=data['password'])
+    if user is not None:
+        login(request, user)
+        print("TEST", user)
+        print("TEST", request.session.session_key)
+        return JsonResponse({'message': "Login successful", "status":status.HTTP_200_OK})
+    else:
+        # Return an 'invalid login' error message.
+        return JsonResponse({"error": 'Invalid Credentials', "status":status.HTTP_401_UNAUTHORIZED})
 
 # Appends the newest event to the df
 def add_most_recent_event():
@@ -48,7 +64,6 @@ def add_most_recent_event():
 def track_event(request):
     try:
         data = json.loads(request.body)
-        print(data)
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
         # print(data)  # Example to print the data received
@@ -265,15 +280,9 @@ def get_options(request):
     options = options_clickhouse_client.query(sql_query).result_rows
     return Response({"options": options})
 
-
-# @api_view(["GET"])
-# def get_user_categories(request):
-#     categories = get_categories()
-#     return Response({"categories": categories})
-
 @api_view(["GET"])
 def get_user_keymetrics(request):
-    keymetrics = get_keymetrics(user)
+    keymetrics = get_keymetrics(request.user)
     return Response({"keymetrics": keymetrics})
 
 
@@ -297,35 +306,21 @@ def get_similar_traces(request):
     similar = find_similar(trace_id, traces_df)
     return Response({"similar_traces": similar})
 
-
-# @api_view(["POST"])
-# def post_user_category(request):
-#     user_id = request.data.get("name")
-#     category = request.data.get("description")
-#     add_category(user_id, category)
-#     return Response({"message": "Category added successfully"})
-
-@api_view(["POST"])
+@csrf_exempt
+@require_POST
 def post_user_keymetric(request):
-    user_id = request.data.get("name")
-    category = request.data.get("description")
-    importance = request.data.get("importance")
-    period = request.data.get('period')
-    print("USER: ", user)
-    add_keymetric(user, user_id, category, importance, period)
-    return Response({"message": "Category added successfully"})
-
-
-# @api_view(["GET"])
-# def delete_user_category(request):
-#     index = request.GET.get("index")
-#     delete_category(index)
-#     return Response({"message": "Category deleted successfully"})
+    data = json.loads(request.body)
+    user_id = data.get("name")
+    category = data.get("description")
+    importance = data.get("importance")
+    period = data.get('period')
+    add_keymetric(request.user, user_id, category, importance, period)
+    return JsonResponse({"message": "Category added successfully"})
 
 @api_view(["GET"])
 def delete_user_keymetric(request):
     index = request.GET.get("index")
-    delete_keymetric(user, index)
+    delete_keymetric(request.user, index)
     return Response({"message": "Category deleted successfully"})
 
 
@@ -337,7 +332,7 @@ def get_filtered_sessions(request):
     excluded_signals = json.loads(request.GET.get("excluded_signals"))
     engagement_time = request.GET.get("engagement_time")
     
-    session_ids = get_session_ids_given_filters(user, included_categories, excluded_categories,
+    session_ids = get_session_ids_given_filters(request.user, included_categories, excluded_categories,
                                                 included_signals, excluded_signals,
                                                 engagement_time)
     if session_ids == []:
@@ -346,5 +341,5 @@ def get_filtered_sessions(request):
 
 @api_view(["GET"])
 def get_surfaced_sessions(request):
-    sessions_obj = score_and_return_sessions(user)
+    sessions_obj = score_and_return_sessions(request.user)
     return Response({"sessions" : sessions_obj})

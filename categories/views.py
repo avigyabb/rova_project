@@ -11,8 +11,11 @@ from myapi.consts import *
 from myapi.traces import *
 from django.contrib.auth import authenticate
 from myapi.scoring import *
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-user = authenticate(username='skadaba', password='harvesttothemoon')
 # Embed the category description and add all session ids
 def assign_session_ids_to_category(user, category_name, category_description, category, similarity_threshold=0.74):
     # Embed the category description
@@ -62,15 +65,15 @@ def autosuggest_categories(user):
             
 @api_view(["GET"])
 def category_list(request):
-    UserCategory = Category.objects.filter(user=user)
+    UserCategory = Category.objects.filter(user_id=request.user)
     categories = UserCategory.all().order_by("date")
     data = serializers.serialize("json", categories)
     data = json.loads(data)
     for index, category in enumerate(data):
-        category["fields"]["volume"] = volume_for_category(user, category['pk'])
+        category["fields"]["volume"] = volume_for_category(request.user, category['pk'])
         category["fields"]["trend"] = "-"  # not done
         category["fields"]["path"] = "-"  # not done
-    autosuggest_categories(user)
+    autosuggest_categories(request.user)
     return Response(data, content_type="application/json")
 
 
@@ -79,24 +82,26 @@ def volume_for_category(user, category):
     return UserSessionCategory.filter(category=category).count()
 
 
-@api_view(["POST"])
+@csrf_exempt
+@require_POST
 def post_user_category(request):
-    name = request.data.get("name")
-    description = request.data.get("description")
-    new_category = Category(name=name, description=description, user=user)
+    data = json.loads(request.body)
+    name = data.get("name")
+    description = data.get("description")
+    new_category = Category(user=request.user, name=name, description=description)
     new_category.save()
-    assign_session_ids_to_category(user, name, description, new_category)
-    return Response({"success": "Category created successfully."})
+    assign_session_ids_to_category(request.user, name, description, new_category)
+    return JsonResponse({"success": "Category created successfully."})
 
 
 @api_view(["GET"])
 def delete_user_category(request):
     index = request.GET.get("index")
-    UserCategory = Category.objects.filter(user=user)
+    UserCategory = Category.objects.filter(user=request.user)
     category_to_delete = UserCategory.get(pk=index)
     # remove the category from the llm_df
     # llm_df = llm_df.drop(columns=[category_to_delete.name])
-    delete_category_sessions(user, index)
+    delete_category_sessions(request.user, index)
     category_to_delete.delete()
     return Response({"message": "Category deleted successfully"})
 
@@ -137,6 +142,7 @@ def filter_session_ids_given_categories(user, session_ids, included_categories, 
 
 @api_view(["GET"])
 def get_categories_ranking(request):
+    user = request.user
     UserSessionCategory = SessionCategory.objects.filter(user=user)
     UserCategory = Category.objects.filter(user=user)
     _, session_score_dict, session_score_names = score_sessions_based_on_kpis(user, 1)

@@ -2,6 +2,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path("login-user/", views.login_user, name="login_user"),
     path("hello-world/", views.hello_world, name="hello_world"),
     path("get-sessions/", views.get_sessions, name="get_sessions"),
     path("get-user/", views.get_user, name="get_user"),
@@ -16,14 +17,9 @@ urlpatterns = [
     path("get-options/", views.get_options, name="get_options"),
     path("get-summary/", views.get_summary, name="get_summary"),
     path("track/", views.track_event, name="track_event"),
-    # path("get-user-categories/", views.get_user_categories, name="get_user_categories"),
     path("get-user-keymetrics/", views.get_user_keymetrics, name="get_user_keymetrics"),
     path("get-similar-traces/", views.get_similar_traces, name="get_similar_traces"),
-    path("post-user-category/", views.post_user_category, name="post_user_category"),
     path("post-user-keymetric/", views.post_user_keymetric, name="post_user_keymetric"),
-    path(
-        "delete-user-category/", views.delete_user_category, name="delete_user_category"
-    ),
     path(
         "delete-user-keymetric/",
         views.delete_user_keymetric,

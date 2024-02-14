@@ -34,13 +34,14 @@ def get_keymetrics_overview(user):
 def add_keymetric(user, name, description, importance, period=None):
     UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
     if(not UserListOfKPIs.filter(name=name).exists()):
-        new_keymetric = ListOfKPIs(name=name, description=description, importance=importance, user=user, summary="")
+        new_keymetric = ListOfKPIs(user=user, name=name, description=description, importance=importance, summary="")
+        print("USER", user)
         new_keymetric.save()
         steps = name.split(',')
         formatted = [s.strip() for s in steps]
 
         session_to_keymetric = find_sessions_with_kpis(df, formatted, True, period)
-        keymetric_objs_to_add = [SessionsToKPIs(session_id=session, user=user, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
+        keymetric_objs_to_add = [SessionsToKPIs(user=user, session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
         SessionsToKPIs.objects.bulk_create(keymetric_objs_to_add)
 
         keymetrics = get_keymetrics_overview(user)
@@ -68,7 +69,7 @@ def add_keymetric_for_new_session(user, session_id):
         steps = [s.strip() for s in raw_names]
         belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, global_period, session_id=session_id)
         if(belongs_to_keymetric and not UserSessionsToKPIs.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
-            SessionsToKPIs.objects.create(session_id=session_id, user=user, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
+            SessionsToKPIs.objects.create( user=user, session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
 
 # Get all keymetrics
 def get_keymetrics(user):
