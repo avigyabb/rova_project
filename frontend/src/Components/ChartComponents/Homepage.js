@@ -46,6 +46,7 @@ const Homepage = ({ sessionIds }) => {
   const [listVolume, setListVolume] = useState([]);
   const [listScoring, setListScoring] = useState([]);
   const [listLoading, setListLoading] = useState(false);
+  const [categoryIds, setCategoryIds] = useState([]);
 
   useEffect(() => {
     // Mocking a fetch sessions details function
@@ -67,6 +68,7 @@ const Homepage = ({ sessionIds }) => {
         setList(categories_ranking.data.category_score);
         setListVolume(categories_ranking.data.category_volume);
         setListScoring(categories_ranking.data.category_score_names);
+        setCategoryIds(categories_ranking.data.all_user_categories);
         console.log(categories_ranking.data);
       } catch (error) {
         console.error("Failed to fetch list: ", error);
@@ -79,24 +81,31 @@ const Homepage = ({ sessionIds }) => {
   }, []);
 
   function getScoreColorHSL(score) {
-    // Ensure score is between 0 and 100
+    if (score < 0) {
+      return '#A3A3A3';
+    }
     const cappedScore = Math.max(0, Math.min(score, 100));
-    // Hue from red (0) to green (120), but you can adjust the range for more subdued hues
     const hue = (cappedScore / 100) * 120;
-    // Lower lightness for a darker color
-    const lightness = 40; // Range from 30% to 50% instead of up to 100%
+    const lightness = 40;
     return `hsl(${hue}, 100%, ${lightness}%)`;
   }
 
-  const TableRow = ({ rank, category_name, score, volume, chips }) => {
+  const navigate = useNavigate();
+
+
+  const TableRow = ({ rank, category_name, score, volume, chips, category_id }) => {
     const scoreColor = getScoreColorHSL(score);
 
+    const handleRowClick = (category_id) => {
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/category-sessions`, { state: { category_id } });
+    }
+
     return (
-      <tr>
+      <tr onClick={() => handleRowClick(category_id)}>
         <td>{rank}</td>
         <td style={{ color: scoreColor }}>
           <div className='score'>
-            <p>{score}</p>
+            <p>{score >= 0 ? score : '-'}</p>
           </div>
         </td>
         <td><p className="inline-block categ-name">{category_name}</p></td>
@@ -123,8 +132,8 @@ const Homepage = ({ sessionIds }) => {
           </tr>
         </thead>
         <tbody>
-          {Object.keys(list).map((key, index) => (
-            <TableRow category_name={key} score={list[key]} rank={index + 1} volume={listVolume[key]} chips={listScoring[key]}/>
+          {Object.keys(list).map((key, index) => ( // key is the category name
+            <TableRow category_name={key} score={list[key]} rank={index + 1} volume={listVolume[key]} chips={listScoring[key]} category_id={categoryIds[key]}/>
           ))}
         </tbody>
       </table>

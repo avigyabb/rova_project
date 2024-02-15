@@ -9,7 +9,8 @@ import Sessions from "./Components/Sessions";
 import Paths from './Components/Paths';
 import Hero from './Components/Website/Hero';
 import Login from './Components/Website/Login';
-import axios from "axios";
+import CategorySessions from "./Components/CategorySessions";
+import axios from 'axios';
 
 const customTheme = createTheme({
   typography: {
@@ -29,6 +30,7 @@ const AppContent = () => {
       <div style={{ height: '100vh' }}>
         {shouldShowNavbar && <Navbar />}
         <Routes>
+          <Route path={`${process.env.REACT_APP_AUTH_HEADER}/category-sessions`} element={<CategorySessions />} />
           <Route exact path={`${process.env.REACT_APP_AUTH_HEADER}`} element={<Flows />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/charts`} element={<Charts />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/trace/:userId`} element={<EventsTrace/>}/>

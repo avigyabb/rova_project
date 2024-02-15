@@ -17,8 +17,10 @@ const Category = () => {
     const fetchData = async () =>  {
       setIsLoading(true);
         try {
+          // const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
           const categories_response = await axios.get(process.env.REACT_APP_API_URL + 'categories/get-user-categories/');
           console.log(categories_response.data);
+          // setCategoryList(response.data.categories);
           setCategoryList(categories_response.data);
         } catch (error) {
           console.error(error);
@@ -217,9 +219,9 @@ const Category = () => {
       };
 
       return (
-        <div className='charts-content'>
+        <div className='charts-content' style={{}}>
           {/* something wrong with below style */}
-          <div className='flex' style={{ width: "80%"}}>
+          <div className='flex' style={{ width: "81%" }}>
             <p className='text-4xl mb-7'>Topic Insights 🗂️</p>
             {!showNewCategoryRow && !editMode ? (
               <>
@@ -230,7 +232,7 @@ const Category = () => {
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
-          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "75%"}}>
+          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "100%"}}>
             <TopicTable />
           </div>
           <div className='flex mt-10'>

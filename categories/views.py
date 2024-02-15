@@ -10,6 +10,8 @@ from myapi.callgpt import *
 from myapi.consts import *
 from myapi.traces import *
 from myapi.scoring import *
+from myapi.sessions import *
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -52,7 +54,7 @@ def autosuggest_categories(user):
             if(count < 2):
                 prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
                 answer = query_gpt(client, prompt, json_output=True)
-                modded_name = answer['name'] + ' 🤖'
+                modded_name = '🤖 ' + answer['name']
                 new_category = Category(user=user, name=modded_name, description=answer['description'])
                 new_category.save()
                 assign_session_ids_to_category(user, modded_name, answer['description'], new_category)
@@ -141,6 +143,8 @@ def get_categories_ranking(request):
     user = request.user
     UserSessionCategory = SessionCategory.objects.filter(user=user)
     UserCategory = Category.objects.filter(user=user)
+    categories_dict = {}
+    all_user_categories = UserCategory.all()
     _, session_score_dict, session_score_names = score_sessions_based_on_kpis(user, 1)
     category_count = defaultdict(int)
     category_score = defaultdict(int)
@@ -148,21 +152,44 @@ def get_categories_ranking(request):
     category_score_names = defaultdict(set) # eventually we could order this by scores that have greatest freq
 
     for row in UserSessionCategory.all():
+        category_name = UserCategory.get(pk=row.category_id).name
         if row.session_id in session_score_dict:
-            category_name = UserCategory.get(pk=row.category_id).name
             category_count[category_name] += 1
             category_score[category_name] += session_score_dict[row.session_id]
             category_score_names[category_name] = category_score_names[category_name].union(session_score_names[row.session_id])
-            if row.session_id not in category_volume:
+            if row.session_id not in category_volume: # just making sure we don't call this multiple times for no reason
                 category_volume[category_name] = volume_for_category(user, row.category_id)
-    
+
+    # get averages for scores for each category
     for category_name in category_count:
         category_score[category_name] = round(category_score[category_name] / category_count[category_name])
+
+    # put down score for categories that have no sessions with KPIs
+    for category in all_user_categories:
+        categories_dict[category.name] = category.id
+        if category.name not in category_score:
+            category_score[category.name] = -1
+            category_score_names[category.name] = set()
+            if category.id not in category_volume: # just making sure we don't call this multiple times for no reason
+                category_volume[category.name] = volume_for_category(user, category.id)
 
     category_score = {k: v for k, v in sorted(category_score.items(), key=lambda item: item[1], reverse=True)}
     return Response({
         "category_score": category_score, 
         "category_volume": category_volume,
-        "category_score_names": category_score_names
+        "category_score_names": category_score_names,
+        "all_user_categories": categories_dict
     })
+
+@api_view(["GET"])
+def get_category_sessions(request):
+    print("loc7")
+    category_id = int(request.GET.get("category_id"))
+    UserSessionCategory = SessionCategory.objects.filter(user=request.user) # make category id unique accross users do not need this line
+    session_ids_for_category = UserSessionCategory.filter(category=category_id)
+    print(list(session_ids_for_category.values_list('session_id', flat=True)))
+    
+    session_data = get_session_data_from_ids(clickhouse_client, list(session_ids_for_category.values_list('session_id', flat=True)))
+
+    return Response({"sessions": session_data})
         

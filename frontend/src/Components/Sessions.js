@@ -114,8 +114,10 @@ const Sessions = () => {
 
   useEffect(() => {
     const getCategoryOptions = async() => {
+      console.log("hello")
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "categories/get-user-categories/")
+        console.log(response)
         if (response.data) {
           console.log(response.data);
           setCategoryOptionsArrayData(response.data.map((category) => [category.fields.name]))
