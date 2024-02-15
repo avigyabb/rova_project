@@ -74,9 +74,9 @@ def category_list(request):
     return Response(data, content_type="application/json")
 
 
-def volume_for_category(user, category):
+def volume_for_category(user, category_id):
     UserSessionCategory = SessionCategory.objects.filter(user=user)
-    return UserSessionCategory.filter(category=category).count()
+    return UserSessionCategory.filter(category_id=category_id).count()
 
 
 @csrf_exempt
