@@ -97,11 +97,11 @@ const Homepage = ({ sessionIds }) => {
     const scoreColor = getScoreColorHSL(score);
 
     const handleRowClick = (category_id) => {
-      navigate(`${process.env.REACT_APP_AUTH_HEADER}/category-sessions`, { state: { category_id } });
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`, { state: { category_name } });
     }
 
     return (
-      <tr onClick={() => handleRowClick(category_id)}>
+      <tr onClick={() => handleRowClick(category_name)}>
         <td>{rank}</td>
         <td style={{ color: scoreColor }}>
           <div className='score'>
