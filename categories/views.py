@@ -124,7 +124,7 @@ def filter_session_ids_given_categories(user, session_ids, included_categories, 
         excluded_category_ids.append(UserCategory.get(name = category))
     filtered_session_ids = []
     for session_id in session_ids:
-        session_category_ids = [session_category.category_id for session_category in UserSessionCategory.filter(session_id = session_id)]
+        session_category_ids = [session_category.category for session_category in UserSessionCategory.filter(session_id = session_id)]
         include = False if len (included_category_ids) > 0 else True
         for session_category_id in session_category_ids:
             if session_category_id in excluded_category_ids:
