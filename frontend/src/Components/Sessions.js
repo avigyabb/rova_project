@@ -160,13 +160,13 @@ const Sessions = () => {
             <div className='filters mb-6'> 
               <p className='mb-2'> Topics: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} />
-                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} />
+                <SessionFiltersNew label="Topics Include:" setFilters = {setIncludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} filters = {includedCategories}/>
+                <SessionFiltersNew label="Topics Exclude:" setFilters = {setExcludedCategories} options = {categoryOptionsArray} isLoading = {isLoading} filters = {excludedCategories}/>
               </div>
               <p className='mt-3 mb-2'> Events: </p>
               <div className='flex justify-between'>
-                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading} />
-                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading} />
+                <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArray} isLoading = {isLoading} filters = {includedSignals}/>
+                <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArray} isLoading = {isLoading} filters = {excludedSignals}/>
               </div>
               <p className='mt-3 mb-4'> Engagement: </p>
               <div>
