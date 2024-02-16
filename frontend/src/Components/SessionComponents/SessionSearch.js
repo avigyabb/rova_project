@@ -54,7 +54,7 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
   
   // Display the entered query below the search bar
   return (
-    <div className="search mb-4">
+    <div className="search">
         <TextField
           style={{ borderRadius: '0px', zIndex: 100 }}
           fullWidth
@@ -70,19 +70,16 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
             endAdornment: (
               <InputAdornment position="end">
                 {/* <IconButton onClick={toggleFilters}> */}
-                <IconButton>
+                <IconButton onClick={toggleFilters}>
                   <FilterListIcon />
                 </IconButton>
               </InputAdornment>
             ),
           }}
         />
-        {showFilters && (
-        <SessionFilters
-          selectedFilters={selectedFilters}
-          setSelectedFilters={setSelectedFilters}
-        />
-      )}
+        {/* {showFilters && (
+          <SessionFilters />
+        )} */}
     </div>
   );
 };

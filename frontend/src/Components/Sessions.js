@@ -48,9 +48,36 @@ const Sessions = () => {
 
   return (
     <div className="flex flex-col items-center h-screen">
-      <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading} setSqlBox={setSqlBox}/>
       <div className='sessions-content flex'>
         <div className='left-col'>
+          <SessionSearch setSessions={setSessions} setIsLoading={setIsLoading} setSqlBox={setSqlBox}/>
+          {(!isLoading && Object.keys(sessions).length > 0) && (
+            <div className='sessions-results'>
+              <h1> {Object.keys(sessions).length} results </h1>
+              {sessions.map(({ session_id, user_id, earliest_timestamp }, index) => (
+                <SessionCard 
+                  key={session_id} 
+                  sessionId={session_id} // Pass the session count here
+                  userId={user_id}
+                  timestamp={earliest_timestamp}
+                  index={index}
+                  sessionList={sessions}
+                />
+              ))}
+            </div>
+          )}
+          {isLoading && (
+            <div className="flex justify-center items-center">
+              <CircularProgress style={{ color: '#FFA189' }}/>
+            </div>
+          )}
+          {!isLoading && Object.keys(sessions).length == 0 && (
+            <div className="flex justify-center items-center">
+              No Sessions Found. 
+            </div>
+          )}
+        </div>
+        <div className='right-col'>
           <SessionsAnalytics 
             category_name={category_name}
             setSessions={setSessions}
@@ -61,31 +88,6 @@ const Sessions = () => {
             handleSqlQuery={handleSqlQuery}
           />
         </div>
-        {(!isLoading && Object.keys(sessions).length > 0) && (
-          <div className='right-col mt-2'>
-            <h1> {Object.keys(sessions).length} results </h1>
-            {sessions.map(({ session_id, user_id, earliest_timestamp }, index) => (
-              <SessionCard 
-                key={session_id} 
-                sessionId={session_id} // Pass the session count here
-                userId={user_id}
-                timestamp={earliest_timestamp}
-                index={index}
-                sessionList={sessions}
-              />
-            ))}
-          </div>
-        )}
-        {isLoading && (
-          <div className="right-col flex justify-center items-center">
-            <CircularProgress style={{ color: '#FFA189' }}/>
-          </div>
-        )}
-        {!isLoading && Object.keys(sessions).length == 0 && (
-          <div className="right-col flex justify-center items-center">
-            No Sessions Found. 
-          </div>
-        )}
       </div>
     </div>
   );

@@ -331,6 +331,7 @@ def get_filtered_sessions(request):
     session_ids = get_session_ids_given_filters(request.user, included_categories, excluded_categories,
                                                 included_signals, excluded_signals,
                                                 engagement_time)
+
     if session_ids == []:
         return Response({"sessions" : {}})
     return Response({"sessions" : get_session_data_from_ids(clickhouse_client, session_ids)})

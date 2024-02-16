@@ -26,7 +26,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-800" style={{backgroundColor: '#00161C'}}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-800" style={{backgroundColor: '#001B2B'}}>
       <form onSubmit={handleLogin} className="w-full max-w-sm">
         <div className="mb-4">
           <label className="block text-white text-sm font-bold mb-2" htmlFor="username">
