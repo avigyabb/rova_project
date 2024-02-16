@@ -6,6 +6,9 @@ class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
+    auto_generated = models.BooleanField(default=True)
+    threshold = models.FloatField(default=1) # Threshold for user-defined categories
+    cluster_id = models.IntegerField(default=-2) # Cluster ID for auto-suggested category
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

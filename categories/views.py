@@ -35,7 +35,7 @@ def assign_session_ids_to_category(user, cluster_id, category):
 def create_new_category(user, cluster_id):
     # Add category to Category DB
     topic = generate_topic_name(cluster_id)
-    new_category = Category(user=user, name='🤖 ' + topic['name'], description=topic['description'])
+    new_category = Category(user=user, name='🤖 ' + topic['name'], description=topic['description'], auto_generated=True, cluster_id=cluster_id)
     new_category.save()
 
     # Add session IDs in the category to SessionCategory DB
@@ -52,19 +52,39 @@ def initial_categories_cluster(user):
     for cluster_id in llm_df['cluster_label'].unique():
         create_new_category(user, cluster_id)
 
-# Embed the category description and add all session ids
-def assign_session_ids_to_user_defined_category(user, category_name, category_description, category, similarity_threshold=0.74):
-    # Embed the category description
+# Returns true if the question belongs to the topic based on GPT
+def question_in_topic(topic, question):
+  return "Yes" in query_gpt(client, prompt_question_to_topic(topic, question))
+
+# Calculates the threshold for a category using GPT
+def calculate_threshold(category_name, category_description):
+  # TODO: make this algorithm better
+  sorted_df = llm_df.sort_values(by=category_name, ascending=False)
+  sorted_df.reset_index(drop=True, inplace=True)
+  index = 0
+  belongs_to_topic = question_in_topic(category_description, sorted_df["event_text"][index])
+  while belongs_to_topic:
+    index += 3
+    belongs_to_topic = question_in_topic(category_description, sorted_df["event_text"][index])
+  return sorted_df[category_name][index]
+
+# Add the category to Category DB and all sessions to SessionCategory DB
+def add_user_defined_category(user, category_name, category_description):
+    # Embed the category description and transform into lower dimension
     category_embedding = np.array(embeddings_model.embed_documents([category_description]))[0]
     category_embedding = category_embedding.reshape(1, -1)
     category_embedding = umap_llm_model.transform(category_embedding)
 
     # Find similarity between the category description and the llm events
     llm_df[category_name] = cosine_similarity(category_embedding, list(llm_df["embeds"])).flatten()
-    llm_df[category_name] = llm_df[category_name] > similarity_threshold
+    
+    # Find the threshold for the category
+    threshold = calculate_threshold(category_name, category_description)
+    category = Category(user=user, name=category_name, description=category_description, auto_generated=False, threshold=threshold)
+    category.save()
 
     # Find all session ids that have a similarity above the threshold
-    unique_session_ids = llm_df[llm_df[category_name]]["session_id"].unique()
+    unique_session_ids = llm_df[llm_df[category_name] > threshold]["session_id"].unique()
     for session_id in unique_session_ids:
         session = SessionCategory(user=user, category=category, session_id=session_id)
         session.save()
@@ -99,9 +119,7 @@ def post_user_category(request):
     data = json.loads(request.body)
     name = data.get("name")
     description = data.get("description")
-    new_category = Category(user=request.user, name=name, description=description)
-    new_category.save()
-    assign_session_ids_to_user_defined_category(request.user, name, description, new_category)
+    add_user_defined_category(request.user, name, description)
     return JsonResponse({"success": "Category created successfully."})
 
 

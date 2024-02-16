@@ -39,6 +39,15 @@ def prompt_to_generate_topics(questions):
     msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "\n ".join(questions)}]                    
     return msg
 
+# Prompt to determine if a question belongs to a topic
+def prompt_question_to_topic(topic, question):
+    system_prompt = "You will be given a topic that describes a set of questions and your job is to determine if a question belongs to that topic. \
+                     Your classification should be either Yes or No."
+    user_prompt = "Topic: " + topic + "\nQuestion: " + question + "Classification: "
+
+    msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]                    
+    return msg
+
 # # Builds prompt to categorize questions
 # def build_topics_prompt(samples):
 #     system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
