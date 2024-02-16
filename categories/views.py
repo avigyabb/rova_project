@@ -16,11 +16,48 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+# Generates the name and description from the HDB cluster
+def generate_topic_name(cluster_id):
+  topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
+  questions = topic_df['event_text'].sample(n=5).tolist()
+  msg = prompt_to_generate_topics(questions)
+  return query_gpt(client, msg, json_output=True)
+
+# Adds all session ids in a cluster to the SessionCategory DB
+def assign_session_ids_to_category(user, cluster_id, category):
+    topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
+    session_ids = list(topic_df['session_id'].unique())
+    for session_id in session_ids:
+        new_session_category = SessionCategory(user=user, category=category, session_id=session_id)
+        new_session_category.save()
+
+# Adds new clusters to the database
+def create_new_category(user, cluster_id):
+    # Add category to Category DB
+    topic = generate_topic_name(cluster_id)
+    new_category = Category(user=user, name='🤖 ' + topic['name'], description=topic['description'])
+    new_category.save()
+
+    # Add session IDs in the category to SessionCategory DB
+    assign_session_ids_to_category(user, cluster_id, new_category)
+
+# Generates initial list of clusters from questions
+def initial_categories_cluster(user):
+    # Fit clustering model to the initial data
+    X = np.array(llm_df['embeds'].tolist()) 
+    llm_clusterer.fit(X)
+    llm_df['cluster_label'] = llm_clusterer.labels_
+
+    # Create new categories
+    for cluster_id in llm_df['cluster_label'].unique():
+        create_new_category(user, cluster_id)
+
 # Embed the category description and add all session ids
-def assign_session_ids_to_category(user, category_name, category_description, category, similarity_threshold=0.74):
+def assign_session_ids_to_user_defined_category(user, category_name, category_description, category, similarity_threshold=0.74):
     # Embed the category description
     category_embedding = np.array(embeddings_model.embed_documents([category_description]))[0]
     category_embedding = category_embedding.reshape(1, -1)
+    category_embedding = umap_llm_model.transform(category_embedding)
 
     # Find similarity between the category description and the llm events
     llm_df[category_name] = cosine_similarity(category_embedding, list(llm_df["embeds"])).flatten()
@@ -33,37 +70,13 @@ def assign_session_ids_to_category(user, category_name, category_description, ca
         session.save()
     return unique_session_ids
 
-def autosuggest_categories(user):
-    UserCategory = Category.objects.filter(user=user)
-    if(UserCategory.count() <= 0):
-        sessions_df = embed_all_sessions(df, embeddings_model)
-        embeddings = np.array(sessions_df["embeds"].tolist()) 
-        # Clustering with K-Means
-        kmeans = KMeans(n_clusters=10, random_state=0).fit(embeddings)
-        # Assign cluster labels to DataFrame
-        sessions_df['cluster_label'] = kmeans.labels_
-        # Calculate the distance between each point and the centroid of its cluster
-        centroids = kmeans.cluster_centers_
-        distances = cdist(embeddings, centroids, 'euclidean')
-        # The distance for each point to its cluster centroid
-        sessions_df['distance_to_centroid'] = np.min(distances, axis=1)
-        # Find the closest row to each cluster's centroid
-        closest_rows = sessions_df.loc[sessions_df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
-        count = 0
-        for row in closest_rows.iterrows():
-            if(count < 2):
-                prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
-                answer = query_gpt(client, prompt, json_output=True)
-                modded_name = '🤖 ' + answer['name']
-                new_category = Category(user=user, name=modded_name, description=answer['description'])
-                new_category.save()
-                assign_session_ids_to_category(user, modded_name, answer['description'], new_category)
-                count += 1
-            else:
-                break
-            
+
 @api_view(["GET"])
 def category_list(request):
+    # if Category DB is empty, create initial categories
+    if not Category.objects.filter(user=request.user).exists():
+        initial_categories_cluster(request.user)
+
     UserCategory = Category.objects.filter(user=request.user)
     categories = UserCategory.all().order_by("date")
     data = serializers.serialize("json", categories)
@@ -72,7 +85,6 @@ def category_list(request):
         category["fields"]["volume"] = volume_for_category(request.user, category['pk'])
         category["fields"]["trend"] = "-"  # not done
         category["fields"]["path"] = "-"  # not done
-    autosuggest_categories(request.user)
     return Response(data, content_type="application/json")
 
 
@@ -89,7 +101,7 @@ def post_user_category(request):
     description = data.get("description")
     new_category = Category(user=request.user, name=name, description=description)
     new_category.save()
-    assign_session_ids_to_category(request.user, name, description, new_category)
+    assign_session_ids_to_user_defined_category(request.user, name, description, new_category)
     return JsonResponse({"success": "Category created successfully."})
 
 
@@ -107,7 +119,6 @@ def delete_user_category(request):
 
 def delete_category_sessions(user, category):
     SessionCategory.objects.filter(user=user, category=category).delete()
-    autosuggest_categories(user)
 
 # Embeds the new event and assigns to relevant categories
 def update_categories_with_new_event(row):

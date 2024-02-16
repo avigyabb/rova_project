@@ -8,7 +8,9 @@ import os
 from .traces import embed_all_traces
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
+from umap import UMAP
 import json
+import hdbscan
 
 ## Constants ##
 embeddings_model = OpenAIEmbeddings(
@@ -109,18 +111,26 @@ def load_df_once():
 
 df = load_df_once()
 
+# Dimension reduction, clustering models for llm events
+umap_llm_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.1, metric='cosine')
+llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=20, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+
 # Creates embeddings for all llm events
 def embed_llm_events():
     # Grab the llm events
     if len(df) == 0:
         return []
     llm_df = df[df['event_type'] == 'llm']
+
+    # TODO: remove the noise from the event_text 
     llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
                         '\n Input: ' + llm_df['input_content'] + \
                         '\n Output: ' + llm_df['output_content']
 
     embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
-    llm_df['embeds'] = [np.array(e) for e in embeds]
+    umap_llm_model.fit(embeds)
+    embeddings_5d = umap_llm_model.transform(embeds)
+    llm_df['embeds'] = [e for e in embeddings_5d]
     return llm_df
 
 # Store the embeddings for all llm_events

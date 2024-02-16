@@ -29,26 +29,35 @@ def query_gpt(
     else:
         return response.choices[0].message.content
 
+# Prompt to generate topics + descriptions
+def prompt_to_generate_topics(questions):
+    system_prompt = "You are a product analyst observing trends in user questions to a chatbot. Observe the following list of questions and produce a \
+                        a category_name for the questions that identifies the topic of the user's question in 3 words or less and 2) a description of this category. \
+                        Your output should be a JSON formatted object of the form \
+                        {'name': 'category_name', 'description': 'category_description'}."
 
-# Builds prompt to categorize questions
-def build_topics_prompt(samples):
-    system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
-                     You want to create a holstic description of the cluster given it's samples. \n \
-                     Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
-                     that accurately summarizes the intent of the user in this platform. \n \
-                     Return your result as a JSON object with the key being the provided Category number and \
-                     the value being the summary description you create for that category \n \
-                     For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
+    msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "\n ".join(questions)}]                    
+    return msg
 
-    user_prompt = ""
-    for category in samples.keys():
-        sample = samples[category]
-        user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ]
-    return messages
+# # Builds prompt to categorize questions
+# def build_topics_prompt(samples):
+#     system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
+#                      You want to create a holstic description of the cluster given it's samples. \n \
+#                      Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
+#                      that accurately summarizes the intent of the user in this platform. \n \
+#                      Return your result as a JSON object with the key being the provided Category number and \
+#                      the value being the summary description you create for that category \n \
+#                      For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
+
+#     user_prompt = ""
+#     for category in samples.keys():
+#         sample = samples[category]
+#         user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
+#     messages = [
+#         {"role": "system", "content": system_prompt},
+#         {"role": "user", "content": user_prompt},
+#     ]
+#     return messages
 
 
 # Builds prompt to generate sql query for sessions
@@ -122,7 +131,7 @@ def build_sessions_sql_prompt(user_query):
     ]
     return messages
 
-
+# TODO: write description
 def explain_trace(df, trace_id):
   
   filtered = df[df['trace_id'] == int(trace_id)]
@@ -136,7 +145,7 @@ def explain_trace(df, trace_id):
   
   return new_prompt 
 
-
+# TODO: write description
 def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     matches = [d for d in keymetrics if d.get("name") == kpi]
     if len(matches) > 0:
@@ -162,20 +171,12 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     return new_prompt
 
 
-def prompt_to_generate_clusters(sentence, flag=0):
-    if(flag):
-        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
-                        the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
-    else:
-        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
-                        a category_name for sessions that specifically identifies the topic of the user's question and 2) a description of this category. Your output should be a JSON formatted object of the form \
-                        {'name': 'category_name', 'description': 'category_description'}."
-    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
-    return msgs
-
+# Generates 1 sentence summary of the given session
 def explain_session(filtered):
     user_prompt_raw = parse_session(filtered)
-    msgs = prompt_to_generate_clusters(user_prompt_raw, 1)
+    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
+                        the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
+    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(user_prompt_raw)}]
     summary = query_gpt(client, msgs, json_output=False)
     return summary
 
