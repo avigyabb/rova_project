@@ -22,10 +22,11 @@ import pytz
 def generate_topic_name(cluster_id):
   llm_df=DataframeLoader.get_dataframe('llm_df')
   topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
-  questions = topic_df['event_text'].sample(n=5).tolist()
+  questions = topic_df['event_text'].tolist()
+  if len(topic_df) > 10:
+    questions = topic_df['event_text'].sample(n=10).tolist()
   msg = prompt_to_generate_clusters(questions)
   return query_gpt(client, msg, json_output=True)
-
 
 # Adds all session ids in a cluster to the SessionCategory DB
 def assign_session_ids_to_category(user, cluster_id, category):

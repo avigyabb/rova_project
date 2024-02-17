@@ -116,7 +116,11 @@ def load_df_once():
 
 # Dimension reduction, clustering models for llm events
 umap_llm_model = umap.UMAP(n_neighbors=15, n_components=10, min_dist=0.1, metric='cosine')
-llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=20, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=5, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+
+# Get question from event_text
+def get_question(input, output):
+    return input
 
 # Creates embeddings for all llm events
 def embed_llm_events(df):
@@ -124,12 +128,10 @@ def embed_llm_events(df):
     if len(df) == 0:
         return []
     llm_df = df[df['event_type'] == 'llm']
+    llm_df = llm_df[llm_df['event_name'] == 'classify_intent']
+    llm_df['event_text'] = get_question(llm_df['input_content'], llm_df['output_content'])
 
-    # TODO: remove the noise from the event_text 
-    llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
-                        '\n Input: ' + llm_df['input_content'] + \
-                        '\n Output: ' + llm_df['output_content']
-
+    # Embed the llm events and reduce dimension
     embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
     umap_llm_model.fit(embeds)
     embeddings_5d = umap_llm_model.transform(embeds)
