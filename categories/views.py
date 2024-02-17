@@ -23,6 +23,7 @@ def generate_topic_name(cluster_id):
   msg = prompt_to_generate_topics(questions)
   return query_gpt(client, msg, json_output=True)
 
+
 # Adds all session ids in a cluster to the SessionCategory DB
 def assign_session_ids_to_category(user, cluster_id, category):
     topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
@@ -30,6 +31,7 @@ def assign_session_ids_to_category(user, cluster_id, category):
     for session_id in session_ids:
         new_session_category = SessionCategory(user=user, category=category, session_id=session_id)
         new_session_category.save()
+
 
 # Adds new clusters to the database
 def create_new_category(user, cluster_id):
@@ -40,6 +42,7 @@ def create_new_category(user, cluster_id):
 
     # Add session IDs in the category to SessionCategory DB
     assign_session_ids_to_category(user, cluster_id, new_category)
+
 
 # Generates initial list of clusters from questions
 def initial_categories_cluster(user):
@@ -52,9 +55,11 @@ def initial_categories_cluster(user):
     for cluster_id in llm_df['cluster_label'].unique():
         create_new_category(user, cluster_id)
 
+
 # Returns true if the question belongs to the topic based on GPT
 def question_in_topic(topic, question):
   return "Yes" in query_gpt(client, prompt_question_to_topic(topic, question))
+
 
 # Calculates the threshold for a category using GPT
 def calculate_threshold(category_name, category_description):
@@ -68,18 +73,26 @@ def calculate_threshold(category_name, category_description):
     belongs_to_topic = question_in_topic(category_description, sorted_df["event_text"][index])
   return sorted_df[category_name][index]
 
+
+# Get the embedding from the text in reduced dimension
+def get_embedding_from_text(text):
+    embedding = np.array(embeddings_model.embed_documents([text]))[0]
+    embedding = embedding.reshape(1, -1)
+    return umap_llm_model.transform(embedding)
+
+
 # Add the category to Category DB and all sessions to SessionCategory DB
 def add_user_defined_category(user, category_name, category_description):
-    # Embed the category description and transform into lower dimension
-    category_embedding = np.array(embeddings_model.embed_documents([category_description]))[0]
-    category_embedding = category_embedding.reshape(1, -1)
-    category_embedding = umap_llm_model.transform(category_embedding)
+    # Get the embedding of the category description
+    category_embedding = get_embedding_from_text(category_description)
 
     # Find similarity between the category description and the llm events
     llm_df[category_name] = cosine_similarity(category_embedding, list(llm_df["embeds"])).flatten()
     
     # Find the threshold for the category
     threshold = calculate_threshold(category_name, category_description)
+
+    # Add the category to Category DB
     category = Category(user=user, name=category_name, description=category_description, auto_generated=False, threshold=threshold)
     category.save()
 
@@ -88,6 +101,8 @@ def add_user_defined_category(user, category_name, category_description):
     for session_id in unique_session_ids:
         session = SessionCategory(user=user, category=category, session_id=session_id)
         session.save()
+
+    # Return the list of session ids in the category
     return unique_session_ids
 
 
@@ -138,10 +153,39 @@ def delete_user_category(request):
 def delete_category_sessions(user, category):
     SessionCategory.objects.filter(user=user, category=category).delete()
 
+
 # Embeds the new event and assigns to relevant categories
 def update_categories_with_new_event(row):
-    # TODO
     pass
+    # if row["event_name"] == "llm":
+    #     row['event_text'] = 'Event name: ' + row['event_name'] + \
+    #                     '\n Input: ' + row['input_content'] + \
+    #                     '\n Output: ' + row['output_content']
+        
+    #     row['embeds'] = get_embedding_from_text(row['event_text'])
+
+    #     # Iterate over all categories in the Category DB
+    #     for category in Category.objects.filter(user=????):
+    #         if category.auto_generated:
+    #             # Determine if it belongs to a cluster
+    #             test_labels, _ = hdbscan.approximate_predict(llm_clusterer, row['embeds'].reshape(1, -1))
+    #             row['cluster_label'] = test_labels[0]
+
+    #             # Check if the session id belongs to the cluster in SessionCategory
+    #             if row['session_id'] not in SessionCategory.objects.filter(user=????, category=category).values_list('session_id', flat=True):
+    #                 session_category = SessionCategory(user=????, category=category, session_id=row['session_id'])
+    #                 session_category.save()
+    #         else:
+    #             # Determine if the event is in the category based on cosine similarity and threshold
+    #             category_embedding = get_embedding_from_text(category.description)
+    #             row[category.name] = cosine_similarity(category_embedding, row['embeds'].reshape(1, -1))[0][0]
+
+    #             # If belongs to the category, add the session id to the list
+    #             if row[category.name] > category.threshold:
+    #                 if row['session_id'] not in SessionCategory.objects.filter(user=????, category=category).values_list('session_id', flat=True):
+    #                     session_category = SessionCategory(user=????, category=category, session_id=row['session_id'])
+    #                     session_category.save()
+        # llm_df.append(row, ignore_index=True)
 
 
 def filter_session_ids_given_categories(user, session_ids, included_categories, excluded_categories):
@@ -166,6 +210,7 @@ def filter_session_ids_given_categories(user, session_ids, included_categories, 
         if include:
             filtered_session_ids.append(session_id)
     return filtered_session_ids
+
 
 @api_view(["GET"])
 def get_categories_ranking(request):
@@ -209,6 +254,7 @@ def get_categories_ranking(request):
         "category_score_names": category_score_names,
         "all_user_categories": categories_dict
     })
+
 
 @api_view(["GET"])
 def get_category_sessions(request):
