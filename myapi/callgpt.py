@@ -31,21 +31,20 @@ def query_gpt(
         return response.choices[0].message.content
 
 # Prompt to generate topics + descriptions
-def prompt_to_generate_topics(questions):
-    system_prompt = "You are a product analyst observing trends in user questions to a chatbot. Observe the following list of questions and produce a \
-                        a category_name for the questions that identifies the topic of the user's question in 3 words or less and 2) a description of this category. \
-                        Your output should be a JSON formatted object of the form \
-                        {'name': 'category_name', 'description': 'category_description'}."
+# def prompt_to_generate_topics(questions):
+#     system_prompt = "You are a product analyst observing trends in user questions to a chatbot. Observe the following list of questions and produce a \
+#                         a category_name for the questions that identifies the topic of the user's question in 3 words or less and 2) a description of this category. \
+#                         Your output should be a JSON formatted object of the form \
+#                         {'name': 'category_name', 'description': 'category_description'}."
 
-    msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "\n ".join(questions)}]                    
-    return msg
+#     msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "\n ".join(questions)}]                    
+#     return msg
 
 # Prompt to determine if a question belongs to a topic
 def prompt_question_to_topic(topic, question):
     system_prompt = "You will be given a topic that describes a set of questions and your job is to determine if a question belongs to that topic. \
                      Your classification should be either Yes or No."
     user_prompt = "Topic: " + topic + "\nQuestion: " + question + "Classification: "
-
     msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]                    
     return msg
 
@@ -185,8 +184,9 @@ def prompt_to_generate_clusters(sentence, flag=0, custom_eval=None):
         system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
                         the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
     elif(flag == 0):
-        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
-                        a category_name for sessions that specifically identifies the topic of the user's question and 2) a description of this category. Your output should be a JSON formatted object of the form \
+        system_prompt = "You are a product analyst observing trends in user questions to a chatbot. Observe the following list of questions and produce a \
+                        a category_name for the questions that identifies the topic of the user's question in 3 words or less and 2) a description of this category. \
+                        Your output should be a JSON formatted object of the form \
                         {'name': 'category_name', 'description': 'category_description'}."
     elif(flag == 2):
         system_prompt = "You are a product analyst observing a single session of a user using your product. Observe the following description of a session and score the \
