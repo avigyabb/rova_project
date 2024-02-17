@@ -23,7 +23,7 @@ def generate_topic_name(cluster_id):
   llm_df=DataframeLoader.get_dataframe('llm_df')
   topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
   questions = topic_df['event_text'].sample(n=5).tolist()
-  msg = prompt_to_generate_topics(questions)
+  msg = prompt_to_generate_clusters(questions)
   return query_gpt(client, msg, json_output=True)
 
 
@@ -69,7 +69,7 @@ def question_in_topic(topic, question):
 # Calculates the threshold for a category using GPT
 def calculate_threshold(category_name, category_description):
   # TODO: make this algorithm better
-  llm_df=DataframeLoader.get_dataframe('llm_df')
+  llm_df = DataframeLoader.get_dataframe('llm_df')
   sorted_df = llm_df.sort_values(by=category_name, ascending=False)
   sorted_df.reset_index(drop=True, inplace=True)
   index = 0
@@ -82,20 +82,19 @@ def calculate_threshold(category_name, category_description):
 
 # Get the embedding from the text in reduced dimension
 def get_embedding_from_text(text):
-    embedding = np.array(embeddings_model.embed_documents([text]))[0]
-    embedding = embedding.reshape(1, -1)
-    return umap_llm_model.transform(embedding)
+    llm_df = DataframeLoader.get_dataframe('llm_df')
+    embeds = np.array(embeddings_model.embed_documents([text]))
+    embeds_array = np.vstack(embeds)
+    return llm_df, umap_llm_model.transform(embeds_array)
 
 
 # Add the category to Category DB and all sessions to SessionCategory DB
 def add_user_defined_category(user, category_name, category_description):
     # Get the embedding of the category description
-    category_embedding = get_embedding_from_text(category_description)
+    llm_df, category_embedding = get_embedding_from_text(category_description)
 
-    llm_df = DataframeLoader.get_dataframe('llm_df')
     # Find similarity between the category description and the llm events
     llm_df[category_name] = cosine_similarity(category_embedding, list(llm_df["embeds"])).flatten()
-    
     # Find the threshold for the category
     threshold = calculate_threshold(category_name, category_description)
 

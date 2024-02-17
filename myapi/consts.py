@@ -8,7 +8,7 @@ import os
 from .traces import embed_all_traces, embed_all_sessions
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
-from umap import UMAP
+import umap.umap_ as umap
 from datetime import datetime
 import json
 import hdbscan
@@ -115,7 +115,7 @@ def load_df_once():
     return df
 
 # Dimension reduction, clustering models for llm events
-umap_llm_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.1, metric='cosine')
+umap_llm_model = umap.UMAP(n_neighbors=15, n_components=10, min_dist=0.1, metric='cosine')
 llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=20, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
 
 # Creates embeddings for all llm events
