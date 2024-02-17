@@ -40,21 +40,40 @@ const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary, sess
 };
 
 const Homepage = ({ sessionIds }) => {
-  const [sessions, setSessions] = useState([]);
+
+  // Initialize state from localStorage or default to initial values
+  const [sessions, setSessions] = useState(() => {
+    const savedSessions = localStorage.getItem('sessions');
+    return savedSessions ? JSON.parse(savedSessions) : [];
+  });
+  const [list, setList] = useState(() => {
+    const savedList = localStorage.getItem('list');
+    return savedList ? JSON.parse(savedList) : [];
+  });
+  const [listVolume, setListVolume] = useState(() => {
+    const savedListVolume = localStorage.getItem('listVolume');
+    return savedListVolume ? JSON.parse(savedListVolume) : [];
+  });
+  const [listScoring, setListScoring] = useState(() => {
+    const savedListScoring = localStorage.getItem('listScoring');
+    return savedListScoring ? JSON.parse(savedListScoring) : [];
+  });
+  const [categoryIds, setCategoryIds] = useState(() => {
+    const savedCategoryIds = localStorage.getItem('categoryIds');
+    return savedCategoryIds ? JSON.parse(savedCategoryIds) : [];
+  });
+  // For loading states, we likely do not need to persist these between sessions
   const [feedLoading, setFeedLoading] = useState(false);
-  const [list, setList] = useState([]);
-  const [listVolume, setListVolume] = useState([]);
-  const [listScoring, setListScoring] = useState([]);
   const [listLoading, setListLoading] = useState(false);
-  const [categoryIds, setCategoryIds] = useState([]);
 
   useEffect(() => {
-    // Mocking a fetch sessions details function
     const fetchFeed = async () => {
       try {
         setFeedLoading(true);
         const response = await axios.get(process.env.REACT_APP_API_URL + 'get-surfaced-sessions/');
         setSessions(response.data.sessions);
+        // Save to localStorage
+        localStorage.setItem('sessions', JSON.stringify(response.data.sessions));
       } catch (error) {
         console.error("Failed to fetch feed: ", error);
       }
@@ -64,20 +83,50 @@ const Homepage = ({ sessionIds }) => {
     const fetchList = async () => {
       try {
         setListLoading(true);
-        const categories_ranking = await axios.get(process.env.REACT_APP_API_URL + 'categories/get-categories-ranking/');
-        setList(categories_ranking.data.category_score);
-        setListVolume(categories_ranking.data.category_volume);
-        setListScoring(categories_ranking.data.category_score_names);
-        setCategoryIds(categories_ranking.data.all_user_categories);
-        console.log(categories_ranking.data);
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'categories/get-categories-ranking/');
+        // Assuming response.data contains all these fields
+        setList(response.data.category_score);
+        setListVolume(response.data.category_volume);
+        setListScoring(response.data.category_score_names);
+        setCategoryIds(response.data.all_user_categories);
+        // Save to localStorage
+        localStorage.setItem('list', JSON.stringify(response.data.category_score));
+        localStorage.setItem('listVolume', JSON.stringify(response.data.category_volume));
+        localStorage.setItem('listScoring', JSON.stringify(response.data.category_score_names));
+        localStorage.setItem('categoryIds', JSON.stringify(response.data.all_user_categories));
       } catch (error) {
         console.error("Failed to fetch list: ", error);
       }
       setListLoading(false);
     };
 
-    fetchFeed();
-    fetchList();
+    const dataChanged = async () => {
+      let lastUpdateTimestamp = localStorage.getItem('lastUpdateTimestamp');
+      if (!lastUpdateTimestamp) {
+        // If not found, no need to set here as we are going to fetch and update anyway
+        return true; // Assume data has changed if we have no timestamp
+      }
+      const response = await axios.get(process.env.REACT_APP_API_URL + 'check-data-has-changed/', { params: { lastUpdateTimestamp } });
+      return response.data.hasChanged;
+    };
+  
+    const fetchData = async () => {
+      const hasChanged = await dataChanged();
+      if (!hasChanged) {
+        console.log('No data change detected, skipping fetch.');
+        return; // Skip fetching if no data change detected
+      }
+  
+      // If data has changed, proceed with fetching
+      fetchFeed();
+      fetchList();
+  
+      // Update the local storage with the new timestamp after successful fetch
+      const currentTimestamp = new Date().toISOString(); // This should ideally come from the server to ensure accuracy
+      localStorage.setItem('lastUpdateTimestamp', currentTimestamp);
+    };
+  
+    fetchData();
   }, []);
 
   function getScoreColorHSL(score) {

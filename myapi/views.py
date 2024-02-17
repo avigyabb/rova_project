@@ -14,6 +14,7 @@ from .traces import *
 from .keymetrics import *
 from .scoring import *
 from categories.views import *
+from keymetrics.models import SessionsToScores
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -24,8 +25,8 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from rest_framework import status
-
-#user = authenticate(username=request.GET.get('username'), password=request.GET.get('password'))
+from datetime import datetime
+import pytz
 
 @csrf_exempt
 @require_POST
@@ -51,8 +52,9 @@ def add_most_recent_event():
         """
     result = clickhouse_client.query(combined_table_sql + sql)
     new_row = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    df = DataframeLoader.get_dataframe('df')
     df.append(new_row.iloc[0], ignore_index=True)
-    update_categories_with_new_event(new_row.iloc[0])
+    update_categories_with_new_event(df, new_row.iloc[0])
     add_keymetric_for_new_session(df, new_row.iloc[0]['session_id'])
     if('trace_id' in new_row.columns and new_row.iloc[0]['trace_id'] is not None):
         traces_df = embed_all_traces(df, embeddings_model, traces_df=traces_df, new_trace=new_row.iloc[0]['trace_id'])
@@ -66,10 +68,12 @@ def track_event(request):
         # Process your data here, e.g., save it to the database or perform other logic
         # print(data)  # Example to print the data received
         #add_most_recent_event()
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse(
             {"status": "success", "message": "Event tracked successfully."}
         )
     except json.JSONDecodeError:
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
 
@@ -96,7 +100,7 @@ def get_fpaths(request):
 def get_sessions_at_step(request):
     startEvent = request.GET.get("start_event")
     endEvent = request.GET.get("end_event")
-
+    df = DataframeLoader.get_dataframe("df")
     events = df_to_user_events_by_user(df)
     paths = find_paths(events, startEvent, endEvent)
 
@@ -251,6 +255,7 @@ def get_processed_query(request):
 
 @api_view(["GET"])
 def get_percentages(request):
+    df = DataframeLoader.get_dataframe('df')
     events = df_to_user_events_by_user(df)
 
     start_event_name = request.GET.get("start_event_name")
@@ -285,6 +290,7 @@ def get_user_keymetrics(request):
 @api_view(["GET"])
 def get_summary(request):
     trace_id = request.GET.get("trace_id")
+    df = DataframeLoader.get_dataframe('df')
     messages = explain_trace(df, trace_id)
     summary = query_gpt(
         client,
@@ -298,6 +304,7 @@ def get_summary(request):
 
 @api_view(["GET"])
 def get_similar_traces(request):
+    traces_df = DataframeLoader.get_dataframe('traces_df')
     trace_id = int(request.GET.get("trace_id"))
     similar = find_similar(trace_id, traces_df)
     return Response({"similar_traces": similar})
@@ -311,6 +318,7 @@ def post_user_keymetric(request):
     importance = data.get("importance")
     period = data.get('period')
     add_keymetric(request.user, user_id, category, importance, period)
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
     return JsonResponse({"message": "Category added successfully"})
 
 @api_view(["GET"])
@@ -340,3 +348,41 @@ def get_filtered_sessions(request):
 def get_surfaced_sessions(request):
     sessions_obj = score_and_return_sessions(request.user)
     return Response({"sessions" : sessions_obj})
+
+@csrf_exempt
+@require_POST
+def post_user_session_score(request):
+    data = json.loads(request.body)
+    session_id = data.get("params").get("session_id")
+    score = int(mapping[data.get("params").get("score")])
+    instance, created = SessionsToScores.objects.get_or_create(user=request.user, session_id=session_id)
+    instance.user_score = score
+    instance.save()
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+    return JsonResponse({"message": "Category added successfully"})
+
+@api_view(['GET'])
+def get_user_session_score(request):
+    session_id = int(request.GET.get('session_id'))
+    instance, created = SessionsToScores.objects.get_or_create(user=request.user, session_id=session_id)
+    if(not created and instance.user_score is not None):
+        score = inverse_mapping[instance.user_score]
+    else:
+        score = 'Neutral'
+    instance.user_score = mapping[score]
+    instance.save()
+    return Response({"score": score})
+
+@api_view(["GET"])
+def check_data_has_changed(request):
+    datetime_from_frontend = request.GET.get('lastUpdateTimestamp')
+    datetime_from_frontend = datetime_from_frontend.replace('Z', '+00:00')
+    parsed_date = datetime.fromisoformat(datetime_from_frontend)
+    datetime_from_backend = DataframeLoader.get_trackchanges()
+    if(datetime_from_backend is None):
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+        return Response({"hasChanged": True})
+    elif(datetime_from_backend > parsed_date):
+        return Response({"hasChanged": True})
+    else:
+        return Response({"hasChanged": False})

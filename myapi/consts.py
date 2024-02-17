@@ -5,10 +5,11 @@ import clickhouse_connect
 import pandas as pd
 import numpy as np
 import os
-from .traces import embed_all_traces
+from .traces import embed_all_traces, embed_all_sessions
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
 from umap import UMAP
+from datetime import datetime
 import json
 import hdbscan
 
@@ -21,6 +22,9 @@ client = OpenAI()
 
 db_name = "rova_dev"
 global_period = 7 # 7 days churn
+
+mapping = {'Very Negative': 1, 'Negative': 2, 'Neutral': 3, 'Positive': 4, 'Very Positive': 5}
+inverse_mapping = {1: 'Very Negative', 2: 'Negative', 3: 'Neutral', 4: 'Positive', 5: 'Very Positive'}
 
 # setup clickhouse client
 def new_clickhouse_client():
@@ -103,20 +107,19 @@ def load_df_once():
         FROM
             CombinedData
         """
-    result = clickhouse_client.query(combined_table_sql + sql)
+    client = new_clickhouse_client()
+    result = client.query(combined_table_sql + sql)
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
     if len(df) != 0:
         df = df.sort_values(by=["timestamp"])
     return df
-
-df = load_df_once()
 
 # Dimension reduction, clustering models for llm events
 umap_llm_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.1, metric='cosine')
 llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=20, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
 
 # Creates embeddings for all llm events
-def embed_llm_events():
+def embed_llm_events(df):
     # Grab the llm events
     if len(df) == 0:
         return []
@@ -133,6 +136,39 @@ def embed_llm_events():
     llm_df['embeds'] = [e for e in embeddings_5d]
     return llm_df
 
-# Store the embeddings for all llm_events
-llm_df = embed_llm_events()
-traces_df = embed_all_traces(df, embeddings_model)
+class DataframeLoader:
+    _dataframes = {}
+    _trackchanges = None
+    @classmethod
+    def get_dataframe(cls, key):
+        if key not in cls._dataframes:
+            # Lazy initialization logic here
+            # For example, load from a file or database
+            if(key == 'df'):
+                cls._dataframes[key] = load_df_once()
+            elif(key == 'llm_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_llm_events(cls._dataframes['df'])
+            elif(key == 'traces_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_all_traces(cls._dataframes['df'], embeddings_model)
+            elif(key == 'sessions_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_all_sessions(cls._dataframes['df'], embeddings_model)
+        return cls._dataframes[key]
+    
+    @classmethod
+    def set_dataframe(cls, key, df):
+        cls._dataframes[key] = df
+
+    @classmethod
+    def get_trackchanges(cls):
+        return cls._trackchanges
+
+    @classmethod
+    def set_trackchanges(cls, datetime_obj):
+        cls._trackchanges = datetime_obj
+

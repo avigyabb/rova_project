@@ -56,6 +56,7 @@ const KeyMetricCard = () => {
         try {
           const response = await axios.get(`${process.env.REACT_APP_API_URL}get-options/`);
           response.data.options.push('churn')
+          response.data.options.push('Custom Eval')
           setOptionsArrayData(response.data.options);
         } catch (error) {
           console.error(error);
@@ -140,31 +141,38 @@ const KeyMetricCard = () => {
       return (
         <div>
           {options.map((option, index) => {
-            const optionValue = getOptionValue(option);
-            return (
-              <div key={index}>
-                <input
-                  type="checkbox"
-                  id={`${id}_option_${index}`}
-                  name="selectedOption"
-                  value={optionValue}
-                  checked={selectedOptions.includes(optionValue)}
-                  onChange={() => toggleOption(optionValue)}
-                  style={{ marginRight: '8px' }}
-                />
-                <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
-                {optionValue === 'churn' && selectedOptions.includes('churn') && (
-                  <input
-                    type="text"
-                    placeholder="Churn Period (days)"
-                    value={churnPeriod}
-                    onChange={(e) => setChurnPeriod(e.target.value)}
-                    style={{ marginLeft: '8px' }}
-                  />
-              )}
-              </div>
-            );
-          })}
+              const optionValue = getOptionValue(option);
+              // Check if "Custom Eval" is in selectedOptions
+              const isCustomEvalSelected = selectedOptions.includes("Custom Eval");
+
+              // Conditionally render options based on whether "Custom Eval" is selected
+              if (!isCustomEvalSelected || optionValue === "Custom Eval") {
+                return (
+                  <div key={index}>
+                    <input
+                      type="checkbox"
+                      id={`${id}_option_${index}`}
+                      name="selectedOption"
+                      value={optionValue}
+                      checked={selectedOptions.includes(optionValue)}
+                      onChange={() => toggleOption(optionValue)}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
+                    {optionValue === 'churn' && selectedOptions.includes('churn') && (
+                      <input
+                        type="text"
+                        placeholder="Churn Period (days)"
+                        value={churnPeriod}
+                        onChange={(e) => setChurnPeriod(e.target.value)}
+                        style={{ marginLeft: '8px' }}
+                      />
+                    )}
+                  </div>
+                );
+              }
+              return null; // Return null for non-matching conditions
+            })}
           <div>Selected Options in Order:</div>
           <ul>
             {selectedOptions.map((option, index) => (

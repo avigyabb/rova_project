@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Category, SessionCategory
 from myapi.consts import *
+from myapi.consts import DataframeLoader
 import json 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -15,9 +16,11 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+import pytz
 
 # Generates the name and description from the HDB cluster
 def generate_topic_name(cluster_id):
+  llm_df=DataframeLoader.get_dataframe('llm_df')
   topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
   questions = topic_df['event_text'].sample(n=5).tolist()
   msg = prompt_to_generate_topics(questions)
@@ -26,6 +29,7 @@ def generate_topic_name(cluster_id):
 
 # Adds all session ids in a cluster to the SessionCategory DB
 def assign_session_ids_to_category(user, cluster_id, category):
+    llm_df=DataframeLoader.get_dataframe('llm_df')
     topic_df = llm_df[llm_df["cluster_label"] == cluster_id]
     session_ids = list(topic_df['session_id'].unique())
     for session_id in session_ids:
@@ -46,6 +50,7 @@ def create_new_category(user, cluster_id):
 
 # Generates initial list of clusters from questions
 def initial_categories_cluster(user):
+    llm_df=DataframeLoader.get_dataframe('llm_df')
     # Fit clustering model to the initial data
     X = np.array(llm_df['embeds'].tolist()) 
     llm_clusterer.fit(X)
@@ -64,6 +69,7 @@ def question_in_topic(topic, question):
 # Calculates the threshold for a category using GPT
 def calculate_threshold(category_name, category_description):
   # TODO: make this algorithm better
+  llm_df=DataframeLoader.get_dataframe('llm_df')
   sorted_df = llm_df.sort_values(by=category_name, ascending=False)
   sorted_df.reset_index(drop=True, inplace=True)
   index = 0
@@ -86,6 +92,7 @@ def add_user_defined_category(user, category_name, category_description):
     # Get the embedding of the category description
     category_embedding = get_embedding_from_text(category_description)
 
+    llm_df = DataframeLoader.get_dataframe('llm_df')
     # Find similarity between the category description and the llm events
     llm_df[category_name] = cosine_similarity(category_embedding, list(llm_df["embeds"])).flatten()
     
@@ -105,7 +112,35 @@ def add_user_defined_category(user, category_name, category_description):
     # Return the list of session ids in the category
     return unique_session_ids
 
-
+def autosuggest_categories(user):
+    UserCategory = Category.objects.filter(user=user)
+    if(UserCategory.count() <= 0):
+        sessions_df = embed_all_sessions(DataframeLoader.get_dataframe('df'), embeddings_model)
+        embeddings = np.array(sessions_df["embeds"].tolist()) 
+        # Clustering with K-Means
+        kmeans = KMeans(n_clusters=10, random_state=0).fit(embeddings)
+        # Assign cluster labels to DataFrame
+        sessions_df['cluster_label'] = kmeans.labels_
+        # Calculate the distance between each point and the centroid of its cluster
+        centroids = kmeans.cluster_centers_
+        distances = cdist(embeddings, centroids, 'euclidean')
+        # The distance for each point to its cluster centroid
+        sessions_df['distance_to_centroid'] = np.min(distances, axis=1)
+        # Find the closest row to each cluster's centroid
+        closest_rows = sessions_df.loc[sessions_df.groupby('cluster_label')['distance_to_centroid'].idxmin()]
+        count = 0
+        for row in closest_rows.iterrows():
+            if(count < 5):
+                prompt = prompt_to_generate_clusters(row[1]['session_to_text'], 0)
+                answer = query_gpt(client, prompt, json_output=True)
+                modded_name = '🤖 ' + answer['name']
+                new_category = Category(user=user, name=modded_name, description=answer['description'])
+                new_category.save()
+                assign_session_ids_to_category(user, modded_name, answer['description'], new_category)
+                count += 1
+            else:
+                break
+            
 @api_view(["GET"])
 def category_list(request):
     # if Category DB is empty, create initial categories
@@ -135,6 +170,7 @@ def post_user_category(request):
     name = data.get("name")
     description = data.get("description")
     add_user_defined_category(request.user, name, description)
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
     return JsonResponse({"success": "Category created successfully."})
 
 
@@ -258,11 +294,9 @@ def get_categories_ranking(request):
 
 @api_view(["GET"])
 def get_category_sessions(request):
-    print("loc7")
     category_id = int(request.GET.get("category_id"))
     UserSessionCategory = SessionCategory.objects.filter(user=request.user) # make category id unique accross users do not need this line
     session_ids_for_category = UserSessionCategory.filter(category=category_id)
-    print(list(session_ids_for_category.values_list('session_id', flat=True)))
     
     session_data = get_session_data_from_ids(clickhouse_client, list(session_ids_for_category.values_list('session_id', flat=True)))
 

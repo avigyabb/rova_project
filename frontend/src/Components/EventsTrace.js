@@ -10,6 +10,7 @@ import { CircularProgress } from '@mui/material';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import { Dropdown } from 'flowbite-react';
 
 
 const EventsTrace = () => {
@@ -19,12 +20,17 @@ const EventsTrace = () => {
 
     const location = useLocation();
     const { userId, sessionId, index, sessionList } = location.state || {}; // Get the passed state
-    console.log(sessionId)
     const [sessionIdState, setSessionIdState] = useState(sessionId);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
     const [selectMode, setSelectMode] = useState(false);
     const [selectedTraces, setSelectedTraces] = useState([]);
+    const [selectedValue, setSelectedValue] = useState("Neutral");
+
+    const handleChange = (event) => {
+      // Update state with the new selected option's value
+      setSelectedValue(event.target.value);
+    };
 
     const navigate = useNavigate();
 
@@ -33,6 +39,63 @@ const EventsTrace = () => {
     if (sessionId !== sessionIdState){
       setSessionIdState(sessionId);
     }
+
+    function MyDropdown({options, id }) {
+
+      // This function checks if the option is an array and returns the appropriate value
+      const getOptionValue = (option) => {
+        if (Array.isArray(option)) {
+          return option[0];
+        }
+        return option; // If it's not an array, return the string directly
+      };
+    
+      return (
+        <select className="form-select ml-auto" value={selectedValue} onChange={handleChange} id={id}>
+          {options.map((option, index) => (
+            <option key={index} value={getOptionValue(option)}>
+              {getOptionValue(option)}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    useEffect(() => {
+      const fetchData = async () =>  {
+        setIsLoading(true);
+        try {
+          var params = {
+            session_id: sessionIdState,
+          };
+          const get_score = await axios.get(process.env.REACT_APP_API_URL + 'get-user-session-score/', { params });
+          setSelectedValue(get_score.data.score);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, [sessionIdState]);
+
+    useEffect(() => {
+      const fetchData = async () =>  {
+        setIsLoading(true);
+        try {
+          var params = {
+            session_id: sessionIdState,
+            score: selectedValue,
+          };
+          const send_score = await axios.post(process.env.REACT_APP_API_URL + 'post-user-session-score/', { params });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, [sessionIdState, selectedValue]);
 
     console.log(location.state)
 
@@ -152,6 +215,8 @@ const EventsTrace = () => {
       } });
     };
 
+    const options = ['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive'];
+
 
     return (
       <div className="event-list-container">
@@ -189,15 +254,16 @@ const EventsTrace = () => {
                 Events Feed
               </h1>
             )}
+            <MyDropdown options={options} id={"scoring_options"}> Score </MyDropdown>
             {!selectMode && (
               <>
-              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Select </button>
+              <button className='ml-5 mr-5' onClick={handleSelectBtn}> Select </button>
               <button className='mr-5'> Filter </button>
               </>
             )}
             {selectMode && (
               <>
-              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
+              <button className='ml-5 mr-5' onClick={handleSelectBtn}> Cancel </button>
               {selectedTraces.length > 0 && 
                 <div className='export-btn flex items-center'>
                   <GetAppIcon className='mr-2'/>

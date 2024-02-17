@@ -1,8 +1,10 @@
 from .consts import *
+from .utils import *
 from langchain.prompts import PromptTemplate
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
+import umap.umap_ as umap
 
 # traeces.py
 
@@ -71,15 +73,21 @@ def embed_all_traces(df, embeddings_model, traces_df=None, new_trace=None):
 
   return traces_df
 
+@time_function
 def embed_all_sessions(df, embeddings_model):
 
-  # Now, you can group by 'session_id' and then 'group_id'
-  result_series = df.groupby(['session_id']).apply(parse_session)
-  sessions_df = result_series.reset_index(name='session_to_text')
-  embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
-  sessions_df['embeds'] = [np.array(e) for e in embeds]
+    result_series = df.groupby(['session_id']).apply(parse_session)
+    sessions_df = result_series.reset_index(name='session_to_text')
 
-  return sessions_df
+    embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
+    
+    embeds_array = np.vstack(embeds)
+    reducer = umap.UMAP(n_components=10, random_state=42)
+    umap_embeddings = reducer.fit_transform(embeds_array)
+
+    sessions_df['embeds'] = list(umap_embeddings)
+
+    return sessions_df
 
 def find_similar(trace_id, df, n=3):
 

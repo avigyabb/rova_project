@@ -16,3 +16,11 @@ class SessionsToKPIs(models.Model):
     session_id = models.IntegerField()
     keymetric_id = models.IntegerField()
     keymetric_name = models.TextField()
+
+class SessionsToScores(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session_id = models.IntegerField()
+    kpi_score = models.IntegerField(null=True)
+    user_score = models.IntegerField(null=True)
+    ai_score = models.IntegerField(null=True)
+    custom_score = models.TextField(null=True)

@@ -1,9 +1,10 @@
 
 from .consts import *
 from .traces import *
-from .callgpt import explain_session_by_kpis, query_gpt
+from .callgpt import explain_session_by_kpis, query_gpt, explain_session
 from .metrics import get_churned_sessions
-from keymetrics.models import ListOfKPIs, SessionsToKPIs
+from keymetrics.models import ListOfKPIs, SessionsToKPIs, SessionsToScores
+import random
 
 #Function to construct the overall representation
 def get_keymetrics_overview(user):
@@ -33,19 +34,21 @@ def get_keymetrics_overview(user):
 # Add a new category
 def add_keymetric(user, name, description, importance, period=None):
     UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
+    count = None
     if(not UserListOfKPIs.filter(name=name).exists()):
         new_keymetric = ListOfKPIs(user=user, name=name, description=description, importance=importance, summary="")
-        print("USER", user)
         new_keymetric.save()
         steps = name.split(',')
         formatted = [s.strip() for s in steps]
-
-        session_to_keymetric = find_sessions_with_kpis(df, formatted, True, period)
-        keymetric_objs_to_add = [SessionsToKPIs(user=user, session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
-        SessionsToKPIs.objects.bulk_create(keymetric_objs_to_add)
-
+        if('Custom Eval' in formatted):
+            count = assign_custom_eval(user, new_keymetric)
+        else:
+            session_to_keymetric = find_sessions_with_kpis(DataframeLoader.get_dataframe('df'), formatted, True, period)
+            keymetric_objs_to_add = [SessionsToKPIs(user=user, session_id=session, keymetric_id=new_keymetric.id, keymetric_name=name) for session in session_to_keymetric]
+            SessionsToKPIs.objects.bulk_create(keymetric_objs_to_add)
         keymetrics = get_keymetrics_overview(user)
-        messages = explain_session_by_kpis(df, keymetrics, name)
+        search_name = name+'-'+str(count) if count else name
+        messages = explain_session_by_kpis(DataframeLoader.get_dataframe('df'), keymetrics, search_name)
         summary = ""
         if(messages):
             summary = query_gpt(
@@ -61,13 +64,30 @@ def add_keymetric(user, name, description, importance, period=None):
         new_keymetric.summary = summary
         new_keymetric.save()
 
+def assign_custom_eval(user, keymetric, n=5):
+    count = ListOfKPIs.objects.filter(user=user,name__icontains='Custom Eval').count()
+    keymetric.name = keymetric.name + "-" + str(count+1)
+    keymetric.save()
+    df = DataframeLoader.get_dataframe('df')
+    session_ids = list(df['session_id'].unique())
+    session_ids = random.sample(session_ids, n)
+    for id in session_ids:
+        filtered = df[df['session_id'] == id]
+        custom_score = explain_session(filtered, flag=3, custom_eval={'description': keymetric.description, 'importance': keymetric.importance})
+        if(custom_score['score'] != 'N/A'):
+            session_score, created = SessionsToScores.objects.get_or_create(user=user, session_id=id)
+            session_score.custom_score = (session_score.custom_score + custom_score['score'] + "_") if session_score.custom_score else (custom_score['score'] + "_")
+            session_score.save()
+            SessionsToKPIs.objects.get_or_create(user=user, session_id=id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
+    return count+1
+
 def add_keymetric_for_new_session(user, session_id):
     UserListOfKPIs = ListOfKPIs.objects.filter(user=user)
     UserSessionsToKPIs = SessionsToKPIs.objects.filter(user=user)
     for keymetric in UserListOfKPIs.all():
         raw_names = keymetric.name.split(',')
         steps = [s.strip() for s in raw_names]
-        belongs_to_keymetric = session_id in find_sessions_with_kpis(df, steps, True, global_period, session_id=session_id)
+        belongs_to_keymetric = session_id in find_sessions_with_kpis(DataframeLoader.get_dataframe('df'), steps, True, global_period, session_id=session_id)
         if(belongs_to_keymetric and not UserSessionsToKPIs.filter(session_id=session_id, keymetric_id=keymetric.id).exists()):
             SessionsToKPIs.objects.create( user=user, session_id=session_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
 
@@ -87,11 +107,13 @@ def delete_keymetric(user, index):
     
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, raw_event_names, in_order=False, period=None, session_id=None):
+
     churn_flag = False
     event_names = raw_event_names
     
     if(period is None):
         period = global_period
+
     if('churn' in raw_event_names):
         event_names.remove('churn')
         churn_flag = True

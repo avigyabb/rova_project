@@ -2,6 +2,7 @@
 import json
 from .consts import *
 from .traces import *
+from .utils import *
 import random
 
 def query_gpt(
@@ -48,25 +49,25 @@ def prompt_question_to_topic(topic, question):
     msg = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]                    
     return msg
 
-# # Builds prompt to categorize questions
-# def build_topics_prompt(samples):
-#     system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
-#                      You want to create a holstic description of the cluster given it's samples. \n \
-#                      Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
-#                      that accurately summarizes the intent of the user in this platform. \n \
-#                      Return your result as a JSON object with the key being the provided Category number and \
-#                      the value being the summary description you create for that category \n \
-#                      For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
+# Builds prompt to categorize questions
+def build_topics_prompt(samples):
+    system_prompt = "You are a data analyst inspecting clusters of questions asked by users. \
+                     You want to create a holstic description of the cluster given it's samples. \n \
+                     Summarize each of the following groups of samples into a single sentence or topic, no more than 10 words, \
+                     that accurately summarizes the intent of the user in this platform. \n \
+                     Return your result as a JSON object with the key being the provided Category number and \
+                     the value being the summary description you create for that category \n \
+                     For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
 
-#     user_prompt = ""
-#     for category in samples.keys():
-#         sample = samples[category]
-#         user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
-#     messages = [
-#         {"role": "system", "content": system_prompt},
-#         {"role": "user", "content": user_prompt},
-#     ]
-#     return messages
+    user_prompt = ""
+    for category in samples.keys():
+        sample = samples[category]
+        user_prompt += f"Category: {category}\n" + f"Samples: {sample}\n\n"
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    return messages
 
 
 # Builds prompt to generate sql query for sessions
@@ -179,14 +180,38 @@ def explain_session_by_kpis(df, keymetrics, kpi, k=5):
     new_prompt = [system_prompt, user_prompt]
     return new_prompt
 
-
-# Generates 1 sentence summary of the given session
-def explain_session(filtered):
-    user_prompt_raw = parse_session(filtered)
-    system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
+def prompt_to_generate_clusters(sentence, flag=0, custom_eval=None):
+    if(flag == 1):
+        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and produce a 1 sentence summary of \
                         the session discussing interesting user behaviors, errors, or question/output pairs that should be surfaced to a product analyst."
-    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(user_prompt_raw)}]
-    summary = query_gpt(client, msgs, json_output=False)
+    elif(flag == 0):
+        system_prompt = "You are a product analyst observing trends in user behaviors. Observe the following description of a session and identify 1) \
+                        a category_name for sessions that specifically identifies the topic of the user's question and 2) a description of this category. Your output should be a JSON formatted object of the form \
+                        {'name': 'category_name', 'description': 'category_description'}."
+    elif(flag == 2):
+        system_prompt = "You are a product analyst observing a single session of a user using your product. Observe the following description of a session and score the \
+                          interaction overall by grading whether the user accomplished their task. Consider how many quetsions the user needed to ask before accomplishing their task \
+                          as well as their overall sentiment, frusturation, satisfaction, and delight during the interaction. Provide your score on from the set {1, 2, 3, 4, 5} with 1 \
+                          being very negative and 5 being very positive and then justify your response in a single sentence. Your output should be a JSON object of the form {'score': 'score', 'justification': 'justification'}."
+    elif(flag == 3 and custom_eval):
+        description = custom_eval['description']
+        importance = custom_eval['importance']
+        system_prompt = "A product analyst has asked you to observe a single session of a user using your product. The product analyst has provided you with a natural language \
+                          description of a evaluation they want to make on that session as well as how important that evaluation is to them. The description is: " + description + ", and the importance of this eval (from Very Negative to Very Positive) is " + importance + ".  \
+                          Evaluate the session according to the product anlayst's criteria and the importance to them. Provide a score on from the set {1, 2, 3, 4, 5} with 1 being very negative and 5 being very positive and then justify your response in a single sentence.\
+                          Your output should be a JSON object of the form '{'score': 'score', 'justification': 'justification'}'. If the evaluation does not seem relevant to the provided session, return 'N/A' for both the score and justification."
+    msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
+    return msgs
+
+@time_function
+def explain_session(filtered, flag=2, user_prompt_provided=None, custom_eval=None):
+    json_flag = False if flag==1 else True
+    if(user_prompt_provided is None):
+      user_prompt_raw = parse_session(filtered)
+    else:
+      user_prompt_raw = user_prompt_provided
+    msgs = prompt_to_generate_clusters(user_prompt_raw, flag, custom_eval=custom_eval)
+    summary = query_gpt(client, msgs, json_output=json_flag)
     return summary
 
 

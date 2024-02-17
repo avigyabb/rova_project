@@ -10,9 +10,7 @@ urlpatterns = [
     path("get-histogram/", views.get_histogram, name="get_histogram"),
     path("get-metrics/", views.get_metrics, name="get_metrics"),
     path("get-processed-query/", views.get_processed_query, name="get_processed_query"),
-    path(
-        "get-sessions-at-step/", views.get_sessions_at_step, name="get_sessions_at_step"
-    ),
+    path("get-sessions-at-step/", views.get_sessions_at_step, name="get_sessions_at_step"),
     path("get-percentages/", views.get_percentages, name="get_percentages"),
     path("get-options/", views.get_options, name="get_options"),
     path("get-summary/", views.get_summary, name="get_summary"),
@@ -20,15 +18,10 @@ urlpatterns = [
     path("get-user-keymetrics/", views.get_user_keymetrics, name="get_user_keymetrics"),
     path("get-similar-traces/", views.get_similar_traces, name="get_similar_traces"),
     path("post-user-keymetric/", views.post_user_keymetric, name="post_user_keymetric"),
-    path(
-        "delete-user-keymetric/",
-        views.delete_user_keymetric,
-        name="delete_user_keymetric",
-    ),
-    path(
-        "get-filtered-sessions/",
-        views.get_filtered_sessions,
-        name="get_filtered_sessions",
-    ),
+    path("delete-user-keymetric/", views.delete_user_keymetric, name="delete_user_keymetric"),
+    path("get-filtered-sessions/", views.get_filtered_sessions, name="get_filtered_sessions"),
     path("get-surfaced-sessions/", views.get_surfaced_sessions, name="get_surfaced_sessions"),
+    path("post-user-session-score/", views.post_user_session_score, name="post_user_session_score"),
+    path("get-user-session-score/", views.get_user_session_score, name="get_user_session_score"),
+    path("check-data-has-changed/", views.check_data_has_changed, name="check_data_has_changed"),
 ]
