@@ -54,7 +54,7 @@ const Sessions = () => {
           {(!isLoading && Object.keys(sessions).length > 0) && (
             <div className='sessions-results'>
               <h1> {Object.keys(sessions).length} results </h1>
-              {sessions.map(({ session_id, user_id, earliest_timestamp }, index) => (
+              {sessions.map(({ session_id, user_id, earliest_timestamp, categories }, index) => (
                 <SessionCard 
                   key={session_id} 
                   sessionId={session_id} // Pass the session count here
@@ -62,6 +62,7 @@ const Sessions = () => {
                   timestamp={earliest_timestamp}
                   index={index}
                   sessionList={sessions}
+                  categoryList={categories}
                 />
               ))}
             </div>
