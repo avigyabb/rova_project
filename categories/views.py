@@ -76,7 +76,7 @@ def calculate_threshold(category_name, category_description):
   index = 0
   belongs_to_topic = question_in_topic(category_description, sorted_df["event_text"][index])
   while belongs_to_topic:
-    index += 3
+    index += 2
     belongs_to_topic = question_in_topic(category_description, sorted_df["event_text"][index])
   return sorted_df[category_name][index]
 

@@ -120,7 +120,8 @@ llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=5, metric='euclidean', cluster_
 
 # Get question from event_text
 def get_question(input, output):
-    return input
+    to_remove = "Determine what type of task needs to be performed for this user and call the appropriate function from your toolbox."
+    return input.replace(to_remove, "")
 
 # Creates embeddings for all llm events
 def embed_llm_events(df):
