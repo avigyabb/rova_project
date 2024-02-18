@@ -59,7 +59,8 @@ def initial_categories_cluster(user):
 
     # Create new categories
     for cluster_id in llm_df['cluster_label'].unique():
-        create_new_category(user, cluster_id)
+        if cluster_id != -1:
+            create_new_category(user, cluster_id)
 
 
 # Returns true if the question belongs to the topic based on GPT
