@@ -196,6 +196,7 @@ const EventsTrace = () => {
     }
 
     const handleClickNext = () => {
+      setSelectedTrace(null);
       setSelectedEvent(null);
       navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index + 1].user_id}`, { state: { 
         userId: sessionList[index + 1].user_id, 
@@ -206,6 +207,7 @@ const EventsTrace = () => {
     };
 
     const handleClickPrev = () => {
+      setSelectedTrace(null);
       setSelectedEvent(null);
       navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index - 1].user_id}`, { state: { 
         userId: sessionList[index - 1].user_id, 
