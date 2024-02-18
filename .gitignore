@@ -3,3 +3,8 @@ myapi/__pycache__/*.cpython-312.pyc
 myapi/__pycache__/*.cpython-39.pyc
 rova_demo/__pycache__/*.cpython-39.pyc
 db.sqlite3
+accounts/__pycache__/
+categories/__pycache__/
+keymetrics/__pycache__/
+myapi/__pycache__/
+rova_demo/__pycache__/
