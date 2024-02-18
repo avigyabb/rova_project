@@ -12,6 +12,7 @@ const Category = () => {
     // const [newCategory, setNewCategory] = useState({ name: '', description: ''});
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [addCategoryLoading, setAddCategoryLoading] = useState(false);
 
     // Fetches the category data
     const fetchData = async () =>  {
@@ -47,6 +48,7 @@ const Category = () => {
         // For example, you can send an API request to save the new category
         // After successful save, update category list and reset new category state
         setShowNewCategoryRow(false);
+        setAddCategoryLoading(true);
         const newCategory = {
             name: document.getElementById("newCategoryName").value,
             description: document.getElementById("newCategoryDescription").value,
@@ -62,6 +64,7 @@ const Category = () => {
           console.error(error);
         } finally {
           fetchData();
+          setAddCategoryLoading(false);
         }
     };
 
@@ -209,10 +212,11 @@ const Category = () => {
               </tr>
             </thead>
             <tbody>
+            {addCategoryLoading && <p>Loading...</p>}
             {showNewCategoryRow && <NewTableRow/>}
-              {categories.slice().reverse().map((category, index) => (
-                <TableRow key={index} category={category}/>
-              ))}
+            {categories.slice().reverse().map((category, index) => (
+              <TableRow key={index} category={category}/>
+            ))}
             </tbody>
           </table>
         );

@@ -47,6 +47,15 @@
   font-size: 12px;
 }
 
+.tag-suggested {
+  display: inline-block;
+  background-color: #a1a1a1;
+  border-radius: 10px;
+  padding: 2px 5px;
+  margin-right: 10px;
+  font-size: 12px;
+}
+
 .insights-card {
   border: 1px solid #e5e7eb; /* light grey border */
   border-radius: 0.5rem;

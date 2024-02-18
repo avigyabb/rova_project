@@ -6,6 +6,7 @@ import Category from './ChartComponents/Category';
 import Graphs from './ChartComponents/Graphs';
 import Homepage from './ChartComponents/Homepage';
 import Settings from './ChartComponents/Settings';
+import CategorySessions from './ChartComponents/CategorySessions';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
@@ -167,19 +168,19 @@ return (
       <p onClick={() => changeView('homepage')}> Dashboard </p>
       <div className='link flex' onClick={() => changeView('homepage')}>
         <DynamicFeedIcon className='mr-4 ml-5'/>
-        <button className="text-lg"> Feed </button>
+        <button className="text-md"> Home </button>
       </div>
       <div className='link flex' onClick={() => changeView('categories')}>
         <TopicIcon className='mr-4 ml-5'/>
-        <button className="text-lg"> Topics </button>
+        <button className="text-md"> Topics </button>
       </div>
       <div className='link flex' onClick={() => changeView('kpis')}>
         <StarsIcon className='mr-4 ml-5'/>
-        <button className="text-lg">KPIs</button>
+        <button className="text-md">KPIs</button>
       </div>
       <div className='link flex' onClick={() => changeView('graphs')}>
         <InsightsIcon className='mr-4 ml-5'/>
-        <button className="text-lg" >Graphs</button>
+        <button className="text-md" >Graphs</button>
       </div>
       <div className='link flex mt-auto' onClick={() => changeView('settings')}>
         <SettingsIcon className='mr-2 ml-3'/>

@@ -3,6 +3,7 @@ import '../../styles/SessionCard.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
+import CategorySessions from './CategorySessions';
 import '../../styles/Homepage.css';
 import { useNavigate } from 'react-router';
 
@@ -39,7 +40,7 @@ const ModifiedSessionCard = ({ sessionId, userId, timestamp, tags, summary, sess
   );
 };
 
-const Homepage = ({ sessionIds }) => {
+const Homepage = ({ sessionIds, changeView }) => {
 
   // Initialize state from localStorage or default to initial values
   const [sessions, setSessions] = useState(() => {
@@ -65,6 +66,7 @@ const Homepage = ({ sessionIds }) => {
   // For loading states, we likely do not need to persist these between sessions
   const [feedLoading, setFeedLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
+  const [focusedCategory, setFocusedCategory] = useState('');
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -145,8 +147,9 @@ const Homepage = ({ sessionIds }) => {
   const TableRow = ({ rank, category_name, score, volume, chips, category_id }) => {
     const scoreColor = getScoreColorHSL(score);
 
-    const handleRowClick = (category_id) => {
-      navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`, { state: { category_name } });
+    const handleRowClick = (category_name) => {
+      // navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`, { state: { category_name } });
+      setFocusedCategory(category_name);   
     }
 
     return (
@@ -192,20 +195,26 @@ const Homepage = ({ sessionIds }) => {
   return (
     <div className='homepage flex'>
       <div className='home-left'>
-        <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! 🎉</h1>
-        {listLoading ? (
-          <div className="flex flex-col items-center" style={{marginTop: '30%'}}>
-            <p className='mb-8 text-gray-500'> Scoring and ranking your categories based off user sessions...</p>
-            <CircularProgress style={{ color: '#FFA189' }}/>
-          </div>
-        ) : (
+        {focusedCategory ? 
+          <CategorySessions focusedCategory={focusedCategory} setFocusedCategory={setFocusedCategory}/>
+        : 
           <>
-            <p className='text-gray-500' style={{width: '85%', marginTop: '4%', marginLeft: '4%'}}> Here are how your categories are doing: </p>
-            <div className='table-card'>
-              <TopicTable />
+          <h1 className='text-3xl' style={{marginTop: '3%', marginLeft: '3%'}}> Welcome Back! 🎉</h1>
+          {listLoading ? (
+            <div className="flex flex-col items-center" style={{marginTop: '30%'}}>
+              <p className='mb-8 text-gray-500'> Scoring and ranking your categories based off user sessions...</p>
+              <CircularProgress style={{ color: '#FFA189' }}/>
             </div>
+          ) : (
+            <>
+              <p className='text-gray-500' style={{width: '85%', marginTop: '4%', marginLeft: '4%'}}> Here are how your categories are doing: </p>
+              <div className='table-card'>
+                <TopicTable />
+              </div>
+            </>
+          )}
           </>
-        )}
+        }
       </div>
       <div className='home-right'>
         <p className='header-text text-2xl'> 📬 Your Feed </p>
