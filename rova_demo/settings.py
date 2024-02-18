@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "keymetrics",  # why do you need to do .apps.MYapiConfig - Avi
     "accounts",
     "categories",
+    "data_sets",
 ]
 
 MIDDLEWARE = [
