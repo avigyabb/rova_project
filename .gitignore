@@ -2,3 +2,4 @@ node_modules
 myapi/__pycache__/*.cpython-312.pyc
 myapi/__pycache__/*.cpython-39.pyc
 rova_demo/__pycache__/*.cpython-39.pyc
+db.sqlite3
