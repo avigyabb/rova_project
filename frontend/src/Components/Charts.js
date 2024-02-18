@@ -7,6 +7,7 @@ import Graphs from './ChartComponents/Graphs';
 import Homepage from './ChartComponents/Homepage';
 import Settings from './ChartComponents/Settings';
 import CategorySessions from './ChartComponents/CategorySessions';
+import Datasets from './ChartComponents/Datasets';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
@@ -15,6 +16,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import DatasetIcon from '@mui/icons-material/Dataset';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -182,6 +184,10 @@ return (
         <InsightsIcon className='mr-4 ml-5'/>
         <button className="text-md" >Graphs</button>
       </div>
+      <div className='link flex' onClick={() => changeView('datasets')}>
+        <DatasetIcon className='mr-4 ml-5'/>
+        <button className="text-md" >Datasets</button>
+      </div>
       <div className='link flex mt-auto' onClick={() => changeView('settings')}>
         <SettingsIcon className='mr-2 ml-3'/>
         <button className="text-sm"> Settings </button>
@@ -193,6 +199,7 @@ return (
        {currentView === 'kpis' && <KeyMetricCard />}
        {/* currentView === 'sequences' && <Sequences />} */}
        {currentView === "graphs" && <Graphs />}
+       {currentView === "datasets" && <Datasets />}
        {currentView === "settings" && <Settings />}
      </div>
    </div>
