@@ -14,10 +14,8 @@ import { Dropdown } from 'flowbite-react';
 
 
 const EventsTrace = () => {
-
     const [userData, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-
     const location = useLocation();
     const { userId, sessionId, index, sessionList } = location.state || {}; // Get the passed state
     const [sessionIdState, setSessionIdState] = useState(sessionId);
@@ -26,6 +24,8 @@ const EventsTrace = () => {
     const [selectMode, setSelectMode] = useState(false);
     const [selectedTraces, setSelectedTraces] = useState([]);
     const [selectedValue, setSelectedValue] = useState("Neutral");
+
+    console.log(sessionList);
 
     const handleChange = (event) => {
       // Update state with the new selected option's value
@@ -162,18 +162,11 @@ const EventsTrace = () => {
     function arrayToCSV() {
       // Assuming all objects have the same keys, use the keys from the first object for the header row
       const csvRows = [];
-      // const headers = Object.keys(selectedTraces[0]);
       const headers = ["timestamp", "trace_id","event_name", "input_content", "output_content"]
       csvRows.push(headers.join(',')); // Create the header row
     
       // Add each object's values as a row
       for (const row of selectedTraces) {
-        // const values = headers.map(header => {
-        //   const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
-        //   return `"${escaped}"`; // Wrap values in double quotes
-        // });
-        // csvRows.push(values.join(','));
-
         for (const traceStep of row.events) {
           const values = headers.map(header => {
             const escaped = ('' + traceStep[header]).toString().replace(/"/g, '\\"'); // Escape double quotes

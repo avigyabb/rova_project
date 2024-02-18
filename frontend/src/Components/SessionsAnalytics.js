@@ -20,7 +20,7 @@ const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading
 
   useEffect(() => {
     const applyFilters = async() => {
-      setIsLoading(true);
+      setIsLoading('Searching Relevant Sessions...');
       try {
         const params = {
           included_categories : JSON.stringify(includedCategories),
@@ -65,7 +65,7 @@ const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false);
+        setIsLoading('');
       }
     }
     applyFilters();

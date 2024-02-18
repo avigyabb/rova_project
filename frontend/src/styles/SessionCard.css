@@ -1,6 +1,6 @@
 .user-card {
   padding: 1rem;
-  margin: 1rem 0;
+  margin-top: 10px;
   border: 1px solid #e5e7eb; /* light grey border */
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
