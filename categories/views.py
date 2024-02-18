@@ -183,12 +183,13 @@ def delete_user_category(request):
     # llm_df = llm_df.drop(columns=[category_to_delete.name])
     delete_category_sessions(request.user, index)
     category_to_delete.delete()
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
     return Response({"message": "Category deleted successfully"})
 
 
 def delete_category_sessions(user, category):
     SessionCategory.objects.filter(user=user, category=category).delete()
-
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
 
 # Embeds the new event and assigns to relevant categories
 def update_categories_with_new_event(row):

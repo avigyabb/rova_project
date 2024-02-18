@@ -325,6 +325,7 @@ def post_user_keymetric(request):
 def delete_user_keymetric(request):
     index = request.GET.get("index")
     delete_keymetric(request.user, index)
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
     return Response({"message": "Category deleted successfully"})
 
 
