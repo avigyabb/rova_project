@@ -65,7 +65,7 @@ def score_sessions_based_on_kpis(user, n):
         
     sessions_df, max_indx = aggregate_score(user, DataframeLoader.get_dataframe('df'), 0.1)
     result = bayes_scoring(sessions_df, max_indx)
-    session_score_dict = {k: v for k, v in sorted(result.items(), key=lambda item: item[1])}
+    session_score_dict = {k: v*20 for k, v in sorted(result.items(), key=lambda item: item[1])}
     worst_ids = list(session_score_dict.keys())[0:n]
 
     return worst_ids, session_score_dict, session_score_name
@@ -171,6 +171,7 @@ def impute(df, max_indx):
 def bayes_scoring(sessions_df, max_indx):
     # Define the structure of your Bayesian Network
     sessions_df = impute(sessions_df, max_indx)
+    print(sessions_df)
     model_structure = [
         ('user_score', 'ai_score'),
         ('user_score', 'cluster_label'),
