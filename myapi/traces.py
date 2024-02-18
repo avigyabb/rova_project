@@ -4,8 +4,9 @@ from langchain.prompts import PromptTemplate
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
-import umap.umap_ as umap
-
+if umap_flag:
+    import umap.umap_ as umap
+    
 # traeces.py
 
 def parse_product(group):
@@ -81,11 +82,14 @@ def embed_all_sessions(df, embeddings_model):
 
     embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
     
-    embeds_array = np.vstack(embeds)
-    reducer = umap.UMAP(n_components=10, random_state=42)
-    umap_embeddings = reducer.fit_transform(embeds_array)
+    if umap_flag:
+      embeds_array = np.vstack(embeds)
+      reducer = umap.UMAP(n_components=10, random_state=42)
+      umap_embeddings = reducer.fit_transform(embeds_array)
 
-    sessions_df['embeds'] = list(umap_embeddings)
+      sessions_df['embeds'] = list(umap_embeddings)
+    else:
+      sessions_df['embeds'] = [e for e in embeds]
 
     return sessions_df
 

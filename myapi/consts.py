@@ -1,3 +1,5 @@
+umap_flag = False
+
 from rova_client import Rova
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
@@ -8,7 +10,8 @@ import os
 from .traces import embed_all_traces, embed_all_sessions
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
-import umap.umap_ as umap
+if umap_flag:
+    import umap.umap_ as umap
 from datetime import datetime
 import json
 import hdbscan
@@ -115,7 +118,8 @@ def load_df_once():
     return df
 
 # Dimension reduction, clustering models for llm events
-umap_llm_model = umap.UMAP(n_neighbors=15, n_components=10, min_dist=0.1, metric='cosine')
+if umap_flag:
+    umap_llm_model = umap.UMAP(n_neighbors=15, n_components=10, min_dist=0.1, metric='cosine')
 llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=5, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
 
 # Get question from event_text
@@ -134,9 +138,10 @@ def embed_llm_events(df):
 
     # Embed the llm events and reduce dimension
     embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
-    umap_llm_model.fit(embeds)
-    embeddings_5d = umap_llm_model.transform(embeds)
-    llm_df['embeds'] = [e for e in embeddings_5d]
+    if umap_flag:
+        umap_llm_model.fit(embeds)
+        embeds = umap_llm_model.transform(embeds)
+    llm_df['embeds'] = [e for e in embeds]
     return llm_df
 
 class DataframeLoader:

@@ -87,6 +87,8 @@ def get_embedding_from_text(text):
     llm_df = DataframeLoader.get_dataframe('llm_df')
     embeds = np.array(embeddings_model.embed_documents([text]))
     embeds_array = np.vstack(embeds)
+    if not umap_flag:
+        return llm_df, embeds_array
     return llm_df, umap_llm_model.transform(embeds_array)
 
 
