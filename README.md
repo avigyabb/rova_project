@@ -30,3 +30,6 @@ add to admin file of the app
 (might have to delete migrations file)
 
 If flows seems broken, try running python manage.py runserver again.
+
+
+If db doesn't work, make sure there is a migrations folder with an empty __init__.py in each django app folder

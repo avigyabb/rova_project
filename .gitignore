@@ -8,7 +8,3 @@ categories/__pycache__/
 keymetrics/__pycache__/
 myapi/__pycache__/
 rova_demo/__pycache__/
-accounts/migrations/
-categories/migrations/
-keymetrics/migrations/
-myapi/migrations/
