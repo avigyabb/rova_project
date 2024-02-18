@@ -23,4 +23,4 @@ class SessionsToScores(models.Model):
     kpi_score = models.IntegerField(null=True)
     user_score = models.IntegerField(null=True)
     ai_score = models.IntegerField(null=True)
-    custom_score = models.TextField(null=True)
+    custom_score = models.TextField(null=True, default=str({}))

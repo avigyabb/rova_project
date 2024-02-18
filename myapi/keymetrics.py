@@ -4,7 +4,9 @@ from .traces import *
 from .callgpt import explain_session_by_kpis, query_gpt, explain_session
 from .metrics import get_churned_sessions
 from keymetrics.models import ListOfKPIs, SessionsToKPIs, SessionsToScores
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 import random
+import json
 
 #Function to construct the overall representation
 def get_keymetrics_overview(user):
@@ -64,19 +66,24 @@ def add_keymetric(user, name, description, importance, period=None):
         new_keymetric.summary = summary
         new_keymetric.save()
 
-def assign_custom_eval(user, keymetric, n=5):
+def assign_custom_eval(user, keymetric, n=0.2):
     count = ListOfKPIs.objects.filter(user=user,name__icontains='Custom Eval').count()
     keymetric.name = keymetric.name + "-" + str(count+1)
     keymetric.save()
     df = DataframeLoader.get_dataframe('df')
     session_ids = list(df['session_id'].unique())
-    session_ids = random.sample(session_ids, n)
+    session_ids = random.sample(session_ids, int(len(session_ids)*n))
     for id in session_ids:
         filtered = df[df['session_id'] == id]
         custom_score = explain_session(filtered, flag=3, custom_eval={'description': keymetric.description, 'importance': keymetric.importance})
         if(custom_score['score'] != 'N/A'):
             session_score, created = SessionsToScores.objects.get_or_create(user=user, session_id=id)
-            session_score.custom_score = (session_score.custom_score + custom_score['score'] + "_") if session_score.custom_score else (custom_score['score'] + "_")
+            if(json.loads(session_score.custom_score) is not None):
+                temp = json.loads(session_score.custom_score)
+                temp.update({keymetric.name : custom_score['score']})
+                session_score.custom_score = json.dumps(temp)
+            else:
+                session_score.custom_score = json.dumps({keymetric.name : custom_score['score']})
             session_score.save()
             SessionsToKPIs.objects.get_or_create(user=user, session_id=id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
     return count+1
@@ -101,10 +108,20 @@ def delete_keymetric(user, index):
     keymetrics = get_keymetrics(user)
     index_to_delete = len(keymetrics) - int(index) - 1
     name = keymetrics[index_to_delete]['name']
+    session_ids = SessionsToKPIs.objects.filter(user=user, keymetric_name=name)
+    if("Custom Eval" in name):
+        for session_id in session_ids:
+            score = SessionsToScores.objects.get(user=user, session_id=session_id.session_id)
+            temp = json.loads(score.custom_score)
+            if(temp is not None):
+                temp.pop(name, None)
+                score.custom_score = json.dumps(temp)
+                score.save()
+        session_ids.delete()
+    else:
+        session_ids.delete()
     ListOfKPIs.objects.filter(user=user, name=name).delete()
-    SessionsToKPIs.objects.filter(user=user, keymetric_name=name).delete()
 
-    
 # given a list of events that are cared about (kpis), returns all sessions with all of those events
 def find_sessions_with_kpis(df, raw_event_names, in_order=False, period=None, session_id=None):
 

@@ -14,6 +14,7 @@ from pgmpy.models import BayesianNetwork
 from pgmpy.estimators import BayesianEstimator
 from pgmpy.inference import VariableElimination
 import hdbscan
+import json
 
 # Dictionary that maps importance texts to score
 importance_score_dict = {
@@ -98,18 +99,22 @@ def aggregate_score(user, df, coverage=0.0):
         # Query the Django model for the current session_id
         session_scores, created = SessionsToScores.objects.get_or_create(user=user, session_id=row['session_id'])
         session_scores.save()
-        custom_scores = []
+        custom_scores_obj = {}
         if(not created):
-            if(session_scores.custom_score is not None):
-                custom_scores = [int(s.strip()) for s in session_scores.custom_score.split('_') if s != '']
             # Update the DataFrame with values from the Django model if they are not None
             sessions_df.at[idx, 'kpi_score'] = session_scores.kpi_score
             sessions_df.at[idx, 'user_score'] = session_scores.user_score if session_scores.user_score else random.choice([session_scores.kpi_score, session_scores.ai_score])
             sessions_df.at[idx, 'ai_score'] = session_scores.ai_score
-            for indx, c in enumerate(custom_scores):
-                if(indx > max_indx):
-                    max_indx = indx
-                sessions_df.at[idx, 'custom_score_'+str(indx+1)] = custom_scores[indx] if custom_scores[indx] is not None else np.nan
+            custom_scores_obj = json.loads(session_scores.custom_score) if (json.loads(session_scores.custom_score)) else {}
+            for key, value in custom_scores_obj.items():
+                ind = int(key.split("-")[1])
+                if(ind > max_indx):
+                    max_indx = ind
+                sessions_df.at[idx, "custom_score_"+str(ind)] = int(value) if value is not None else np.nan
+    for i in range(max_indx+1):
+        col_n = ("custom_score_"+(str(i+1)))
+        if(col_n not in sessions_df.index):
+            sessions_df[col_n] = np.nan
         # Reshape data for k-means
     embeddings = np.array(sessions_df['embeds'].tolist())
 
@@ -171,7 +176,6 @@ def impute(df, max_indx):
 def bayes_scoring(sessions_df, max_indx):
     # Define the structure of your Bayesian Network
     sessions_df = impute(sessions_df, max_indx)
-    print(sessions_df)
     model_structure = [
         ('user_score', 'ai_score'),
         ('user_score', 'cluster_label'),
