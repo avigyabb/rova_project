@@ -43,7 +43,6 @@ def new_clickhouse_client():
 clickhouse_client = new_clickhouse_client()
 
 options_clickhouse_client = new_clickhouse_client()
-filters_clickhouse_client = new_clickhouse_client()
 
 rova_client = Rova(db_name)
 

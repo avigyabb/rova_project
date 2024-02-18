@@ -119,7 +119,7 @@ def get_session_ids_given_filters(user, included_categories, excluded_categories
                 )
             """
         ).format(start)
-    result = filters_clickhouse_client.query(combined_table_sql + sql_query)
+    result = clickhouse_client.query(combined_table_sql + sql_query)
     df = pd.DataFrame(data = result.result_rows, columns = result.column_names)
     if len(df) == 0:
         return []

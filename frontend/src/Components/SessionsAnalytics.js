@@ -92,7 +92,8 @@ const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-options/");
         if (response.data.options) {
-          setSignalOptionsArrayData(response.data.options);
+          const options = response.data.options.map(option => option[0])
+          setSignalOptionsArrayData(options);
         }
       } catch (error) {
         console.error(error);
