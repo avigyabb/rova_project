@@ -13,3 +13,4 @@ accounts/migrations/
 categories/migrations/
 keymetrics/migrations/
 myapi/migrations/
+data_sets/migrations/
