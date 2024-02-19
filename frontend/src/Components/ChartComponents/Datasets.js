@@ -4,8 +4,10 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { Icon } from '@mui/material';
+import GetAppIcon from '@mui/icons-material/GetApp';
+
 // Initial sample database data
-const initialDatabases = [
+const initialDatasets = [
   {
     id: 1,
     type: 'CRM',
@@ -34,43 +36,50 @@ function getScoreColorHSL(score) {
 }
 
   
-const DatasetCard = ({ database, index, onDelete}) => {
+const DatasetCard = ({ dataset, index, onDelete}) => {
     const [showOptions, setShowOptions] = useState(false);
-    const scoreColor = getScoreColorHSL(database.score);
+    const scoreColor = getScoreColorHSL(dataset.score);
+    const [cardColor, setCardColor] = useState('white');
+    
     const handleOptionsClick = () => {
-        console.log("Options clicked, current state is: ", !showOptions); // This should log the state change
-        setShowOptions(!showOptions);
-      };
+      console.log("Options clicked, current state is: ", !showOptions); // This should log the state change
+      setShowOptions(!showOptions);
+    };
   
     const handleDelete = () => {
-        onDelete(database.id); // Call the passed deletion function with the id
+      onDelete(dataset.id); // Call the passed deletion function with the id
     };
+
+    const handleDatasetClick = () => {
+      setCardColor(cardColor === 'white' ? 'lightgray' : 'white');
+    }
 
     const cardStyle = {
       height: '200px',
       width: '350px',
-      position: 'relative', // Added to position children absolutely with respect to this card
+      position: 'relative',
+      backgroundColor: cardColor,
     };
   
     return (
-      <div className="database-card" style={cardStyle}>
+      <div className="database-card" style={cardStyle} onClick={handleDatasetClick}>
         <div className="text-lg font-bold flex p-3">
-            {database.name}
-            <div className='ml-auto score' style={{ color: scoreColor }}>
-                <p>{database.score >= 0 ? database.score : '-'}</p>
-            </div>
+          {dataset.name}
+          <div className='ml-auto score' style={{ color: scoreColor }}>
+            <p>{dataset.score >= 0 ? dataset.score : '-'}</p>
+          </div>
         </div>
         <div className="card-body">
-          <div className='text-sm'>{database.description}</div>
+          <div className='text-sm'>{dataset.description}</div>
           <hr class="faint-line" />
           <div className='flex flex-row'>
             <div>
                 <div className='text-xs count'>Items</div>
-                <div className='text-xs count'>{database.count}</div>
+                <div className='text-xs count'>{dataset.count}</div>
             </div>
             <div className='ml-auto'>
                 <div className='text-xs count'>
-                    {database.tags.map((tag, index) => (
+                    {dataset.tags.map((tag, index) => (
                         <div key={index} className="tag">{tag}</div>
                     ))}
                 </div>
@@ -86,35 +95,44 @@ const DatasetCard = ({ database, index, onDelete}) => {
             <button>Edit</button>
           </div>
         )}
+        {cardColor === 'lightgray' && (
+          <div className="absolute inset-0 bg-black bg-opacity-30 flex flex-col justify-center items-center">
+              <div className='export-btn flex items-center'>
+                <GetAppIcon className='mr-2'/>
+                <button> Export </button>
+              </div>
+          </div>
+        )}
       </div>
     );
   };
 
 const Databases = () => {
-    const [databases, setDatabases] = useState(initialDatabases);
+  const [datasets, setDatasets] = useState(initialDatasets);
 
-    const addNewDataset = () => {
-      const newDataset = {
-        id: Math.max(...databases.map(d => d.id)) + 1, // Improved id assignment
-        type: 'New Type',
-        name: `New Dataset ${databases.length + 1}`,
-        description: 'This is a new dataset.',
-        color: '#FFD700',
-        logo: '/logos/newlogo.png',
-        count: '0',
-        score: '0',
-        tags: ['New', 'Dataset']
-      };
-      setDatabases([...databases, newDataset]);
+  const addNewDataset = () => {
+    const newDataset = {
+      id: Math.max(...datasets.map(d => d.id)) + 1, // Improved id assignment
+      type: 'New Type',
+      name: `New Dataset ${datasets.length + 1}`,
+      description: 'This is a new dataset.',
+      color: '#FFD700',
+      logo: '/logos/newlogo.png',
+      count: '0',
+      score: '0',
+      tags: ['New', 'Dataset']
     };
+    setDatasets([...datasets, newDataset]);
+  };
   
-    const deleteDataset = (id) => {
-      setDatabases(databases.filter(database => database.id !== id));
-    };
+  const deleteDataset = (id) => {
+    setDatasets(datasets.filter(dataset => dataset.id !== id));
+  };
+
   return (
     <div className="mt-10 databases-page mr-10 ml-10" style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      {databases.map((database, index) => (
-        <DatasetCard key={database.id} database={database} onDelete={deleteDataset} index={index}/>
+      {datasets.map((dataset, index) => (
+        <DatasetCard key={dataset.id} dataset={dataset} onDelete={deleteDataset} index={index}/>
       ))}
       <IconButton onClick={addNewDataset} className="ml-auto" aria-label="add-new-dataset" size="small">
         <AddIcon fontSize="small" />

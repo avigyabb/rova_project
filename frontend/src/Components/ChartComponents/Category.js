@@ -147,9 +147,9 @@ const Category = () => {
         }
       }
       
-      const TableRow = ({ category }) => (
+      const TableRow = ({ category, isCreating=false }) => (
         <tr>
-          <td><p className="inline-block categ-name">{category.name}</p></td>
+          <td><p className={isCreating ? "" : "inline-block categ-name"}>{category.name}</p></td>
           <td>{category.description}</td>
           <td>{category.volume}</td>
           <td>
@@ -212,7 +212,9 @@ const Category = () => {
               </tr>
             </thead>
             <tbody>
-            {addCategoryLoading && <p>Loading...</p>}
+            {addCategoryLoading && (
+              <TableRow category={{name: "Creating New Category...", description: "Analyzing Description..."}} isCreating={true}/>
+            )}
             {showNewCategoryRow && <NewTableRow/>}
             {categories.slice().reverse().map((category, index) => (
               <TableRow key={index} category={category}/>

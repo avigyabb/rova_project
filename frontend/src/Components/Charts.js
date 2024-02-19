@@ -17,6 +17,7 @@ import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import DatasetIcon from '@mui/icons-material/Dataset';
+import HomeIcon from '@mui/icons-material/Home';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -169,7 +170,7 @@ return (
     <div className='home-sidebar flex flex-col' >
       <p onClick={() => changeView('homepage')}> Dashboard </p>
       <div className='link flex' onClick={() => changeView('homepage')}>
-        <DynamicFeedIcon className='mr-4 ml-5'/>
+        <HomeIcon className='mr-4 ml-5'/>
         <button className="text-md"> Home </button>
       </div>
       <div className='link flex' onClick={() => changeView('categories')}>

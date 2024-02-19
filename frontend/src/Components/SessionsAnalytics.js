@@ -164,18 +164,33 @@ const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading
         <SessionFiltersNew label="Events Include:" setFilters = {setIncludedSignals} options = {signalOptionsArrayData} isLoading = {isLoading} filters = {includedSignals}/>
         <SessionFiltersNew label="Events Exclude:" setFilters = {setExcludedSignals} options = {signalOptionsArrayData} isLoading = {isLoading} filters = {excludedSignals}/>
       </div>
-      <div>
-        <TextField
-          id="outlined-number"
-          label="Days since last session"
-          type="number"
-          InputLabelProps={{
-            shrink: true,
-          }}
-          disabled={isLoading}
-          onKeyPress={engagementTimeOnKeyPress}
-          onBlur={engagementTimeOnBlur}
-        />
+      <div className='flex justify-between'>
+        <div>
+          <TextField
+            id="outlined-number"
+            label="Days Since Last Session"
+            type="number"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            disabled={isLoading}
+            onKeyPress={engagementTimeOnKeyPress}
+            onBlur={engagementTimeOnBlur}
+          />
+        </div>
+        <div>
+          <TextField
+            id="outlined-number"
+            label="Number Events In Session"
+            type="number"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            disabled={isLoading}
+            onKeyPress={engagementTimeOnKeyPress}
+            onBlur={engagementTimeOnBlur}
+          />
+        </div>
       </div>
     </div>
     <div className='sql-header' style={{background: '#001B2B'}}> Analytics </div>

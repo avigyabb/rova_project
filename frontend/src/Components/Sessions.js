@@ -61,7 +61,6 @@ const Sessions = () => {
 
   const arrayToCSV = async () => {
     setIsLoading('Exporting Sessions to CSV...');
-    setSelectedSessions([]);
     setSelectMode(false);
     // Assuming all objects have the same keys, use the keys from the first object for the header row
     const csvRows = [];
@@ -70,6 +69,7 @@ const Sessions = () => {
     
     // Add each object's values as a row
     for (const session of selectedSessions) {
+      console.log(session);
       let response = null;
       try {
         const params = {
@@ -103,6 +103,7 @@ const Sessions = () => {
     document.body.appendChild(link); // Required for Firefox
     link.click();
     document.body.removeChild(link); // Clean up
+    setSelectedSessions([]);
     setIsLoading('');
   }
 
