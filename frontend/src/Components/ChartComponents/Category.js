@@ -82,8 +82,8 @@ const Category = () => {
         name: category.fields.name,
         description: category.fields.description,
         volume: category.fields.volume,
-        trend: category.fields.trend,
-        path: category.fields.path
+        trend: "-10%",
+        path: "M 0 20 L 25 10 L 50 30 L 75 20 L 100 40"
     })); 
 
     const chartData = {
@@ -92,24 +92,17 @@ const Category = () => {
         {
           label: 'Volume',
           data: categories.map(metric => metric.volume),
-          backgroundColor: 'rgba(255, 161, 137, 1.0)',
+          backgroundColor: 'rgba(255, 161, 137, 0.4)',
+          borderColor: 'rgba(255, 161, 137, 1)',
+          borderWidth: 1,
         },
       ],
     };
 
     const chartOptions = {
-      plugins: {
-        title: {
-          display: true,
-          text: 'Volume by Event',
-        },
-      },
       scales: {
         y: {
           beginAtZero: true
-        },
-        x: {
-          display: false
         }
       },
       maintainAspectRatio: false, // Adjust aspect ratio here
@@ -155,8 +148,7 @@ const Category = () => {
           <td>
             {/* This would be replaced with a chart component */}
             <div className="trend-line">
-              {category.trend}
-              {/* <TrendLine value={category.trend} trend='up' path={category.path}/> */}
+              <TrendLine value={category.trend} trend='up' path={category.path}/>
             </div>
           </td>
           <td style={{border: "none"}}>

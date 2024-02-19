@@ -307,24 +307,17 @@ const KeyMetricCard = () => {
           {
             label: 'Volume',
             data: keymetrics.map(metric => metric.volume),
-            backgroundColor: 'rgba(255, 161, 137, 1.0)',
+            backgroundColor: 'rgba(255, 161, 137, 0.4)',
+            borderColor: 'rgba(255, 161, 137, 1)',
+            borderWidth: 1,
           },
         ],
       };
 
     const chartOptions = {
-      plugins: {
-        title: {
-          display: true,
-          text: 'Volume by Event',
-        },
-      },
       scales: {
         y: {
           beginAtZero: true
-        },
-        x: {
-          display: false
         }
       },
       maintainAspectRatio: false, // Adjust aspect ratio here
