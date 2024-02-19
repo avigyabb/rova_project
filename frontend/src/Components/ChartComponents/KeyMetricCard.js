@@ -22,6 +22,16 @@ const KeyMetricCard = () => {
     const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
     const [modalContent, setModalContent] = useState(''); // State to hold the modal's content
 
+    function getScoreColorHSL(score) {
+      if (score < 0) {
+          return '#A3A3A3';
+      }
+      const cappedScore = Math.max(0, Math.min(score, 100));
+      const hue = (cappedScore / 100) * 120;
+      const lightness = 40;
+      return `hsl(${hue}, 100%, ${lightness}%)`;
+    }
+
     // Fetches the category data
     const fetchData = async () =>  {
       setIsLoading(true);
@@ -244,7 +254,7 @@ const KeyMetricCard = () => {
           <td  onClick={()=>handleRowClick(keymetricList[keymetricList.length - index - 1].analysis)}><p className="inline-block categ-name">{keymetric.name}</p></td>
           <td>{keymetric.description}</td>
           <td>{keymetric.volume}</td>
-          <td>{keymetric.importance}</td>
+          <td style={{ color: getScoreColorHSL(scores[keymetric.importance]) }}>{keymetric.importance}</td>
           <td style={{border: "none"}}>
             {editMode && <RemoveCircleIcon onClick={() => removeKeyMetric(index)}/>}
           </td>
@@ -252,6 +262,7 @@ const KeyMetricCard = () => {
       );
 
       const importanceArray = ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"];
+      const scores = {"Very Negative": 10, "Negative": 30, "Neutral": 50, "Positive": 70, "Very Positive": 90};
 
       const NewTableRow = () => (
         <tr>
