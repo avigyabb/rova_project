@@ -35,9 +35,11 @@ def login_user(request):
     user = authenticate(request, username=data['username'], password=data['password'])
     if user is not None:
         login(request, user)
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse({'message': "Login successful", "status":status.HTTP_200_OK})
     else:
         # Return an 'invalid login' error message.
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse({"error": 'Invalid Credentials', "status":status.HTTP_401_UNAUTHORIZED})
 
 # Appends the newest event to the df

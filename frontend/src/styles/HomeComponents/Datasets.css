@@ -6,7 +6,7 @@
   }
   
   .database-card {
-    border: 1px solid #dee2e6;
+    border: 3px solid #dee2e6;
     border-radius: 1rem;
     overflow: hidden;
     transition: box-shadow 0.2s;
@@ -15,6 +15,7 @@
   
   .database-card:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    cursor: pointer;
   }
   
   .card-header {
@@ -78,4 +79,34 @@
     border-bottom: none;
   }
   
+  .faint-line {
+    border: none; /* Removes the default border */
+    height: 1px; /* Sets the height of the line */
+    background-color: rgba(0, 0, 0, 0.1); /* Sets a faint black line, you can adjust the opacity as needed */
+    margin: 20px 0; /* Adds some space above and below the line */
+  }
   
+  .database-card .score {
+    border: 1px solid;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border-width: 2px;
+  }
+  
+  .database-card .score p {
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .database-card .tag {
+    padding: 5px;
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgb(249, 178, 149);
+  }
