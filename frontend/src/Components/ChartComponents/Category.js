@@ -77,13 +77,17 @@ const Category = () => {
       );
     }
 
-    const categories = categoryList.map(category => ({
+    const trends = ["-6%", "12%", "2%", "-6%"]
+    const paths = ["M 0 5 L 25 20 L 50 10 L 75 15 L 100 30", 
+                   "M 0 30 L 25 25 L 50 10 L 75 15 L 100 5", 
+                   "M 0 20 L 25 25 L 50 13 L 75 18 L 100 22"]
+    const categories = categoryList.map((category, index) => ({
         id: category.pk, // primary key
         name: category.fields.name,
         description: category.fields.description,
         volume: category.fields.volume,
-        trend: "-10%",
-        path: "M 0 20 L 25 10 L 50 30 L 75 20 L 100 40"
+        trend: trends[index],
+        path: paths[index],
     })); 
 
     const chartData = {
