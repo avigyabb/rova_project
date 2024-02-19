@@ -128,21 +128,36 @@ def get_sessions(request):
     return Response({"sessions": sessions_data})
 
 
+@api_view(["GET"])
+def get_session_events_given_session_ids (request):
+    session_ids = json.loads(request.GET.get("sessionIds"))
+    sql_query = (
+        """
+        SELECT *
+        FROM CombinedData
+        WHERE session_id IN ("""
+        + ", ".join([f"'{session_id}'" for session_id in session_ids])
+        + """)
+        """
+    )
+    result = clickhouse_client.query(combined_table_sql + sql_query)
+    if (len(result.result_rows) == 0):
+        return Response({"info" : []})
+    df = pd.DataFrame(data = result.result_rows, columns = result.column_names).sort_values(
+        by = ["timestamp"]
+    )
+    output = df_to_user_events(df)
+    return Response({"info" : output})
+
+
 # client-server comm for finding trace sessions for specific user
 @api_view(["GET"])
 def get_user(request):
-    if int(request.GET.get("sessionId")) >= 0:
-        sql_query = f"""
-            SELECT *
-            FROM CombinedData
-            WHERE user_id = '{request.GET.get("userId")}' AND session_id = '{request.GET.get("sessionId")}'
-            """
-    else:
-        sql_query = f"""
-            SELECT *
-            FROM CombinedData
-            WHERE user_id = '{request.GET.get("userId")}'
-            """
+    sql_query = f"""
+        SELECT *
+        FROM CombinedData
+        WHERE user_id = '{request.GET.get("userId")}'
+        """
     result = clickhouse_client.query(combined_table_sql + sql_query)
     # dataframe of all events of user ordered by timestamp
     if (len(result.result_rows) == 0):

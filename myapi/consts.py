@@ -179,3 +179,15 @@ class DataframeLoader:
     def set_trackchanges(cls, datetime_obj):
         cls._trackchanges = datetime_obj
 
+class ScoresLoader:
+    _scores = {}
+
+    @classmethod
+    def get_scores(cls, key):
+        if key not in cls._scores:
+            return None
+        return cls._scores[key]
+
+    @classmethod
+    def set_scores(cls, key, val):
+        cls._scores[key] = val

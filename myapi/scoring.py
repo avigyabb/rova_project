@@ -158,6 +158,8 @@ def score_and_return_sessions(user):
 
     # Create a list of session ID, score pairs sorted by score in ascending order
     
+    ScoresLoader.set_scores("session_scores", session_score_dict)
+
     return session_score_dict
 
 def impute(df, max_indx):

@@ -5,6 +5,7 @@ urlpatterns = [
     path("login-user/", views.login_user, name="login_user"),
     path("hello-world/", views.hello_world, name="hello_world"),
     path("get-sessions/", views.get_sessions, name="get_sessions"),
+    path("get-session-events-given-session-ids/", views.get_session_events_given_session_ids, name = "get_session_events_given_session_ids"),
     path("get-user/", views.get_user, name="get_user"),
     path("get-fpaths/", views.get_fpaths, name="filter_paths"),
     path("get-histogram/", views.get_histogram, name="get_histogram"),

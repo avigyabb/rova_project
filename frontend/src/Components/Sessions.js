@@ -73,10 +73,9 @@ const Sessions = () => {
       let response = null;
       try {
         const params = {
-          userId: session.user_id,
-          sessionId: session.session_id,
+          sessionIds: JSON.stringify([session.session_id]),
         };
-        response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
+        response = await axios.get(process.env.REACT_APP_API_URL + 'get-session-events-given-session-ids/', { params });
       } catch (error) {
         console.error(error);
       }
