@@ -16,7 +16,7 @@ const Sessions = () => {
   const [isLoading, setIsLoading] = useState('');
   const [sqlBox, setSqlBox] = useState(`SELECT *\nFROM (\nSELECT session_id FROM rova_dev.llm\nUNION DISTINCT\nSELECT session_id FROM rova_dev.product\n)\nLIMIT 50\n`);
   const location = useLocation();
-  const { category_name } = location.state || {}; // Get the passed state
+  const { category_name, start, end, step, numSteps, event } = location.state || {}; // Get the passed state
   const [selectMode, setSelectMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
 
@@ -181,6 +181,11 @@ const Sessions = () => {
             sqlBox={sqlBox}
             handleSqlChange={handleSqlChange}
             handleSqlQuery={handleSqlQuery}
+            start = {start}
+            end = {end}
+            step = {step}
+            numSteps = {numSteps}
+            event = {event}
           />
         </div>
       </div>

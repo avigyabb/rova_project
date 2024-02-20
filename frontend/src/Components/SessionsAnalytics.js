@@ -8,7 +8,7 @@ import { Line } from 'react-chartjs-2';
 import { Legend } from 'chart.js';
 
 
-const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading, sqlBox, handleSqlChange, handleSqlQuery }) => {
+const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading, sqlBox, handleSqlChange, handleSqlQuery, start, end, step, numSteps, event }) => {
   const [engagementTime, setEngagementTime] = useState(0);
   const [signalOptionsArrayData, setSignalOptionsArrayData] = useState([]);
   const [categoryOptionsArrayData, setCategoryOptionsArrayData] = useState([]);
@@ -21,17 +21,30 @@ const SessionsAnalytics = ({ category_name, setSessions, isLoading, setIsLoading
   useEffect(() => {
     const applyFilters = async() => {
       setIsLoading('Searching Relevant Sessions...');
+      var response;
       try {
-        const params = {
-          included_categories : JSON.stringify(includedCategories),
-          excluded_categories : JSON.stringify(excludedCategories),
-          included_signals : JSON.stringify(includedSignals),
-          excluded_signals : JSON.stringify(excludedSignals),
-          engagement_time : engagementTime,
+        if (event) {
+          const params = {
+            start_event : start,
+            end_event : end,
+            step_num : step,
+            num_steps : numSteps,
+            event_name : event,
+          }
+          response = await axios.get(process.env.REACT_APP_API_URL + 'get-sessions-at-step/', {params});
         }
-        console.log(process.env.REACT_APP_API_URL);
-        const response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
-        console.log(response.data.sessions)
+        else {
+          const params = {
+            included_categories : JSON.stringify(includedCategories),
+            excluded_categories : JSON.stringify(excludedCategories),
+            included_signals : JSON.stringify(includedSignals),
+            excluded_signals : JSON.stringify(excludedSignals),
+            engagement_time : engagementTime,
+          }
+          console.log(process.env.REACT_APP_API_URL);
+          response = await axios.get(process.env.REACT_APP_API_URL + "get-filtered-sessions/", {params});
+          console.log(response.data.sessions)
+        }
         setSessions(response.data.sessions);
         
         // Helper function to format a Date object to a 'YYYY-MM-DD' string
