@@ -254,7 +254,20 @@ const KeyMetricCard = () => {
           <td  onClick={()=>handleRowClick(keymetricList[keymetricList.length - index - 1].analysis)}><p className="inline-block categ-name">{keymetric.name}</p></td>
           <td>{keymetric.description}</td>
           <td>{keymetric.volume}</td>
-          <td style={{ color: getScoreColorHSL(scores[keymetric.importance]) }}>{keymetric.importance}</td>
+          <td style={{ textAlign: 'center' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '5px 10px', // Adjust padding as needed to change the size of the bubble
+              borderRadius: '10px', // This makes the bubble round
+              color: 'black', // Set text color (optional, based on your design preferences)
+              background: getScoreColorHSL(scores[keymetric.importance]),
+              textAlign: 'center',
+              lineHeight: '20px', // Adjust line height to vertically center the text within the bubble
+            }}>
+              {keymetric.importance}
+            </span>
+          </td>
+          {/* <td style={{ color: getScoreColorHSL(scores[keymetric.importance]) }}>{keymetric.importance}</td> */}
           <td style={{border: "none"}}>
             {editMode && <RemoveCircleIcon onClick={() => removeKeyMetric(index)}/>}
           </td>
@@ -262,7 +275,7 @@ const KeyMetricCard = () => {
       );
 
       const importanceArray = ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"];
-      const scores = {"Very Negative": 10, "Negative": 30, "Neutral": 50, "Positive": 70, "Very Positive": 90};
+      const scores = {"Very Negative": 20, "Negative": 40, "Neutral": 60, "Positive": 80, "Very Positive": 100};
 
       const NewTableRow = () => (
         <tr>
