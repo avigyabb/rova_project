@@ -18,6 +18,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import DatasetIcon from '@mui/icons-material/Dataset';
 import HomeIcon from '@mui/icons-material/Home';
+import { useLocation, useNavigate} from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -160,7 +161,10 @@ const Charts = () => {
   );
   
  // State to track the current view
- const [currentView, setCurrentView] = useState('homepage'); // default view
+ const location = useLocation();
+ const { key } = location.state || {}; // Get the passed state
+
+ const [currentView, setCurrentView] = useState(key || 'homepage'); // default view
 
  // Function to change the current view
  const changeView = (view) => setCurrentView(view);

@@ -8,8 +8,9 @@ import SessionSearch from './SessionComponents/SessionSearch';
 import SessionsAnalytics from './SessionsAnalytics';
 
 import CircularProgress from '@mui/material/CircularProgress';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate} from 'react-router-dom';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import DatasetIcon from '@mui/icons-material/Dataset';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState([]);
@@ -19,6 +20,7 @@ const Sessions = () => {
   const { category_name, start, end, step, numSteps, event } = location.state || {}; // Get the passed state
   const [selectMode, setSelectMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
+  const navigate = useNavigate();
 
   const handleSqlChange = (event) => {
     // Update the sqlQuery state with the new value from the textarea
@@ -57,6 +59,10 @@ const Sessions = () => {
       setSelectedSessions(sessions);
     }
     setSelectMode(!selectMode);
+  }
+
+  const goToDatsets = () => {
+    navigate(process.env.REACT_APP_AUTH_HEADER + '/charts', { state: {key: 'datasets'} });
   }
 
   const arrayToCSV = async () => {
@@ -133,9 +139,9 @@ const Sessions = () => {
               <>
               <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
               {selectedSessions.length > 0 && 
-                <div className='export-btn flex items-center' onClick={arrayToCSV}>
-                  <GetAppIcon className='mr-2'/>
-                  <button> Export </button>
+                <div className='export-btn flex items-center' onClick={goToDatsets}>
+                  <DatasetIcon className='mr-2'/>
+                  <button> Add Dataset </button>
                 </div>
               }
               </>
