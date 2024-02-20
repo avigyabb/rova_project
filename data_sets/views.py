@@ -7,7 +7,7 @@ from myapi.views import *
 from rest_framework.decorators import api_view
 from .models import Dataset, SessionDataset
 
-# Create your views here.
+# Adds a new dataset
 @csrf_exempt
 @require_POST
 def add_new_dataset (request):
@@ -15,6 +15,15 @@ def add_new_dataset (request):
     dataset = Dataset(user = request.user, name = data.get("name"), description = data.get("description"))
     dataset.save()
     return JsonResponse({"success": "Dataset created successfully."})
+
+# Deletes a dataset given the index
+@api_view(["GET"])
+def delete_dataset(request):
+    index = request.GET.get("index")
+    UserCategory = Dataset.objects.filter(user=request.user)
+    dataset_to_delete = UserCategory.get(pk=index)
+    dataset_to_delete.delete()
+    return Response({"message": "Dataset deleted successfully"})
 
 @api_view(["GET"])
 def get_properties_for_datasets(request):
@@ -67,4 +76,3 @@ def get_session_data_given_dataset (request):
     dataset = Dataset.objects.filter(user = request.user).get(name = dataset_name)
     session_ids = [session_data.session_id for session_data in SessionDataset.objects.filter(user = request.user).filter(dataset = dataset)]
     return Response({"events" : get_session_events_given_session_ids(session_ids)})
-

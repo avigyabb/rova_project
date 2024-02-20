@@ -195,8 +195,17 @@ const DatasetCard = ({ dataset, index, onDelete}) => {
       fetchData();
     };
   
-    const deleteDataset = (id) => {
-      setDatasets(datasets.filter(dataset => dataset.id !== id));
+    const deleteDataset = async (id) => {
+      const params = {
+        index: id
+      };
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'data_sets/delete-dataset/', { params });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        fetchData();
+      }
     };
   
     return (
