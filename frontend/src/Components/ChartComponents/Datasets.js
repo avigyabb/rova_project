@@ -1,20 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
+import axios from  'axios';
 import '../../styles/HomeComponents/Datasets.css'; // Make sure to create a corresponding CSS file for styling
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { Icon } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 // Initial sample database data
 const initialDatasets = [
   {
-    id: 1,
-    type: 'CRM',
     name: 'Salesforce (suggested)',
     description: 'Send your contacts directly to Salesforce as either leads or contacts.',
-    color: '#00A1E0',
-    logo: '/logos/salesforce.png',
     count: '1,000,000',
     score: '50',
     tags: [
@@ -35,6 +34,59 @@ function getScoreColorHSL(score) {
     return `hsl(${hue}, 100%, ${lightness}%)`;
 }
 
+const cardStyle = {
+  height: '200px',
+  width: '350px',
+  position: 'relative',
+  backgroundColor: 'white',
+};
+
+const EditableDatasetCard = ({onSave}) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSave = async () => {
+    const newDataset = {
+      name: name,
+      description: description
+    }
+    try {
+      const response = await axios.post(process.env.REACT_APP_API_URL + 'data_sets/add-new-dataset/', newDataset);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // fetchData();
+      // setAddCategoryLoading(false);
+    }
+    onSave();
+  };
+
+  return (
+    <div className="database-card" style={cardStyle}>
+      <div className="text-lg font-bold flex p-3">
+      <input
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="dataset-input" // Assign proper CSS classes as needed
+      />
+      </div>
+      <div className="card-body">
+      <textarea
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="dataset-textarea" // Assign proper CSS classes as needed
+      />
+        <hr class="faint-line" />
+        <IconButton onClick={handleSave} aria-label="done" size="small">
+        <CheckIcon fontSize="small" />
+      </IconButton>        
+        </div>
+      </div>
+  );
+};
   
 const DatasetCard = ({ dataset, index, onDelete}) => {
     const [showOptions, setShowOptions] = useState(false);
@@ -53,13 +105,6 @@ const DatasetCard = ({ dataset, index, onDelete}) => {
     const handleDatasetClick = () => {
       setCardColor(cardColor === 'white' ? 'lightgray' : 'white');
     }
-
-    const cardStyle = {
-      height: '200px',
-      width: '350px',
-      position: 'relative',
-      backgroundColor: cardColor,
-    };
   
     return (
       <div className="database-card" style={cardStyle} onClick={handleDatasetClick}>
@@ -107,38 +152,66 @@ const DatasetCard = ({ dataset, index, onDelete}) => {
     );
   };
 
-const Databases = () => {
-  const [datasets, setDatasets] = useState(initialDatasets);
+  const Databases = () => {
+    const [datasets, setDatasets] = useState(initialDatasets);
+    const [isAdding, setIsAdding] = useState(false); // New state to manage if adding new dataset
+    const [isLoading, setIsLoading] = useState(false);
 
-  const addNewDataset = () => {
-    const newDataset = {
-      id: Math.max(...datasets.map(d => d.id)) + 1, // Improved id assignment
-      type: 'New Type',
-      name: `New Dataset ${datasets.length + 1}`,
-      description: 'This is a new dataset.',
-      color: '#FFD700',
-      logo: '/logos/newlogo.png',
-      count: '0',
-      score: '0',
-      tags: ['New', 'Dataset']
+    // Fetches the datasets
+    const fetchData = async () =>  {
+      setIsLoading(true);
+        try {
+          // const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user-categories/');
+          const datasets_response = await axios.get(process.env.REACT_APP_API_URL + 'data_sets/get-properties-for-datasets/');
+          console.log(datasets_response.data.datasets);
+          setDatasets(datasets_response.data.datasets);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+    // Fetch data on page open
+    useEffect(() => {
+        fetchData();
+      }, []);
+
+      // Conditional rendering based on isLoading
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex justify-center items-center">
+          <CircularProgress style={{ color: '#FFA189' }}/>
+        </div>
+      );
+    }
+  
+    const handleAddNewDataset = () => {
+      setIsAdding(true); // Activates the editing mode for a new dataset
     };
-    setDatasets([...datasets, newDataset]);
+  
+    const saveNewDataset = (newDataset) => {
+      setIsAdding(false); // Deactivates the editing mode
+      fetchData();
+    };
+  
+    const deleteDataset = (id) => {
+      setDatasets(datasets.filter(dataset => dataset.id !== id));
+    };
+  
+    return (
+      <div className="mt-10 databases-page mr-10 ml-10" style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        {datasets.map((dataset, index) => (
+          <DatasetCard key={dataset.id} dataset={dataset} onDelete={deleteDataset} index={index}/>
+        ))}
+        {isAdding && (
+        <EditableDatasetCard onSave={saveNewDataset} />
+      )}
+        <IconButton onClick={handleAddNewDataset} className="ml-auto" aria-label="add-new-dataset" size="small">
+          <AddIcon fontSize="small" />
+        </IconButton>
+      </div>
+    );
   };
   
-  const deleteDataset = (id) => {
-    setDatasets(datasets.filter(dataset => dataset.id !== id));
-  };
-
-  return (
-    <div className="mt-10 databases-page mr-10 ml-10" style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      {datasets.map((dataset, index) => (
-        <DatasetCard key={dataset.id} dataset={dataset} onDelete={deleteDataset} index={index}/>
-      ))}
-      <IconButton onClick={addNewDataset} className="ml-auto" aria-label="add-new-dataset" size="small">
-        <AddIcon fontSize="small" />
-      </IconButton>
-    </div>
-  );
-};
-
-export default Databases;
+  export default Databases;
