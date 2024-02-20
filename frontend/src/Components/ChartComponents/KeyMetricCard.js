@@ -349,10 +349,10 @@ const KeyMetricCard = () => {
             ) : null}
           </div>
           <div style={{ width: keymetricList.length > 0 || showNewCategoryRow ? "100%" : "85%"}}>
-            <TopicTable />
+            <TopicTable/>
           </div>
-          <div className='flex mt-10'>
-            <div className='chart-container' style={{ width: '90%', height: '400px', marginTop: '10px' }}>
+          <div className='flex' style={{ width: '85%'}}>
+            <div className='chart-container' style={{ width: '100%', height: '400px', 'margin-left': '0px'}}>
               <Bar data={chartData} options={chartOptions} />
             </div>
             <Modal

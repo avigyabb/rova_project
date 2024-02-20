@@ -223,7 +223,7 @@ const Category = () => {
       return (
         <div className='charts-content' style={{}}>
           {/* something wrong with below style */}
-          <div className='flex' style={{ width: "81%" }}>
+          <div className='flex' style={{ width: "85%" }}>
             <p className='text-4xl mb-7'>Topic Insights 🗂️</p>
             {!showNewCategoryRow && !editMode ? (
               <>
@@ -234,11 +234,11 @@ const Category = () => {
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
-          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "100%"}}>
+          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "113%" : "100%"}}>
             <TopicTable />
           </div>
-          <div className='flex mt-10'>
-            <div className='chart-container' style={{ width: '90%', height: '400px', marginTop: '10px' }}>
+          <div className='flex' style={{ width: "85%"}}>
+            <div className='chart-container mr-auto' style={{ width: '100%', height: '400px', 'margin-left': '0px'}}>
               <Bar data={chartData} options={chartOptions} />
             </div>
           </div>

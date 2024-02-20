@@ -66,18 +66,29 @@ def add_keymetric(user, name, description, importance, period=None):
         new_keymetric.summary = summary
         new_keymetric.save()
 
-def assign_custom_eval(user, keymetric, n=0.2):
+def assign_custom_eval(user, keymetric, n=0.3):
     count = ListOfKPIs.objects.filter(user=user,name__icontains='Custom Eval').count()
     keymetric.name = keymetric.name + "-" + str(count+1)
     keymetric.save()
+
     df = DataframeLoader.get_dataframe('df')
-    session_ids = list(df['session_id'].unique())
-    session_ids = random.sample(session_ids, int(len(session_ids)*n))
-    for id in session_ids:
-        filtered = df[df['session_id'] == id]
+    sessions_df = DataframeLoader.get_dataframe('sessions_df')
+
+    to_explore = list(df['session_id'].unique())
+    random.shuffle(to_explore)
+
+    total_sessions_observed = 0
+    next_id = to_explore[total_sessions_observed]
+
+    visited = []
+
+    while(total_sessions_observed <= 0.3*len(to_explore)):
+        filtered = df[df['session_id'] == next_id]
         custom_score = explain_session(filtered, flag=3, custom_eval={'description': keymetric.description, 'importance': keymetric.importance})
         if(custom_score['score'] != 'N/A'):
-            session_score, created = SessionsToScores.objects.get_or_create(user=user, session_id=id)
+            visited.append(next_id)
+            to_explore = list(find_similar_sessions(sessions_df, next_id, None).difference(visited))
+            session_score, created = SessionsToScores.objects.get_or_create(user=user, session_id=next_id)
             if(json.loads(session_score.custom_score) is not None):
                 temp = json.loads(session_score.custom_score)
                 temp.update({keymetric.name : custom_score['score']})
@@ -85,7 +96,11 @@ def assign_custom_eval(user, keymetric, n=0.2):
             else:
                 session_score.custom_score = json.dumps({keymetric.name : custom_score['score']})
             session_score.save()
-            SessionsToKPIs.objects.get_or_create(user=user, session_id=id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
+            SessionsToKPIs.objects.get_or_create(user=user, session_id=next_id, keymetric_id=keymetric.id, keymetric_name=keymetric.name)
+        to_explore = to_explore[1:]
+        next_id = to_explore[0]
+        total_sessions_observed += 1
+
     return count+1
 
 def add_keymetric_for_new_session(user, session_id):

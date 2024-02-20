@@ -196,10 +196,10 @@ def prompt_to_generate_clusters(sentence, flag=0, custom_eval=None):
     elif(flag == 3 and custom_eval):
         description = custom_eval['description']
         importance = custom_eval['importance']
-        system_prompt = "A product analyst has asked you to observe a single session of a user using your product. Determine if the session follows this description: " + description + ". \
-                        If the session does follow the provided description, it should be rated (from Very Negative to Very Positive) as " + importance + ".  \
-                        Evaluate the session according to the product anlayst's criteria and decide if the evaluaion description truly characterizes the session. Then refine the intended score based on your analysis and output a score from {1, 2, 3, 4, 5} with 1 being very negative and 5 being very positive and then justify your response in a single sentence.\
-                        Your output should be a JSON object of the form '{'score': 'score', 'justification': 'justification'}'. If the evaluation does not seem relevant to the provided session, return 'N/A' for both the score and justification."
+        system_prompt = "A product analyst has asked you to observe a single session of a user using your product. The product analyst has provided you with a natural language \
+                          description of a evaluation they want to make on that session as well as how important that evaluation is to them. The description is: " + description + ", and the importance of this eval (from Very Negative to Very Positive) is " + importance + ".  \
+                          Determine if the provided description characterizes the session below. If so output the given score from the user from the set {1, 2, 3, 4, 5} with 1 being very negative and 5 being very positive and then justify your response in a single sentence. \
+                          Your output should be a JSON object of the form '{'score': 'score', 'justification': 'justification'}'. If the evaluation does not seem relevant to the provided session, return 'N/A' for the score and justification."
     msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Here is a description of a session: {}".format(sentence)}]
     return msgs
 
