@@ -29,3 +29,40 @@
   padding: 2%;
   border-radius: 10px;
 }
+
+.chart-sessions-content {
+  padding-top: 2%;
+  height: 40%;
+}
+
+.chart-sessions-content .col {
+  width: 50%;
+  min-height: 100%;
+  align-items: center;
+}
+
+.subsession-card {
+  width: 96%;
+  display: flex;
+  background-color: #F5F5F2;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.subsession-card:hover {
+  background-color: #d3d3d3;
+  cursor: pointer;
+  transition-duration: 0.5s;
+}
+
+.subsession-card .score {
+  border: 1px solid;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border-width: 2px;
+}

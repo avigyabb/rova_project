@@ -1,34 +1,34 @@
 import HomeIcon from '@mui/icons-material/Home';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import '../../styles/HomeComponents/CategorySessions.css';
 import { useNavigate } from 'react-router-dom';
 
 const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
   const data = {
-    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+    labels: [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
     datasets: [
       {
-        label: 'Dataset 1',
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-        ],
-        borderWidth: 1
-      }
+        label: 'Stanford Students',
+        data: [12, 19, 3, 5, 2, 3, 5, 34, 6, 23, 5, 6, 3, 5, 7, 9, 12, 19, 3, 5, 2],
+        borderWidth: 1,
+        borderColor: '#FF4415',
+        backgroundColor: 'rgba(255, 68, 21, 0.2)',
+      },
+      {
+        label: 'Spanish Speakers',
+        data: [1, 1, 13, 15, 12, 13, 15, 4, 16, 3, 15, 16, 13, 15, 27, 19, 2, 9, 13, 15, 12],
+        borderWidth: 1,
+        borderColor: 'orange',
+        backgroundColor: 'rgba(255, 68, 21, 0.2)',
+      },
+      {
+        label: 'Stanford Students',
+        data: [32, 39, 33, 35, 32, 33, 35, 34, 46, 33, 45, 46, 33, 35, 37, 39, 32, 39, 33, 35, 33],
+        borderWidth: 1,
+        borderColor: 'blue',
+        backgroundColor: 'rgba(55, 68, 255, 0.2)',
+      },
     ]
   };
 
@@ -36,6 +36,49 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
   const navExplorePage = (category_name) => {
     navigate(`${process.env.REACT_APP_AUTH_HEADER}/sessions`, { state: { category_name } });
   }
+
+  function getScoreColorHSL(score) {
+    if (score < 0) {
+      return '#A3A3A3';
+    }
+    const cappedScore = Math.max(0, Math.min(score, 100));
+    const hue = (cappedScore / 100) * 120;
+    const lightness = 40;
+    return `hsl(${hue}, 100%, ${lightness}%)`;
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'left', // can be 'top', 'bottom', 'left', 'right'
+        labels: {
+          color: 'black', // 'fontColor' is now 'color'
+          boxWidth: 20,
+          padding: 10
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'Past 20 Days'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Session Counts'
+        }
+      }
+    },
+  };
 
   return (
     <>
@@ -51,7 +94,36 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
       </div>
       <h1 className='text-3xl' style={{marginTop: '2%', marginLeft: '3%'}}> {focusedCategory} </h1>
       <div className='chart-container'>
-        <Bar data={data} />
+        <Line data={data} options={options}/>
+      </div>
+      <div className='chart-sessions-content flex'>
+        <div className='col flex flex-col' style={{borderRight: '1px solid lightgray'}}>
+          <h1 className='text-xl'> Cohorts 👨‍👩‍👧‍👦 </h1>
+          <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
+            <div>
+              <h1> Stanford Students </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 17 sessions </p>
+            </div>
+            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(73) }}> 73 </h1>
+          </div>
+          <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
+            <div>
+              <h1> Spanish Speakers </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 10 sessions </p>
+            </div>
+            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(14) }}> 14 </h1>
+          </div>
+        </div>
+        <div className='col flex flex-col'> 
+          <h1 className='text-xl'> Intents ⚒️ </h1>
+          <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
+            <div>
+              <h1> Intent </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 17 sessions </p>
+            </div>
+            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(53) }}> 53 </h1>
+          </div>
+        </div>
       </div>
     </>
   );
