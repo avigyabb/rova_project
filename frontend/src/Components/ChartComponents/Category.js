@@ -151,9 +151,10 @@ const Category = () => {
           <td>{category.volume}</td>
           <td>
             {/* This would be replaced with a chart component */}
-            <div className="trend-line">
+            {/* <div className="trend-line">
               <TrendLine value={category.trend} trend='up' path={category.path}/>
-            </div>
+            </div> */}
+            -
           </td>
           <td style={{border: "none"}}>
             {editMode && <RemoveCircleIcon onClick={() => removeCategory(category.id)}/>}
