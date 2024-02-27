@@ -9,7 +9,7 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
     labels: [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
     datasets: [
       {
-        label: 'Stanford Students',
+        label: 'Java Queries',
         data: [12, 19, 3, 5, 2, 3, 5, 34, 6, 23, 5, 6, 3, 5, 7, 9, 12, 19, 3, 5, 2],
         borderWidth: 1,
         borderColor: '#FF4415',
@@ -17,13 +17,13 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
       },
       {
         label: 'Spanish Speakers',
-        data: [1, 1, 13, 15, 12, 13, 15, 4, 16, 3, 15, 16, 13, 15, 27, 19, 2, 9, 13, 15, 12],
+        data: [51, 51, 53, 45, 42, 43, 45, 38, 36, 33, 35, 26, 23, 25, 27, 19, 2, 9, 13, 15, 12],
         borderWidth: 1,
         borderColor: 'orange',
         backgroundColor: 'rgba(255, 68, 21, 0.2)',
       },
       {
-        label: 'Stanford Students',
+        label: 'Python Queries',
         data: [32, 39, 33, 35, 32, 33, 35, 34, 46, 33, 45, 46, 33, 35, 37, 39, 32, 39, 33, 35, 33],
         borderWidth: 1,
         borderColor: 'blue',
@@ -101,13 +101,6 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
           <h1 className='text-xl'> Cohorts 👨‍👩‍👧‍👦 </h1>
           <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
             <div>
-              <h1> Stanford Students </h1>
-              <p className='ml-auto text-gray-500 text-xs'> 17 sessions </p>
-            </div>
-            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(73) }}> 73 </h1>
-          </div>
-          <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
-            <div>
               <h1> Spanish Speakers </h1>
               <p className='ml-auto text-gray-500 text-xs'> 10 sessions </p>
             </div>
@@ -115,13 +108,20 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
           </div>
         </div>
         <div className='col flex flex-col'> 
-          <h1 className='text-xl'> Intents ⚒️ </h1>
+          <h1 className='text-xl'> Segments ⚒️ </h1>
           <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
             <div>
-              <h1> Intent </h1>
+              <h1> Python Queries </h1>
               <p className='ml-auto text-gray-500 text-xs'> 17 sessions </p>
             </div>
-            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(53) }}> 53 </h1>
+            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(87) }}> 87 </h1>
+          </div>
+          <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
+            <div>
+              <h1> Java Queries </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 7 sessions </p>
+            </div>
+            <h1 className='ml-auto score' style={{ color: getScoreColorHSL(43) }}> 43 </h1>
           </div>
         </div>
       </div>
