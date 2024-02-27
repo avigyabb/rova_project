@@ -9,7 +9,7 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
     labels: [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
     datasets: [
       {
-        label: 'Java Queries',
+        label: 'Academic Inquiries',
         data: [12, 19, 3, 5, 2, 3, 5, 34, 6, 23, 5, 6, 3, 5, 7, 9, 12, 19, 3, 5, 2],
         borderWidth: 1,
         borderColor: '#FF4415',
@@ -23,7 +23,7 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
         backgroundColor: 'rgba(255, 68, 21, 0.2)',
       },
       {
-        label: 'Python Queries',
+        label: 'Location Inqueries',
         data: [32, 39, 33, 35, 32, 33, 35, 34, 46, 33, 45, 46, 33, 35, 37, 39, 32, 39, 33, 35, 33],
         borderWidth: 1,
         borderColor: 'blue',
@@ -102,7 +102,7 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
           <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
             <div>
               <h1> Spanish Speakers </h1>
-              <p className='ml-auto text-gray-500 text-xs'> 10 sessions </p>
+              <p className='ml-auto text-gray-500 text-xs'> 168 sessions </p>
             </div>
             <h1 className='ml-auto score' style={{ color: getScoreColorHSL(14) }}> 14 </h1>
           </div>
@@ -111,15 +111,15 @@ const CategorySessions = ({ focusedCategory, setFocusedCategory }) => {
           <h1 className='text-xl'> Segments ⚒️ </h1>
           <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
             <div>
-              <h1> Python Queries </h1>
-              <p className='ml-auto text-gray-500 text-xs'> 17 sessions </p>
+              <h1> Academic Inquiries </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 188 sessions </p>
             </div>
             <h1 className='ml-auto score' style={{ color: getScoreColorHSL(87) }}> 87 </h1>
           </div>
           <div className='subsession-card' onClick={() => navExplorePage(focusedCategory)}>
             <div>
-              <h1> Java Queries </h1>
-              <p className='ml-auto text-gray-500 text-xs'> 7 sessions </p>
+              <h1> Location Inquiries </h1>
+              <p className='ml-auto text-gray-500 text-xs'> 107 sessions </p>
             </div>
             <h1 className='ml-auto score' style={{ color: getScoreColorHSL(43) }}> 43 </h1>
           </div>
