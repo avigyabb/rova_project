@@ -16,8 +16,15 @@
     padding: 1rem;
 }
 
-.content2{
-    margin-top: 100px;
+.hero .signup-form {
+    height: 100vh;
+    background-color: gray;
+}
+
+.signup-form .box {
+    color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .hero .content p:nth-child(2) {
