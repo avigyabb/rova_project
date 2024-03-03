@@ -35,6 +35,7 @@ const AppContent = () => {
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/sessions`} element={<Sessions />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/paths`} element={<Paths/>} />
           <Route path={`/login`} element={<Login />} />
+          
           <Route path={`/`} element={<Hero />} />
         </Routes>
       </div>

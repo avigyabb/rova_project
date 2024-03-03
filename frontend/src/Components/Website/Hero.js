@@ -31,10 +31,9 @@ const Hero = () => {
         <>
         < WebNavbar />
         <div className='hero'>
-            <div className='content'>
-                <div className='content2'>
-                    {false ? (
-                        <>
+            {true ? (
+                <div className='content'>
+                    <div className='content2'>
                         <div className='backedby'>
                             <h1 style={{marginRight: '1%'}}>Backed By</h1>
                             <img src={yc} alt='yc' style={{ width: '180px', height: '50px' }}/>
@@ -54,74 +53,61 @@ const Hero = () => {
                             <source src={rovaDemo} type="video/mp4"/>
                             Your browser does not support the video tag.
                         </video>
-                        </>
-                    ) : (
-                        <div className='signup-form'>
-                            <Box
-                                className='box'
-                                component="form"
-                                noValidate
-                                autoComplete="off"
-                                onSubmit={handleSubmit}
-                            >
-                                <Typography variant="h6" gutterBottom>
-                                    Registration Form
-                                </Typography>
-                                <div className='flex'>
-                                    <TextField
-                                        required
-                                        id="firstName"
-                                        name="firstName"
-                                        label="First Name"
-                                        variant="outlined"
-                                    />
-                                    <TextField
-                                        required
-                                        id="lastName"
-                                        name="lastName"
-                                        label="Last Name"
-                                        variant="outlined"
-                                    />
-                                    <TextField
-                                        required
-                                        id="email"
-                                        name="email"
-                                        label="Email"
-                                        type="email"
-                                        variant="outlined"
-                                    />
-                                </div>
-                                <div className='flex'>
-                                    <TextField
-                                        id="company"
-                                        name="company"
-                                        label="Company"
-                                        variant="outlined"
-                                    />
-                                    <TextField
-                                        id="role"
-                                        name="role"
-                                        label="Role"
-                                        variant="filled"
-                                        className='text-field'
-                                    />
-                                </div>
-                                <TextField
-                                    id="additionalDetails"
-                                    name="additionalDetails"
-                                    label="Additional Details"
-                                    multiline
-                                    rows={4}
-                                    variant="outlined"
-                                />
-                                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                                    Submit
-                                </Button>
-                            </Box>
-                        </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className='signup-form'>
+                    <Box
+                        className='box'
+                        component="form"
+                        noValidate
+                        autoComplete="off"
+                        onSubmit={handleSubmit}
+                    >
+                        <Typography variant="h6" gutterBottom>
+                            Registration Form
+                        </Typography>
+                        <div className='flex'>
+                            <TextField required id="firstName" name="firstName" label="First Name" variant="outlined"/>
+                            <TextField required id="lastName" name="lastName" label="Last Name" variant="outlined"/>
+                            <TextField
+                                required
+                                id="email"
+                                name="email"
+                                label="Email"
+                                type="email"
+                                variant="outlined"
+                            />
+                        </div>
+                        <div className='flex'>
+                            <TextField
+                                id="company"
+                                name="company"
+                                label="Company"
+                                variant="outlined"
+                            />
+                            <TextField
+                                id="role"
+                                name="role"
+                                label="Role"
+                                variant="filled"
+                                className='text-field'
+                            />
+                        </div>
+                        <TextField
+                            id="additionalDetails"
+                            name="additionalDetails"
+                            label="Additional Details"
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                        />
+                        <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                            Submit
+                        </Button>
+                    </Box>
+                </div>
+            )}
         </div>
         </>
     )

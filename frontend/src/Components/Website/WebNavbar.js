@@ -48,17 +48,17 @@ const WebNavbar = () => {
                 </div>
                 <ul className={click ? "nav-menu active" : "nav-menu"}>
                     <li className='nav-item'>
+                        <Link to={`/prompt-optimizer`}>
+                            <span class="label-down">Prompt Optimizer 🆕</span>
+                            <span class="label-down">Prompt Optimizer 🆕</span>
+                        </Link>
+                    </li>
+                    <li className='nav-item'>
                         <a href={`mailto:${email}?subject=${subject}&body=${body}`} onClick={closeMenu}>
                             <span class="label-down">Book Demo</span>
                             <span class="label-down">Book Demo</span>
                         </a>
                     </li>
-                    {/* <li className='nav-item'>
-                        <a href='/' onClick={closeMenu}>
-                            <span class="label-down">Get Started</span>
-                            <span class="label-down">Get Started</span>
-                        </a>
-                    </li> */}
                     <li className='nav-item'>
                         <Link to={`/login`} onClick={closeMenu}>
                             <span class="label-down">Early Access</span>
