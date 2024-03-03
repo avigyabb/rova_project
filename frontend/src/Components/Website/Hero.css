@@ -1,6 +1,5 @@
 .hero {
     background-color: #16161C; /* Change to white background color */
-    height: 100vh;
     width: 100%;
     position: relative;
 }
@@ -21,16 +20,27 @@
     margin-top: 100px;
 }
 
-.hero .content p:first-child {
+.hero .content p:nth-child(2) {
     font-size: 3rem;
     color: white;
     font-weight: bold;
     align-items: center; /* Center items horizontally */
     justify-content: center; /* Center items vertically */
     text-align: center; /* Center text within the container */
+    margin-top: 1%;
 }
 
-.hero .content p:nth-child(2) {
+.hero .content p:nth-child(3) {
+    font-size: 1.25rem;
+    color: white;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    text-align: center; /* Center text within the container */
+}
+
+.hero p {
     font-size: 1.25rem;
     color: white;
     margin-top: 25px;
@@ -48,7 +58,7 @@
 }
 
 .backedby {
-    margin-top: 20px;
+    margin-top: 10%;
     display: flex;
     color: white;
     align-items: center; /* Center items horizontally */
