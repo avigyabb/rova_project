@@ -31,7 +31,7 @@ const Hero = () => {
         <>
         < WebNavbar />
         <div className='hero'>
-            {true ? (
+            {false ? (
                 <div className='content'>
                     <div className='content2'>
                         <div className='backedby'>
@@ -56,6 +56,10 @@ const Hero = () => {
                     </div>
                 </div>
             ) : (
+                <div className='signup flex'>
+                <div className='signup-description'>
+                    <h1>Book a Demo</h1>
+                </div>
                 <div className='signup-form'>
                     <Box
                         className='box'
@@ -90,7 +94,7 @@ const Hero = () => {
                                 id="role"
                                 name="role"
                                 label="Role"
-                                variant="filled"
+                                variant="outlined"
                                 className='text-field'
                             />
                         </div>
@@ -106,6 +110,7 @@ const Hero = () => {
                             Submit
                         </Button>
                     </Box>
+                </div>
                 </div>
             )}
         </div>

@@ -2,6 +2,8 @@
     background-color: #16161C; /* Change to white background color */
     width: 100%;
     position: relative;
+    padding-top: 85px;
+    height: 100%;
 }
 
 /* Deleted hero before code */
@@ -15,9 +17,22 @@
     margin: auto;
 }
 
+.hero .signup {
+    height: 100%;
+}
+
 .hero .signup-form {
-    height: 100vh;
-    background-color: gray;
+    height: 80%;
+    width: 40%;
+    padding: 2%;
+    border-radius: 10%;
+    margin-left: 5%;
+    margin-top: 5%;
+    background-color: white;
+}
+
+.hero .signup-description {
+    width: 50%
 }
 
 .signup-form .box {
