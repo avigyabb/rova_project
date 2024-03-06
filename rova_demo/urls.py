@@ -24,4 +24,5 @@ urlpatterns = [
     path("categories/", include("categories.urls")),
     path('keymetrics/', include('keymetrics.urls')),
     path("data_sets/", include('data_sets.urls')),
+    path("fileupload/", include('fileupload.urls')),
 ]

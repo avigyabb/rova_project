@@ -23,7 +23,7 @@ def get_df_from_json(path):
     return df
 
 # daily active users
-def get_dau(clickhouse_client):
+def get_dau(metrics_client):
     dau_sql = """
     SELECT date, COUNT(DISTINCT user_id) AS daily_active_users
     FROM (
@@ -36,35 +36,35 @@ def get_dau(clickhouse_client):
     GROUP BY date
     ORDER BY date
     """.format(db_name, db_name)
-    result = clickhouse_client.query(dau_sql)
+    result = metrics_client.query(dau_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
 # cost per day
-def get_acpd(clickhouse_client):
+def get_acpd(metrics_client):
     acpd_sql = """
     SELECT toStartOfDay(timestamp) AS date, SUM(cost) AS total_cost
     FROM {}.llm
     GROUP BY date
     ORDER BY date
     """.format(db_name)
-    result = clickhouse_client.query(acpd_sql)
+    result = metrics_client.query(acpd_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
 # average latency per day
-def get_alpd(clickhouse_client):
+def get_alpd(metrics_client):
     alpd_sql = """
     SELECT toStartOfDay(timestamp) AS date, AVG(latency) AS average_latency
     FROM {}.llm
     GROUP BY date
     ORDER BY date
     """.format(db_name)
-    result = clickhouse_client.query(alpd_sql)
+    result = metrics_client.query(alpd_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
-def get_asdpd(clickhouse_client):
+def get_asdpd(metrics_client):
     asdpd_sql = """
     SELECT
         session_date,
@@ -90,7 +90,7 @@ def get_asdpd(clickhouse_client):
         session_date
 
     """.format(db_name, db_name)
-    result = clickhouse_client.query(asdpd_sql)
+    result = metrics_client.query(asdpd_sql)
     result_dict = {str(date): count for date, count in result.result_rows}
     return result_dict
 

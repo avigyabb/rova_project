@@ -44,6 +44,8 @@ clickhouse_client = new_clickhouse_client()
 
 options_clickhouse_client = new_clickhouse_client()
 
+metrics_client = new_clickhouse_client()
+
 rova_client = Rova(db_name)
 
 # Returns sql query to join dbs
