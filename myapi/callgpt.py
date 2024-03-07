@@ -56,7 +56,7 @@ def build_topics_prompt(samples):
                      that accurately summarizes the intent of the user in this platform. \n \
                      Return your result as a JSON object with the key being the provided Category number and \
                      the value being the summary description you create for that category \n \
-                     For example, a single category should look like {1:'YOUR SUMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
+                     For example, a single category should look like {1:'YOUR SUMMARY OF SAMPLES IN CATEGORY ONE GOES HERE'} "
 
     user_prompt = ""
     for category in samples.keys():

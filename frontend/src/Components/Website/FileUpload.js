@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Button from '@mui/material/Button';
 
 const FileUpload = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -38,8 +39,8 @@ const FileUpload = () => {
   };
 
   return (
-    <div className="mt-10 flex flex-col" style={{color: "white"}}>
-      <input style={{color: "black"}}
+    <div className="mt-5 flex flex-col" style={{color: "black"}}>
+      {/* <input style={{color: "black"}}
         type="text"
         placeholder="Your Name"
         value={uploaderName}
@@ -50,9 +51,10 @@ const FileUpload = () => {
         placeholder="Your Email"
         value={uploaderEmail}
         onChange={(e) => setUploaderEmail(e.target.value)}
-      />
-      <input type="file" multiple onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload Files</button>
+      /> */}
+      <h1 className='mb-3 text-gray-500'>Get a free report on your data. We typically respond in 24 hours.</h1>
+      <input className="mb-3" type="file" multiple onChange={handleFileChange} />
+      <Button variant="contained" onClick={handleUpload}>Upload Files</Button>
     </div>
   );
 };

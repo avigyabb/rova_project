@@ -9,7 +9,6 @@
 /* Deleted hero before code */
 
 .hero .content {
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -79,7 +78,7 @@
 }
 
 .backedby {
-    margin-top: 15%;
+    margin-top: 10%;
     display: flex;
     color: white;
     align-items: center; /* Center items horizontally */

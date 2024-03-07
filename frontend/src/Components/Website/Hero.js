@@ -1,37 +1,20 @@
 import React from 'react'
 import './Hero.css'
 import WebNavbar from './WebNavbar'
-import FileUpload from './FileUpload'
 import yc from './images/yc_logo.webp'
 import rovaDemo from './rova_demo.mp4'
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+
 
 const Hero = () => {
     const email = "founders@rovaai.com";
     const subject = encodeURIComponent("Join Waitlist");
     const body = encodeURIComponent("First Name:\nLast Name:\n\nCompany:\nRole:\n\nAdditional Info:");
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        console.log({
-            email: formData.get('email'),
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            company: formData.get('company'),
-            role: formData.get('role'),
-            additionalDetails: formData.get('additionalDetails'),
-        });
-        // Here, you would typically send the formData to a server
-    };
-
     return (
         <>
         < WebNavbar />
         <div className='hero'>
+            {true ? (
                 <div className='content'>
                     <div className='content2'>
                         <div className='backedby'>
@@ -54,12 +37,14 @@ const Hero = () => {
                             Your browser does not support the video tag.
                         </video>
                     </div>
-                    <div className='backedby'>
-                        Backed By
-                        <img src={yc} alt='yc' style={{ width: '200px', height: '50px' }}/>
-                    </div>
-                    <FileUpload />
                 </div>
+            ) : (
+                <div className='signup flex'>
+                    <div className='signup-description'>
+                        <h1>Book a Demo</h1>
+                    </div>
+                </div>
+            )}
         </div>
         </>
     )
