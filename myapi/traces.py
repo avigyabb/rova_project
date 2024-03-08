@@ -1,9 +1,12 @@
 from .consts import *
+from .utils import *
 from langchain.prompts import PromptTemplate
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
-
+if umap_flag:
+    import umap.umap_ as umap
+    
 # traeces.py
 
 def parse_product(group):
@@ -71,15 +74,24 @@ def embed_all_traces(df, embeddings_model, traces_df=None, new_trace=None):
 
   return traces_df
 
+@time_function
 def embed_all_sessions(df, embeddings_model):
 
-  # Now, you can group by 'session_id' and then 'group_id'
-  result_series = df.groupby(['session_id']).apply(parse_session)
-  sessions_df = result_series.reset_index(name='session_to_text')
-  embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
-  sessions_df['embeds'] = [np.array(e) for e in embeds]
+    result_series = df.groupby(['session_id']).apply(parse_session)
+    sessions_df = result_series.reset_index(name='session_to_text')
 
-  return sessions_df
+    embeds = embeddings_model.embed_documents(sessions_df['session_to_text'])
+    
+    if umap_flag:
+      embeds_array = np.vstack(embeds)
+      reducer = umap.UMAP(n_components=10, random_state=42)
+      umap_embeddings = reducer.fit_transform(embeds_array)
+
+      sessions_df['embeds'] = list(umap_embeddings)
+    else:
+      sessions_df['embeds'] = [e for e in embeds]
+
+    return sessions_df
 
 def find_similar(trace_id, df, n=3):
 
@@ -96,3 +108,23 @@ def find_similar(trace_id, df, n=3):
     
     return similar_dict
 
+
+def find_similar_sessions(df, given_session_id=None, given_embedding=None):
+    # Check that either a session_id or an embedding is provided
+    if given_session_id is None and given_embedding is None:
+        raise ValueError("Either a session_id or an embedding must be provided.")
+    elif given_session_id is not None and given_embedding is not None:
+        raise ValueError("Both a session_id and an embedding were provided. Please provide only one.")
+    
+    # If a session_id is provided, extract the embedding for it
+    if given_session_id is not None:
+        given_embedding = [df.loc[df['session_id'] == given_session_id, 'embeds'].values[0]]
+    
+    similarities = cosine_similarity(given_embedding, df['embeds'].tolist())[0]
+    similarity_df = pd.DataFrame({'session_id': df['session_id'], 'similarity': similarities})
+    
+    if given_session_id is not None:
+        similarity_df = similarity_df[similarity_df['session_id'] != given_session_id]
+    similarity_df.sort_values(by='similarity', ascending=False, inplace=True)
+    
+    return set(similarity_df['session_id'].tolist())

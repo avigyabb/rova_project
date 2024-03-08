@@ -12,15 +12,38 @@ from .categories import *
 from .callgpt import *
 from .traces import *
 from .keymetrics import *
+from .scoring import *
+from categories.views import *
+from keymetrics.models import SessionsToScores
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from rest_framework import status
+from datetime import datetime
+import pytz
+
+@csrf_exempt
+@require_POST
+def login_user(request):
+    data = json.loads(request.body)
+    user = authenticate(request, username=data['username'], password=data['password'])
+    if user is not None:
+        login(request, user)
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+        return JsonResponse({'message': "Login successful", "status":status.HTTP_200_OK})
+    else:
+        # Return an 'invalid login' error message.
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+        return JsonResponse({"error": 'Invalid Credentials', "status":status.HTTP_401_UNAUTHORIZED})
+
 # Appends the newest event to the df
 def add_most_recent_event():
-    print("TEST")
     sql = """
         SELECT
             *
@@ -31,9 +54,9 @@ def add_most_recent_event():
         """
     result = clickhouse_client.query(combined_table_sql + sql)
     new_row = pd.DataFrame(data=result.result_rows, columns=result.column_names)
+    df = DataframeLoader.get_dataframe('df')
     df.append(new_row.iloc[0], ignore_index=True)
-    print("TEST")
-    update_categories_with_new_event(new_row.iloc[0])
+    update_categories_with_new_event(df, new_row.iloc[0])
     add_keymetric_for_new_session(df, new_row.iloc[0]['session_id'])
     if('trace_id' in new_row.columns and new_row.iloc[0]['trace_id'] is not None):
         traces_df = embed_all_traces(df, embeddings_model, traces_df=traces_df, new_trace=new_row.iloc[0]['trace_id'])
@@ -43,15 +66,16 @@ def add_most_recent_event():
 def track_event(request):
     try:
         data = json.loads(request.body)
-        print(data)
         rova_client.capture(data)
         # Process your data here, e.g., save it to the database or perform other logic
         # print(data)  # Example to print the data received
         #add_most_recent_event()
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse(
             {"status": "success", "message": "Event tracked successfully."}
         )
     except json.JSONDecodeError:
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
 
@@ -78,7 +102,7 @@ def get_fpaths(request):
 def get_sessions_at_step(request):
     startEvent = request.GET.get("start_event")
     endEvent = request.GET.get("end_event")
-
+    df = DataframeLoader.get_dataframe("df")
     events = df_to_user_events_by_user(df)
     paths = find_paths(events, startEvent, endEvent)
 
@@ -104,24 +128,37 @@ def get_sessions(request):
     return Response({"sessions": sessions_data})
 
 
+@api_view(["GET"])
+def get_session_events_given_session_ids (request):
+    session_ids = json.loads(request.GET.get("sessionIds"))
+    sql_query = (
+        """
+        SELECT *
+        FROM CombinedData
+        WHERE session_id IN ("""
+        + ", ".join([f"'{session_id}'" for session_id in session_ids])
+        + """)
+        """
+    )
+    result = clickhouse_client.query(combined_table_sql + sql_query)
+    if (len(result.result_rows) == 0):
+        return Response({"info" : []})
+    df = pd.DataFrame(data = result.result_rows, columns = result.column_names).sort_values(
+        by = ["timestamp"]
+    )
+    output = df_to_user_events(df)
+    return Response({"info" : output})
+
+
 # client-server comm for finding trace sessions for specific user
 @api_view(["GET"])
 def get_user(request):
-    if int(request.GET.get("sessionId")) >= 0:
-        sql_query = f"""
-            SELECT *
-            FROM CombinedData
-            WHERE user_id = '{request.GET.get("userId")}' AND session_id = '{request.GET.get("sessionId")}'
-            """
-    else:
-        sql_query = f"""
-            SELECT *
-            FROM CombinedData
-            WHERE user_id = '{request.GET.get("userId")}'
-            """
+    sql_query = f"""
+        SELECT *
+        FROM CombinedData
+        WHERE user_id = '{request.GET.get("userId")}'
+        """
     result = clickhouse_client.query(combined_table_sql + sql_query)
-    print("loc2")
-    print(len(result.result_rows))
     # dataframe of all events of user ordered by timestamp
     if (len(result.result_rows) == 0):
         return Response({"info": []})
@@ -235,6 +272,7 @@ def get_processed_query(request):
 
 @api_view(["GET"])
 def get_percentages(request):
+    df = DataframeLoader.get_dataframe('df')
     events = df_to_user_events_by_user(df)
 
     start_event_name = request.GET.get("start_event_name")
@@ -260,21 +298,16 @@ def get_options(request):
     options = options_clickhouse_client.query(sql_query).result_rows
     return Response({"options": options})
 
-
-@api_view(["GET"])
-def get_user_categories(request):
-    categories = get_categories()
-    return Response({"categories": categories})
-
 @api_view(["GET"])
 def get_user_keymetrics(request):
-    keymetrics = get_keymetrics()
+    keymetrics = get_keymetrics(request.user)
     return Response({"keymetrics": keymetrics})
 
 
 @api_view(["GET"])
 def get_summary(request):
     trace_id = request.GET.get("trace_id")
+    df = DataframeLoader.get_dataframe('df')
     messages = explain_trace(df, trace_id)
     summary = query_gpt(
         client,
@@ -288,38 +321,28 @@ def get_summary(request):
 
 @api_view(["GET"])
 def get_similar_traces(request):
+    traces_df = DataframeLoader.get_dataframe('traces_df')
     trace_id = int(request.GET.get("trace_id"))
     similar = find_similar(trace_id, traces_df)
-    print(similar)
     return Response({"similar_traces": similar})
 
-
-@api_view(["POST"])
-def post_user_category(request):
-    user_id = request.data.get("name")
-    category = request.data.get("description")
-    add_category(user_id, category)
-    return Response({"message": "Category added successfully"})
-
-@api_view(["POST"])
+@csrf_exempt
+@require_POST
 def post_user_keymetric(request):
-    user_id = request.data.get("name")
-    category = request.data.get("description")
-    importance = request.data.get("importance")
-    add_keymetric(user_id, category, importance)
-    return Response({"message": "Category added successfully"})
-
-
-@api_view(["GET"])
-def delete_user_category(request):
-    index = request.GET.get("index")
-    delete_category(index)
-    return Response({"message": "Category deleted successfully"})
+    data = json.loads(request.body)
+    user_id = data.get("name")
+    category = data.get("description")
+    importance = data.get("importance")
+    period = data.get('period')
+    add_keymetric(request.user, user_id, category, importance, period)
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+    return JsonResponse({"message": "Category added successfully"})
 
 @api_view(["GET"])
 def delete_user_keymetric(request):
     index = request.GET.get("index")
-    delete_keymetric(index)
+    delete_keymetric(request.user, index)
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
     return Response({"message": "Category deleted successfully"})
 
 
@@ -331,9 +354,53 @@ def get_filtered_sessions(request):
     excluded_signals = json.loads(request.GET.get("excluded_signals"))
     engagement_time = request.GET.get("engagement_time")
     
-    session_ids = get_session_ids_given_filters(included_categories, excluded_categories,
+    session_ids = get_session_ids_given_filters(request.user, included_categories, excluded_categories,
                                                 included_signals, excluded_signals,
                                                 engagement_time)
+
     if session_ids == []:
         return Response({"sessions" : {}})
     return Response({"sessions" : get_session_data_from_ids(clickhouse_client, session_ids)})
+
+@api_view(["GET"])
+def get_surfaced_sessions(request):
+    sessions_obj = score_and_return_sessions(request.user)
+    return Response({"sessions" : sessions_obj})
+
+@csrf_exempt
+@require_POST
+def post_user_session_score(request):
+    data = json.loads(request.body)
+    session_id = data.get("params").get("session_id")
+    score = int(mapping[data.get("params").get("score")])
+    instance, created = SessionsToScores.objects.get_or_create(user=request.user, session_id=session_id)
+    instance.user_score = score
+    instance.save()
+    DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+    return JsonResponse({"message": "Category added successfully"})
+
+@api_view(['GET'])
+def get_user_session_score(request):
+    session_id = int(request.GET.get('session_id'))
+    instance, created = SessionsToScores.objects.get_or_create(user=request.user, session_id=session_id)
+    if(not created and instance.user_score is not None):
+        score = inverse_mapping[instance.user_score]
+    else:
+        score = 'Neutral'
+    instance.user_score = mapping[score]
+    instance.save()
+    return Response({"score": score})
+
+@api_view(["GET"])
+def check_data_has_changed(request):
+    datetime_from_frontend = request.GET.get('lastUpdateTimestamp')
+    datetime_from_frontend = datetime_from_frontend.replace('Z', '+00:00')
+    parsed_date = datetime.fromisoformat(datetime_from_frontend)
+    datetime_from_backend = DataframeLoader.get_trackchanges()
+    if(datetime_from_backend is None):
+        DataframeLoader.set_trackchanges(datetime.now(pytz.utc))
+        return Response({"hasChanged": True})
+    elif(datetime_from_backend > parsed_date):
+        return Response({"hasChanged": True})
+    else:
+        return Response({"hasChanged": False})

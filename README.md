@@ -12,7 +12,9 @@ Debug = False
 Change rova_dev to buster_dev
 consts.py (line 28)
 npm start (frontend)
+comment out env local
 remember to put slash at end of url
+
 
 Things to convert to models
 traces_df
@@ -26,3 +28,8 @@ python manage.py makemigrations - save the changes
 python manage.py migrate - apply the changes
 add to admin file of the app
 (might have to delete migrations file)
+
+If flows seems broken, try running python manage.py runserver again.
+
+
+If db doesn't work, make sure there is a migrations folder with an empty __init__.py in each django app folder

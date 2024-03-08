@@ -3,8 +3,11 @@ import '../../styles/EventComponentsStyles/KeyMetricCard.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import Modal from '@mui/material/Modal'; // Import the Modal component from MUI
+import Box from '@mui/material/Box'; // Import the Box component for modal styling
 import { Bar } from 'react-chartjs-2';
 import '../../styles/Charts.css';
+import { set } from 'date-fns';
 
 const KeyMetricCard = () => {
 
@@ -14,6 +17,20 @@ const KeyMetricCard = () => {
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [churnPeriod, setChurnPeriod] = useState('');
+
+    const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
+    const [modalContent, setModalContent] = useState(''); // State to hold the modal's content
+
+    function getScoreColorHSL(score) {
+      if (score < 0) {
+          return '#A3A3A3';
+      }
+      const cappedScore = Math.max(0, Math.min(score, 100));
+      const hue = (cappedScore / 100) * 120;
+      const lightness = 40;
+      return `hsl(${hue}, 100%, ${lightness}%)`;
+    }
 
     // Fetches the category data
     const fetchData = async () =>  {
@@ -47,8 +64,9 @@ const KeyMetricCard = () => {
     useEffect(() => {
       const getOptions = async () => {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-options/`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}get-options/`);
           response.data.options.push('churn')
+          response.data.options.push('Custom Eval')
           setOptionsArrayData(response.data.options);
         } catch (error) {
           console.error(error);
@@ -64,14 +82,14 @@ const KeyMetricCard = () => {
             description: document.getElementById("newKeyMetricDescription").value,
             volume: '',
             importance: document.getElementById("newKeyMetricImportance").value,
-            path: ''
+            path: '',
+            period: churnPeriod
         }
         // Save new category logic here
         // For example, you can send an API request to save the new category
         // After successful save, update category list and reset new category state
         setShowNewCategoryRow(false);
         try {
-          console.log("NEW", newKeyMetric)
           const response = await axios.post(process.env.REACT_APP_API_URL + 'post-user-keymetric/', newKeyMetric);
           console.log(response);
         } catch (error) {
@@ -102,10 +120,10 @@ const KeyMetricCard = () => {
       );
     }
 
-    function MultiSelectDropdown({ options, id }) {
+    function MultiSelectDropdown({ options, id}) {
       // State to keep track of selected options and their order
-    
       // This function checks if the option is an array and returns the appropriate value
+
       const getOptionValue = (option) => {
         if (Array.isArray(option)) {
           // Assuming the first element of the array is the value we want
@@ -113,7 +131,7 @@ const KeyMetricCard = () => {
         }
         return option; // If it's not an array, return the string directly
       };
-    
+
       // Function to handle option toggle
       const toggleOption = (optionValue) => {
         const currentIndex = selectedOptions.findIndex((opt) => opt === optionValue);
@@ -133,22 +151,38 @@ const KeyMetricCard = () => {
       return (
         <div>
           {options.map((option, index) => {
-            const optionValue = getOptionValue(option);
-            return (
-              <div key={index}>
-                <input
-                  type="checkbox"
-                  id={`${id}_option_${index}`}
-                  name="selectedOption"
-                  value={optionValue}
-                  checked={selectedOptions.includes(optionValue)}
-                  onChange={() => toggleOption(optionValue)}
-                  style={{ marginRight: '8px' }}
-                />
-                <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
-              </div>
-            );
-          })}
+              const optionValue = getOptionValue(option);
+              // Check if "Custom Eval" is in selectedOptions
+              const isCustomEvalSelected = selectedOptions.includes("Custom Eval");
+
+              // Conditionally render options based on whether "Custom Eval" is selected
+              if (!isCustomEvalSelected || optionValue === "Custom Eval") {
+                return (
+                  <div key={index}>
+                    <input
+                      type="checkbox"
+                      id={`${id}_option_${index}`}
+                      name="selectedOption"
+                      value={optionValue}
+                      checked={selectedOptions.includes(optionValue)}
+                      onChange={() => toggleOption(optionValue)}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <label htmlFor={`${id}_option_${index}`}>{optionValue}</label>
+                    {optionValue === 'churn' && selectedOptions.includes('churn') && (
+                      <input
+                        type="text"
+                        placeholder="Churn Period (days)"
+                        value={churnPeriod}
+                        onChange={(e) => setChurnPeriod(e.target.value)}
+                        style={{ marginLeft: '8px' }}
+                      />
+                    )}
+                  </div>
+                );
+              }
+              return null; // Return null for non-matching conditions
+            })}
           <div>Selected Options in Order:</div>
           <ul>
             {selectedOptions.map((option, index) => (
@@ -191,13 +225,49 @@ const KeyMetricCard = () => {
           setKeyMetricList(prevList => prevList.filter((_, idx) => idx !== keymetrics.length - index - 1));
         }
       }
+
+      // Fetch data, other state management, and useEffect hooks remain the same...
+
+      // Function to open the modal with specific content
+      const handleRowClick = (description) => {
+        setModalContent(description); // Set the content to be displayed in the modal
+        setModalOpen(true); // Show the modal
+      };
+
+      // Function to close the modal
+      const handleCloseModal = () => setModalOpen(false);
+
+      // Modal style
+      const modalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        boxShadow: 24,
+        p: 4,
+      };
       
       const TableRow = ({ keymetric, index }) => (
         <tr>
-          <td><p className="inline-block categ-name">{keymetric.name}</p></td>
+          <td  onClick={()=>handleRowClick(keymetricList[keymetricList.length - index - 1].analysis)}><p className="inline-block categ-name">{keymetric.name}</p></td>
           <td>{keymetric.description}</td>
           <td>{keymetric.volume}</td>
-          <td>{keymetric.importance}</td>
+          <td style={{ textAlign: 'center' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '5px 10px', // Adjust padding as needed to change the size of the bubble
+              borderRadius: '10px', // This makes the bubble round
+              color: 'black', // Set text color (optional, based on your design preferences)
+              background: getScoreColorHSL(scores[keymetric.importance]),
+              textAlign: 'center',
+              lineHeight: '20px', // Adjust line height to vertically center the text within the bubble
+            }}>
+              {keymetric.importance}
+            </span>
+          </td>
+          {/* <td style={{ color: getScoreColorHSL(scores[keymetric.importance]) }}>{keymetric.importance}</td> */}
           <td style={{border: "none"}}>
             {editMode && <RemoveCircleIcon onClick={() => removeKeyMetric(index)}/>}
           </td>
@@ -205,6 +275,7 @@ const KeyMetricCard = () => {
       );
 
       const importanceArray = ["Very Negative", "Negative", "Neutral", "Positive", "Very Positive"];
+      const scores = {"Very Negative": 20, "Negative": 40, "Neutral": 60, "Positive": 80, "Very Positive": 100};
 
       const NewTableRow = () => (
         <tr>
@@ -260,74 +331,27 @@ const KeyMetricCard = () => {
           {
             label: 'Volume',
             data: keymetrics.map(metric => metric.volume),
-            backgroundColor: 'rgba(255, 161, 137, 1.0)',
+            backgroundColor: 'rgba(255, 161, 137, 0.4)',
+            borderColor: 'rgba(255, 161, 137, 1)',
+            borderWidth: 1,
           },
         ],
       };
 
     const chartOptions = {
-      plugins: {
-        title: {
-          display: true,
-          text: 'Volume by Event',
-        },
-      },
       scales: {
         y: {
           beginAtZero: true
-        },
-        x: {
-          display: false
         }
       },
       maintainAspectRatio: false, // Adjust aspect ratio here
       aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
-    };
-    const FlipCard = ({ name, analysis }) => {
-      const [isFlipped, setIsFlipped] = useState(false);
-    
-      const flipCard = () => {
-        setIsFlipped(!isFlipped);
-      };
-    
-      return (
-        <div className="m-2">
-          <div
-            className={`w-48 h-48 transition-transform duration-500 ease-linear
-                        transform perspective-1000 ${isFlipped ? 'rotate-y-180' : ''}
-                        shadow-lg cursor-pointer rounded-lg overflow-hidden relative`}
-            onClick={flipCard}
-          >
-            <div className={`absolute inset-0 flex items-center justify-center p-2 ${isFlipped ? 'bg-orange-100' : 'bg-orange-200'}`}>
-              {isFlipped ? (
-                <div className="text-center text-white-900 overflow-auto text-xs h-full">{analysis}</div>
-              ) : (
-                <div className="text-center text-xs text-white-700">{name}</div>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    };
-     
-    
-    const Categories = ({ categories }) => {
-      // Skip the first element using slice
-      const itemsToDisplay = categories;
-    
-      return (
-        <div className="flex flex-wrap justify-center">
-          {itemsToDisplay.map((category, index) => (
-            <FlipCard key={index} name={category.name} analysis={category.analysis} />
-          ))}
-        </div>
-      );
-    };
+    };  
 
       return (
         <div className='charts-content'>
           <div className='flex' style={{ width: '85%'}}>
-            <p className='text-4xl mb-7'>Key Performance Indicators</p>
+            <p className='text-4xl mb-7'>Key Performance Indicators 🔑</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
@@ -338,15 +362,23 @@ const KeyMetricCard = () => {
             ) : null}
           </div>
           <div style={{ width: keymetricList.length > 0 || showNewCategoryRow ? "100%" : "85%"}}>
-            <TopicTable />
+            <TopicTable/>
           </div>
-          <div className='flex mt-10'>
-            <div className='chart-container' style={{ width: '50%', height: '400px', marginTop: '10px' }}>
+          <div className='flex' style={{ width: '85%'}}>
+            <div className='chart-container' style={{ width: '100%', height: '400px', 'margin-left': '0px'}}>
               <Bar data={chartData} options={chartOptions} />
             </div>
-            <div className='flex-1'>
-              <Categories categories={keymetricList} />
-            </div>
+            <Modal
+              open={modalOpen}
+              onClose={handleCloseModal}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={modalStyle}>
+                <h2 id="modal-modal-title">Summary</h2>
+                <p id="modal-modal-description">{modalContent}</p>
+              </Box>
+            </Modal>
           </div>
         </div>
       );

@@ -6,7 +6,8 @@
 .home-sidebar {
     background-color: #f3f4f6;
     height: 92%;
-    width: 15%;
+    /* connected to homepage-overall-content */
+    width: 12%; 
 }
 
 .home-sidebar p {
@@ -95,5 +96,5 @@
 }
 
 .homepage-overall-content {
-    width: 85%;
+    width: 88%;
 }

@@ -9,6 +9,8 @@ import Sessions from "./Components/Sessions";
 import Paths from './Components/Paths';
 import Hero from './Components/Website/Hero';
 import Login from './Components/Website/Login';
+import MiniProjects from "./Components/MiniProjects";
+import axios from 'axios';
 
 const customTheme = createTheme({
   typography: {
@@ -16,7 +18,10 @@ const customTheme = createTheme({
   },
 });
 
+axios.defaults.withCredentials = true;
+
 const AppContent = () => {
+
   const location = useLocation();
   const shouldShowNavbar = location.pathname.startsWith(process.env.REACT_APP_AUTH_HEADER);
 
@@ -31,6 +36,7 @@ const AppContent = () => {
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/sessions`} element={<Sessions />} />
           <Route path={`${process.env.REACT_APP_AUTH_HEADER}/paths`} element={<Paths/>} />
           <Route path={`/login`} element={<Login />} />
+          <Route path={`/mini-projects`} element={<MiniProjects />} />
           <Route path={`/`} element={<Hero />} />
         </Routes>
       </div>

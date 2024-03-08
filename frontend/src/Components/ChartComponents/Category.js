@@ -3,6 +3,7 @@ import '../../styles/Charts.css';
 import axios from  'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import { Bar } from 'react-chartjs-2';
 
 const Category = () => {
 
@@ -11,6 +12,7 @@ const Category = () => {
     // const [newCategory, setNewCategory] = useState({ name: '', description: ''});
     const [showNewCategoryRow, setShowNewCategoryRow] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [addCategoryLoading, setAddCategoryLoading] = useState(false);
 
     // Fetches the category data
     const fetchData = async () =>  {
@@ -46,6 +48,7 @@ const Category = () => {
         // For example, you can send an API request to save the new category
         // After successful save, update category list and reset new category state
         setShowNewCategoryRow(false);
+        setAddCategoryLoading(true);
         const newCategory = {
             name: document.getElementById("newCategoryName").value,
             description: document.getElementById("newCategoryDescription").value,
@@ -61,6 +64,7 @@ const Category = () => {
           console.error(error);
         } finally {
           fetchData();
+          setAddCategoryLoading(false);
         }
     };
 
@@ -73,14 +77,41 @@ const Category = () => {
       );
     }
 
-    const categories = categoryList.map(category => ({
+    const trends = ["-6%", "12%", "2%", "-6%"]
+    const paths = ["M 0 5 L 25 20 L 50 10 L 75 15 L 100 30", 
+                   "M 0 30 L 25 25 L 50 10 L 75 15 L 100 5", 
+                   "M 0 20 L 25 25 L 50 13 L 75 18 L 100 22"]
+    const categories = categoryList.map((category, index) => ({
         id: category.pk, // primary key
         name: category.fields.name,
         description: category.fields.description,
         volume: category.fields.volume,
-        trend: category.fields.trend,
-        path: category.fields.path
+        trend: trends[index],
+        path: paths[index],
     })); 
+
+    const chartData = {
+      labels: categories.map(metric => metric.name),
+      datasets: [
+        {
+          label: 'Volume',
+          data: categories.map(metric => metric.volume),
+          backgroundColor: 'rgba(255, 161, 137, 0.4)',
+          borderColor: 'rgba(255, 161, 137, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    const chartOptions = {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      maintainAspectRatio: false, // Adjust aspect ratio here
+      aspectRatio: 2, // Lower values will make the chart taller, and higher values will make it wider
+    }; 
     
       const TrendLine = ({ value, trend, path }) => {
         // Choose the path based on the trend
@@ -113,17 +144,17 @@ const Category = () => {
         }
       }
       
-      const TableRow = ({ category }) => (
+      const TableRow = ({ category, isCreating=false }) => (
         <tr>
-          <td><p className="inline-block categ-name">{category.name}</p></td>
+          <td><p className={isCreating ? "" : "inline-block categ-name"}>{category.name}</p></td>
           <td>{category.description}</td>
           <td>{category.volume}</td>
           <td>
             {/* This would be replaced with a chart component */}
-            <div className="trend-line">
-              {category.trend}
-              {/* <TrendLine value={category.trend} trend='up' path={category.path}/> */}
-            </div>
+            {/* <div className="trend-line">
+              <TrendLine value={category.trend} trend='up' path={category.path}/>
+            </div> */}
+            -
           </td>
           <td style={{border: "none"}}>
             {editMode && <RemoveCircleIcon onClick={() => removeCategory(category.id)}/>}
@@ -178,20 +209,23 @@ const Category = () => {
               </tr>
             </thead>
             <tbody>
+            {addCategoryLoading && (
+              <TableRow category={{name: "Creating New Category...", description: "Analyzing Description..."}} isCreating={true}/>
+            )}
             {showNewCategoryRow && <NewTableRow/>}
-              {categories.slice().reverse().map((category, index) => (
-                <TableRow key={index} category={category}/>
-              ))}
+            {categories.slice().reverse().map((category, index) => (
+              <TableRow key={index} category={category}/>
+            ))}
             </tbody>
           </table>
         );
       };
 
       return (
-        <div className='charts-content'>
+        <div className='charts-content' style={{}}>
           {/* something wrong with below style */}
-          <div className='flex' style={{ width: "80%"}}>
-            <p className='text-4xl mb-7'>Topic Insights</p>
+          <div className='flex' style={{ width: "85%" }}>
+            <p className='text-4xl mb-7'>Topic Insights 🗂️</p>
             {!showNewCategoryRow && !editMode ? (
               <>
                 <button className='ml-auto mb-5' onClick={handleEdit}> Edit </button>
@@ -201,8 +235,13 @@ const Category = () => {
               <button className='ml-auto' onClick={handleEdit}> Done </button>
             ) : null}
           </div>
-          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "100%" : "75%"}}>
+          <div style={{ width: categoryList.length > 0 || showNewCategoryRow ? "113%" : "100%"}}>
             <TopicTable />
+          </div>
+          <div className='flex' style={{ width: "85%"}}>
+            <div className='chart-container mr-auto' style={{ width: '100%', height: '400px', 'margin-left': '0px'}}>
+              <Bar data={chartData} options={chartOptions} />
+            </div>
           </div>
         </div>
       );

@@ -1,6 +1,6 @@
 .web-header {
     position: fixed;
-    height: 90px;
+    height: 85px;
     width: 100%;
     top: 0;
     left: 0;
@@ -17,10 +17,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1240px;
     margin: auto;
     height: 100%;
-    padding: 0 1rem;
+    padding: 0 2%;
 }
 
 .web-logo-container {
@@ -47,16 +46,16 @@
 }
 
 .label-down {
-    display:block;
-    margin:0px 20px;
-    height:100%;
-    position:relative;
-    top:-100%;
-    transition:0.3s;
-  }
+    display: block;
+    margin: 0px 20px;
+    height: 100%;
+    position: relative;
+    top: -100%;
+    transition: 0.3s;
+}
   
 .web-header .nav-item a:hover .label-down {
-    top:0%;
+    top: 0%;
 }
 
 .web-header .web-navbar img {
@@ -69,6 +68,8 @@
 }
 
 .web-header .nav-item {
+    display: flex;
+    align-items: center;
     padding: 1rem;
     font-weight: 500;
 }

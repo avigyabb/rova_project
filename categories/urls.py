@@ -4,9 +4,7 @@ from . import views
 urlpatterns = [
     path("get-user-categories/", views.category_list, name="category_list"),
     path("post-user-category/", views.post_user_category, name="post_user_category"),
-    path(
-        "delete-user-category/",
-        views.delete_user_category,
-        name="delete_user_category",
-    ),
+    path("delete-user-category/", views.delete_user_category, name="delete_user_category"),
+    path("get-categories-ranking/", views.get_categories_ranking, name="get_categories_ranking"),
+    path("get-category-sessions/", views.get_category_sessions, name="get_category_sessions"),
 ]

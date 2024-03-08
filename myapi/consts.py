@@ -1,3 +1,5 @@
+umap_flag = False
+
 from rova_client import Rova
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
@@ -5,10 +7,14 @@ import clickhouse_connect
 import pandas as pd
 import numpy as np
 import os
-from .traces import embed_all_traces
+from .traces import embed_all_traces, embed_all_sessions
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
+if umap_flag:
+    import umap.umap_ as umap
+from datetime import datetime
 import json
+import hdbscan
 
 ## Constants ##
 embeddings_model = OpenAIEmbeddings(
@@ -16,6 +22,12 @@ embeddings_model = OpenAIEmbeddings(
 )
 os.environ["OPENAI_API_KEY"] = "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"
 client = OpenAI()
+
+db_name = "rova_dev"
+global_period = 7 # 7 days churn
+
+mapping = {'Very Negative': 1, 'Negative': 2, 'Neutral': 3, 'Positive': 4, 'Very Positive': 5}
+inverse_mapping = {1: 'Very Negative', 2: 'Negative', 3: 'Neutral', 4: 'Positive', 5: 'Very Positive'}
 
 # setup clickhouse client
 def new_clickhouse_client():
@@ -25,15 +37,14 @@ def new_clickhouse_client():
         username="default",
         password="V8fBb2R_ZmW4i",
     )
-    clickhouse_client.command('USE buster_dev')
+    clickhouse_client.command('USE {}'.format(db_name))
     return clickhouse_client
 
 clickhouse_client = new_clickhouse_client()
 
 options_clickhouse_client = new_clickhouse_client()
-filters_clickhouse_client = new_clickhouse_client()
 
-db_name = "buster_dev"
+metrics_client = new_clickhouse_client()
 
 rova_client = Rova(db_name)
 
@@ -100,28 +111,85 @@ def load_df_once():
         FROM
             CombinedData
         """
-    result = clickhouse_client.query(combined_table_sql + sql)
+    client = new_clickhouse_client()
+    result = client.query(combined_table_sql + sql)
     df = pd.DataFrame(data=result.result_rows, columns=result.column_names)
     if len(df) != 0:
         df = df.sort_values(by=["timestamp"])
     return df
 
-df = load_df_once()
+# Dimension reduction, clustering models for llm events
+if umap_flag:
+    umap_llm_model = umap.UMAP(n_neighbors=15, n_components=10, min_dist=0.1, metric='cosine')
+llm_clusterer = hdbscan.HDBSCAN(min_cluster_size=5, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+
+# Get question from event_text
+def get_question(input, output):
+    to_remove = "Determine what type of task needs to be performed for this user and call the appropriate function from your toolbox."
+    return input.replace(to_remove, "")
 
 # Creates embeddings for all llm events
-def embed_llm_events():
+def embed_llm_events(df):
     # Grab the llm events
     if len(df) == 0:
         return []
     llm_df = df[df['event_type'] == 'llm']
-    llm_df['event_text'] = 'Event name: ' + llm_df['event_name'] + \
-                        '\n Input: ' + llm_df['input_content'] + \
-                        '\n Output: ' + llm_df['output_content']
+    llm_df = llm_df[llm_df['event_name'] == 'classify_intent']
+    llm_df['event_text'] = get_question(llm_df['input_content'], llm_df['output_content'])
 
+    # Embed the llm events and reduce dimension
     embeds = np.array(embeddings_model.embed_documents(llm_df['event_text'].to_list()))
-    llm_df['embeds'] = [np.array(e) for e in embeds]
+    if umap_flag:
+        umap_llm_model.fit(embeds)
+        embeds = umap_llm_model.transform(embeds)
+    llm_df['embeds'] = [e for e in embeds]
     return llm_df
 
-# Store the embeddings for all llm_events
-llm_df = embed_llm_events()
-traces_df = embed_all_traces(df, embeddings_model)
+class DataframeLoader:
+    _dataframes = {}
+    _trackchanges = None
+    @classmethod
+    def get_dataframe(cls, key):
+        if key not in cls._dataframes:
+            # Lazy initialization logic here
+            # For example, load from a file or database
+            if(key == 'df'):
+                cls._dataframes[key] = load_df_once()
+            elif(key == 'llm_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_llm_events(cls._dataframes['df'])
+            elif(key == 'traces_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_all_traces(cls._dataframes['df'], embeddings_model)
+            elif(key == 'sessions_df'):
+                if('df' not in cls._dataframes):
+                    cls._dataframes['df'] = load_df_once()
+                cls._dataframes[key] = embed_all_sessions(cls._dataframes['df'], embeddings_model)
+        return cls._dataframes[key]
+    
+    @classmethod
+    def set_dataframe(cls, key, df):
+        cls._dataframes[key] = df
+
+    @classmethod
+    def get_trackchanges(cls):
+        return cls._trackchanges
+
+    @classmethod
+    def set_trackchanges(cls, datetime_obj):
+        cls._trackchanges = datetime_obj
+
+class ScoresLoader:
+    _scores = {}
+
+    @classmethod
+    def get_scores(cls, key):
+        if key not in cls._scores:
+            return None
+        return cls._scores[key]
+
+    @classmethod
+    def set_scores(cls, key, val):
+        cls._scores[key] = val

@@ -6,6 +6,8 @@ import Category from './ChartComponents/Category';
 import Graphs from './ChartComponents/Graphs';
 import Homepage from './ChartComponents/Homepage';
 import Settings from './ChartComponents/Settings';
+import CategorySessions from './ChartComponents/CategorySessions';
+import Datasets from './ChartComponents/Datasets';
 import '../styles/Charts.css';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
@@ -13,6 +15,10 @@ import TopicIcon from '@mui/icons-material/Topic';
 import StarsIcon from '@mui/icons-material/Stars';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import DatasetIcon from '@mui/icons-material/Dataset';
+import HomeIcon from '@mui/icons-material/Home';
+import { useLocation, useNavigate} from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, LineElement, Title, Tooltip, Legend);
 
@@ -155,7 +161,10 @@ const Charts = () => {
   );
   
  // State to track the current view
- const [currentView, setCurrentView] = useState('kpis'); // default view
+ const location = useLocation();
+ const { key } = location.state || {}; // Get the passed state
+
+ const [currentView, setCurrentView] = useState(key || 'homepage'); // default view
 
  // Function to change the current view
  const changeView = (view) => setCurrentView(view);
@@ -163,18 +172,26 @@ const Charts = () => {
 return (
   <div className='charts-container flex'>
     <div className='home-sidebar flex flex-col' >
-      <p onClick={() => changeView('homepage')}>Homepage</p>
+      <p onClick={() => changeView('homepage')}> Dashboard </p>
+      <div className='link flex' onClick={() => changeView('homepage')}>
+        <HomeIcon className='mr-4 ml-5'/>
+        <button className="text-md"> Home </button>
+      </div>
       <div className='link flex' onClick={() => changeView('categories')}>
         <TopicIcon className='mr-4 ml-5'/>
-        <button className="text-lg"> Topics </button>
+        <button className="text-md"> Topics </button>
       </div>
       <div className='link flex' onClick={() => changeView('kpis')}>
         <StarsIcon className='mr-4 ml-5'/>
-        <button className="text-lg">KPIs</button>
+        <button className="text-md">KPIs</button>
       </div>
       <div className='link flex' onClick={() => changeView('graphs')}>
         <InsightsIcon className='mr-4 ml-5'/>
-        <button className="text-lg" >Graphs</button>
+        <button className="text-md" >Graphs</button>
+      </div>
+      <div className='link flex' onClick={() => changeView('datasets')}>
+        <DatasetIcon className='mr-4 ml-5'/>
+        <button className="text-md" >Datasets</button>
       </div>
       <div className='link flex mt-auto' onClick={() => changeView('settings')}>
         <SettingsIcon className='mr-2 ml-3'/>
@@ -182,11 +199,12 @@ return (
       </div>
      </div>
      <div className='homepage-overall-content'>
-       {currentView === 'homepage' && <Settings />}
+       {currentView === 'homepage' && <Homepage />}
        {currentView === 'categories' && <Category/>}
        {currentView === 'kpis' && <KeyMetricCard />}
        {/* currentView === 'sequences' && <Sequences />} */}
        {currentView === "graphs" && <Graphs />}
+       {currentView === "datasets" && <Datasets />}
        {currentView === "settings" && <Settings />}
      </div>
    </div>

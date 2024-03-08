@@ -1,7 +1,7 @@
 from .callgpt import *
 from .consts import *
 import pandas as pd
-
+from categories.models import SessionCategory
 
 def process_session_query(gptclient, query):
     response = query_gpt(gptclient, build_sessions_sql_prompt(query))
@@ -28,7 +28,18 @@ def get_session_data_from_ids(clickhouse_client, session_ids):
         return {}
     df = df.sort_values(by="earliest_timestamp", ascending=False)
     df["earliest_timestamp"] = df["earliest_timestamp"].astype(str)
-    return df.to_dict(orient="records")
+    df_dicts = df.to_dict(orient="records")
+
+    # Add all categories for each session
+    for i in range(len(df_dicts)):
+        # Loop over all categories associated with the session ID from SessionCategory DB
+        category_names = get_category_names_given_session_id (df_dicts[i]["session_id"])
+        df_dicts[i]["categories"] = category_names
+    return df_dicts
+
+
+def get_category_names_given_session_id (session_id):
+    return SessionCategory.objects.filter(session_id=session_id).values_list('category__name', flat=True)
 
 
 def get_all_paths(paths):

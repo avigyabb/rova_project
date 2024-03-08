@@ -4,6 +4,7 @@ import numpy as np
 from .consts import *
 from datetime import timedelta
 import datetime 
+import pandas as pd
 
 # Return the df corresponding to a JSON file
 def get_df_from_json(path):
@@ -22,7 +23,7 @@ def get_df_from_json(path):
     return df
 
 # daily active users
-def get_dau(clickhouse_client):
+def get_dau(metrics_client):
     dau_sql = """
     SELECT date, COUNT(DISTINCT user_id) AS daily_active_users
     FROM (
@@ -35,35 +36,35 @@ def get_dau(clickhouse_client):
     GROUP BY date
     ORDER BY date
     """.format(db_name, db_name)
-    result = clickhouse_client.query(dau_sql)
+    result = metrics_client.query(dau_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
 # cost per day
-def get_acpd(clickhouse_client):
+def get_acpd(metrics_client):
     acpd_sql = """
     SELECT toStartOfDay(timestamp) AS date, SUM(cost) AS total_cost
     FROM {}.llm
     GROUP BY date
     ORDER BY date
     """.format(db_name)
-    result = clickhouse_client.query(acpd_sql)
+    result = metrics_client.query(acpd_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
 # average latency per day
-def get_alpd(clickhouse_client):
+def get_alpd(metrics_client):
     alpd_sql = """
     SELECT toStartOfDay(timestamp) AS date, AVG(latency) AS average_latency
     FROM {}.llm
     GROUP BY date
     ORDER BY date
     """.format(db_name)
-    result = clickhouse_client.query(alpd_sql)
+    result = metrics_client.query(alpd_sql)
     result_dict = {str(date.date()): count for date, count in result.result_rows}
     return result_dict
 
-def get_asdpd(clickhouse_client):
+def get_asdpd(metrics_client):
     asdpd_sql = """
     SELECT
         session_date,
@@ -89,7 +90,7 @@ def get_asdpd(clickhouse_client):
         session_date
 
     """.format(db_name, db_name)
-    result = clickhouse_client.query(asdpd_sql)
+    result = metrics_client.query(asdpd_sql)
     result_dict = {str(date): count for date, count in result.result_rows}
     return result_dict
 
@@ -101,20 +102,27 @@ def get_churned_sessions(df, timedelta_str="0 days 00:30:00"):
     # Ensure timestamp is in datetime format
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     
-    # Sort the DataFrame by 'sessions' and then by 'timestamp' to ensure the order
+    # Sort the DataFrame by 'session_id' and then by 'timestamp' to ensure the order
     df = df.sort_values(by=['session_id', 'timestamp'])
     prev_max_timestamp = None
     churned_sessions = []
-    for session_id, group in df.groupby('session_id'):
-        # Check if there is a previous group to compare with
+    # Get today's datetime for comparison with the most recent group
+    today_datetime = pd.to_datetime(datetime.datetime.now()) + pd.Timedelta(days=40)
+    
+    for i, (session_id, group) in enumerate(df.groupby('session_id')):
+        # Check if the current group is the last one
+        is_last_group = i == len(df.groupby('session_id')) - 1
         if prev_max_timestamp is not None:
-            # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
-            time_diff = group['timestamp'].min() - prev_max_timestamp
+            if is_last_group:
+                # For the last group, calculate the timedelta as today's datetime minus the max datetime of the group
+                time_diff = today_datetime - group['timestamp'].max()
+            else:
+                # Calculate the time difference between the current group's min timestamp and the previous group's max timestamp
+                time_diff = group['timestamp'].min() - prev_max_timestamp
             # If the time difference is greater than the specified timedelta, add the session to the list
             if time_diff > timedelta_datetime:
                 churned_sessions.append(session_id)
 
         # Update the prev_max_timestamp with the max timestamp of the current group
         prev_max_timestamp = group['timestamp'].max()
-      
     return set(churned_sessions)

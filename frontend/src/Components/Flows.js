@@ -40,9 +40,10 @@ function Flows() {
 
       // label is what is shown on the box
       return (
-        <Link to={`${process.env.REACT_APP_AUTH_HEADER}/paths`} state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
+        //<Link to={`${process.env.REACT_APP_AUTH_HEADER}/paths`} state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
+        <Link to = {`${process.env.REACT_APP_AUTH_HEADER}/sessions`} state={{start : startState, end : endState, step : stepNum, numSteps : columnsCount + 2, event : eventName}}>
           <div id={`${eventName}${stepNum}`} class = {color} style={{height : `${height}%`}}>
-              <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px"}}/>
+              <Chip icon = {<ChatIcon/>} label={eventName} variants="outlined" style={{position:"absolute", backgroundColor:"white", transform:"translate(8px, 8px)", padding:"5px", zIndex: 2}}/>
           </div>
         </Link>
       );
@@ -62,20 +63,44 @@ function Flows() {
     );
   }
 
-  function Arrow({ start, end, percentage}) {
+  const Arrow = ({start, end, percentage}) => {
+    const [label, setLabel] = useState(undefined);
+    const [size, setSize] = useState(5);
+    const [color, setColor] = useState("#FFD0C4");
+    const [zIndex, setZIndex] = useState(0);
+
+    const handleHover = () => {
+      setLabel(percentage);
+      setSize(10);
+      setColor("#FF9B82");
+      setZIndex(1);
+    };
+
+    const handleNoHover = () => {
+      setLabel(undefined);
+      setSize(5);
+      setColor("#FFD0C4");
+      setZIndex(0);
+    }
+
     return (
+      <div
+        onMouseEnter = {handleHover}
+        onMouseLeave = {handleNoHover}
+      >
       <Xarrow
-        start={start}
-        end={end}
-        labels={percentage}
-        startAnchor={'right'}
-        endAnchor={'left'}
-        color={'#FFD0C4'}
-        showHead={false}
-        strokeWidth={1}
-        //animateDrawing={true}
+      start={start}
+      end={end}
+      labels={label}
+      startAnchor={'right'}
+      endAnchor={'left'}
+      color={color}
+      showHead={false}
+      strokeWidth={size}
+      zIndex={zIndex}
+      //animateDrawing={true}
       />
-    );
+    </div>);
   }
   
   const [columnsCount, setColumnsCount] = useState(0);
@@ -107,9 +132,7 @@ function Flows() {
         }
         const response = await axios.get(process.env.REACT_APP_API_URL + "get-percentages/", {params});
         setArrowsData(response.data.arrow_percentages);
-        console.log(response.data.arrow_percentages);
         setFlowBoxesData(response.data.box_percentages);
-        console.log(response.data.box_percentages);
       } catch (error) {
         console.error(error);
       } finally {

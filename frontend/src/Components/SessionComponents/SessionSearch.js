@@ -54,35 +54,32 @@ const SessionSearch = ({ setSessions, setIsLoading, setSqlBox }) => {
   
   // Display the entered query below the search bar
   return (
-    <div className="search mb-4">
-        <TextField
-          style={{ borderRadius: '0px', zIndex: 100 }}
-          fullWidth
-          variant="outlined"
-          placeholder="Show me sessions where ..."
-          onKeyPress={handleSearch} // Listen for Enter key press
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                {/* <IconButton onClick={toggleFilters}> */}
-                <IconButton>
-                  <FilterListIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        {showFilters && (
-        <SessionFilters
-          selectedFilters={selectedFilters}
-          setSelectedFilters={setSelectedFilters}
-        />
-      )}
+    <div className="search">
+      <TextField
+        style={{ borderRadius: '0px', zIndex: 100 }}
+        fullWidth
+        variant="outlined"
+        placeholder="Show me sessions where ..."
+        onKeyPress={handleSearch} // Listen for Enter key press
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {/* <IconButton onClick={toggleFilters}> */}
+              <IconButton onClick={toggleFilters}>
+                <FilterListIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+        {/* {showFilters && (
+          <SessionFilters />
+        )} */}
     </div>
   );
 };

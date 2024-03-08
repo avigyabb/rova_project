@@ -1,36 +1,66 @@
 .hero {
-    background-color: #00161C; /* Change to white background color */
-    height: 100vh;
+    background-color: #16161C; /* Change to white background color */
     width: 100%;
     position: relative;
+    padding-top: 85px;
+    height: 100%;
 }
 
 /* Deleted hero before code */
 
 .hero .content {
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    max-width: 1100px;
+    width: 75%;
     margin: auto;
-    padding: 1rem;
 }
 
-.content2{
-    margin-top: 100px;
+.hero .signup {
+    height: 100%;
 }
 
-.hero .content p:first-child {
+.hero .signup-form {
+    height: 80%;
+    width: 40%;
+    padding: 2%;
+    border-radius: 10%;
+    margin-left: 5%;
+    margin-top: 5%;
+    background-color: white;
+}
+
+.hero .signup-description {
+    width: 50%
+}
+
+.signup-form .box {
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero .content p:nth-child(2) {
     font-size: 3rem;
     color: white;
     font-weight: bold;
     align-items: center; /* Center items horizontally */
     justify-content: center; /* Center items vertically */
     text-align: center; /* Center text within the container */
+    margin-top: 1%;
 }
 
-.hero .content p:nth-child(2) {
+.hero .content p:nth-child(3) {
+    font-size: 1.25rem;
+    color: white;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    text-align: center; /* Center text within the container */
+}
+
+.hero p {
     font-size: 1.25rem;
     color: white;
     margin-top: 25px;
@@ -48,7 +78,7 @@
 }
 
 .backedby {
-    margin-top: 20px;
+    margin-top: 10%;
     display: flex;
     color: white;
     align-items: center; /* Center items horizontally */

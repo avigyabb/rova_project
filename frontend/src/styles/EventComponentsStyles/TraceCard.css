@@ -2,12 +2,19 @@
     border-right: 1px solid #e5e7eb;
     padding-right: 1%;
     margin-right: 2%;
-    height: 90%;
+    height: 80%;
     min-width: 35%;
+    overflow-y: auto;
 }
+
+.sidebar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+  }
 
 .trace-content {
     width: 65%;
+    height: 80%;
+    overflow-y: auto;
 }
 
 .input-text-header {

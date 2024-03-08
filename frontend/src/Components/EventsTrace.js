@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from  'axios';
 import "../styles/EventTrace.css";
 
@@ -7,34 +7,117 @@ import EventCard from './EventComponents/EventCard';
 import TraceCard from './EventComponents/TraceCard';
 
 import { CircularProgress } from '@mui/material';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import { Dropdown } from 'flowbite-react';
 
 
 const EventsTrace = () => {
-
     const [userData, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-
     const location = useLocation();
-    const { userId, sessionId } = location.state || {}; // Get the passed state
+    const { userId, sessionId, index, sessionList } = location.state || {}; // Get the passed state
     const [sessionIdState, setSessionIdState] = useState(sessionId);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedTrace, setSelectedTrace] = useState(null);
     const [selectMode, setSelectMode] = useState(false);
     const [selectedTraces, setSelectedTraces] = useState([]);
+    const [selectedValue, setSelectedValue] = useState("Neutral");
+
+    console.log(sessionList);
+
+    const handleChange = (event) => {
+      // Update state with the new selected option's value
+      setSelectedValue(event.target.value);
+    };
+
+    const navigate = useNavigate();
+
+    console.log(sessionIdState)
+    // fix this, create a better fix
+    if (sessionId !== sessionIdState){
+      setSessionIdState(sessionId);
+    }
+
+    function MyDropdown({options, id }) {
+
+      // This function checks if the option is an array and returns the appropriate value
+      const getOptionValue = (option) => {
+        if (Array.isArray(option)) {
+          return option[0];
+        }
+        return option; // If it's not an array, return the string directly
+      };
+    
+      return (
+        <select className="form-select ml-auto" value={selectedValue} onChange={handleChange} id={id}>
+          {options.map((option, index) => (
+            <option key={index} value={getOptionValue(option)}>
+              {getOptionValue(option)}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    useEffect(() => {
+      const fetchData = async () =>  {
+        setIsLoading(true);
+        try {
+          var params = {
+            session_id: sessionIdState,
+          };
+          const get_score = await axios.get(process.env.REACT_APP_API_URL + 'get-user-session-score/', { params });
+          setSelectedValue(get_score.data.score);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, [sessionIdState]);
+
+    useEffect(() => {
+      const fetchData = async () =>  {
+        setIsLoading(true);
+        try {
+          var params = {
+            session_id: sessionIdState,
+            score: selectedValue,
+          };
+          const send_score = await axios.post(process.env.REACT_APP_API_URL + 'post-user-session-score/', { params });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, [sessionIdState, selectedValue]);
+
+    console.log(location.state)
 
     useEffect(() => {
 
       const fetchData = async () =>  {
         setIsLoading(true);
         try {
-          const params = {
-            userId: userId,
-            sessionId: sessionIdState,
-          };
-          const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
-          console.log(response.data.info)
-          setData(response.data.info);
+          if (sessionIdState >= 0) {
+            const params = {
+              sessionIds: JSON.stringify([sessionIdState]),
+            };
+            const response = await axios.get(process.env.REACT_APP_API_URL + "get-session-events-given-session-ids/", {params});
+            setData(response.data.info);
+          } else {
+            const params = {
+              userId: userId,
+            };
+            const response = await axios.get(process.env.REACT_APP_API_URL + 'get-user/', { params });
+            console.log(response.data.info)
+            setData(response.data.info);
+          }
         } catch (error) {
           console.error(error);
         } finally {
@@ -54,6 +137,7 @@ const EventsTrace = () => {
     }
 
     const seeAllUserEvents = () => {
+      location.state.sessionId = -1;
       setSessionIdState(-1);
       setSelectedTraces([]);
     };
@@ -85,18 +169,11 @@ const EventsTrace = () => {
     function arrayToCSV() {
       // Assuming all objects have the same keys, use the keys from the first object for the header row
       const csvRows = [];
-      // const headers = Object.keys(selectedTraces[0]);
       const headers = ["timestamp", "trace_id","event_name", "input_content", "output_content"]
       csvRows.push(headers.join(',')); // Create the header row
     
       // Add each object's values as a row
       for (const row of selectedTraces) {
-        // const values = headers.map(header => {
-        //   const escaped = ('' + row[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
-        //   return `"${escaped}"`; // Wrap values in double quotes
-        // });
-        // csvRows.push(values.join(','));
-
         for (const traceStep of row.events) {
           const values = headers.map(header => {
             const escaped = ('' + traceStep[header]).toString().replace(/"/g, '\\"'); // Escape double quotes
@@ -118,8 +195,29 @@ const EventsTrace = () => {
       document.body.removeChild(link); // Clean up
     }
 
-    console.log(selectMode);
-    console.log(selectedTraces);
+    const handleClickNext = () => {
+      setSelectedTrace(null);
+      setSelectedEvent(null);
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index + 1].user_id}`, { state: { 
+        userId: sessionList[index + 1].user_id, 
+        sessionId: sessionList[index + 1].session_id, 
+        index: index + 1, 
+        sessionList 
+      } });
+    };
+
+    const handleClickPrev = () => {
+      setSelectedTrace(null);
+      setSelectedEvent(null);
+      navigate(`${process.env.REACT_APP_AUTH_HEADER}/trace/${sessionList[index - 1].user_id}`, { state: { 
+        userId: sessionList[index - 1].user_id, 
+        sessionId: sessionList[index - 1].session_id, 
+        index: index - 1, 
+        sessionList 
+      } });
+    };
+
+    const options = ['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive'];
 
 
     return (
@@ -143,28 +241,31 @@ const EventsTrace = () => {
                 {/* <p>Email: {sessionData.email}</p> */}
               </div>
             </div>
-            {/* need to get rid of this */}
-            <p className='mt-2'>Session ID: {sessionId}</p>
           </div>
           <div className='flex' style={{borderBottom:'1px solid #e5e7eb', paddingBottom:"1%"}}>
             {sessionIdState >= 0 ? (
-              <h1 className='ml-5 mb-1 text-xl'>
-                Session {sessionId} Events
-              </h1>
+              <>
+                <h1 className='ml-5 mb-1 text-xl' style={{marginRight: '5%'}}>
+                  Session {sessionId} Events
+                </h1>
+                {index > 0 && <button className='nav-btn mr-4' onClick={handleClickPrev}> <ArrowLeftIcon/>Prev Session</button>}
+                {index < sessionList.length - 1 && <button className='nav-btn' onClick={handleClickNext}> Next Session<ArrowRightIcon/></button>}
+              </>
             ) : (
               <h1 className = 'ml-5 mb-1 text-xl'>
                 Events Feed
               </h1>
             )}
+            <MyDropdown options={options} id={"scoring_options"}> Score </MyDropdown>
             {!selectMode && (
               <>
-              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Select </button>
+              <button className='ml-5 mr-5' onClick={handleSelectBtn}> Select </button>
               <button className='mr-5'> Filter </button>
               </>
             )}
             {selectMode && (
               <>
-              <button className='ml-auto mr-5' onClick={handleSelectBtn}> Cancel </button>
+              <button className='ml-5 mr-5' onClick={handleSelectBtn}> Cancel </button>
               {selectedTraces.length > 0 && 
                 <div className='export-btn flex items-center'>
                   <GetAppIcon className='mr-2'/>

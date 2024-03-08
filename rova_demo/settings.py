@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-cregy+byp5ma2i+&ad&duv625--oz=uy_(2bxo7fqwfc5m4%qa"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -41,25 +42,32 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     "myapi",
     "keymetrics",  # why do you need to do .apps.MYapiConfig - Avi
     "accounts",
     "categories",
+    "data_sets",
+    "fileupload",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# CORS Settings: Adjust according to your needs
+CORS_ALLOW_ALL_ORIGINS = True  # Consider narrowing this down in production
+CORS_ALLOW_CREDENTIALS = True  # Allows cookies to be included in cross-origin HTTP requests
 CORS_ORIGIN_ALLOW_ALL = True
+
 ROOT_URLCONF = "rova_demo.urls"
 
 TEMPLATES = [
@@ -79,6 +87,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "rova_demo.wsgi.application"
+
+# Ensure the session cookie is HttpOnly (prevents JavaScript access to the cookie)
+SESSION_COOKIE_HTTPONLY = True
+
+# Add a SameSite attribute to the session cookie (enhances CSRF protection)
+SESSION_COOKIE_SAMESITE = 'Lax'  # Can be 'Strict' or 'Lax' depending on your needs
 
 
 # Database
@@ -132,3 +146,17 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',  # Uncomment this line if you want to use session authentication along with token authentication
+    ),
+}
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    # Include any custom backends
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

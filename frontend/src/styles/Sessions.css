@@ -1,27 +1,56 @@
-.sessions-list {
-    width: 52%;
+.sessions-content .explore-bar {
+    display: flex;
+    height: 35px;
+    margin-top: 10px;
+}
+
+.explore-btn {
+    background-color: #e0e0e0;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 20px;
+}
+
+.explore-btn:hover {
+    background-color: rgb(205, 205, 205);
+    transition-duration: 0.5s;
+}
+
+.sessions-content {
+    width: 100%;
+    height: 89%;
+}
+
+.sessions-content .right-col {
+    width: 35%;
     margin-left: 2%;
     height: 100%;
     overflow: hidden;
     overflow-y: auto;
 }
 
-.sql-col {
-    width: 40%;
-    height: 100%;
-    margin-left: 3%;
+.sessions-content .left-col {
+    width: 60%;
+    height: 98%;
+    padding-left: 3%;
     padding-right: 2%;
-    margin-top: 1%;
+    border-right: 2px solid lightgray;
+}
+
+.sessions-results {
+    margin-top: 5px;
+    height: 88%;
     overflow: hidden;
     overflow-y: auto;
-    border-right: 2px solid lightgray;
 }
 
 .filters {
     width: 100%;
-    background-color: #F4F4F1;
+    background-color: #FBFBFA;
     padding: 3%;
     border-radius: 0 0 10px 10px;
+    border: 1px solid lightgray;
 }
 
 .sql-header {
