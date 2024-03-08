@@ -1,7 +1,27 @@
-.signup-form {
-  background-color: #e1e1d3;
+.left-content {
+  background-color: #16161C;
   width: 50%;
+}
+
+.signup-form {
+  width: 50%;
+  height: 100%;
   padding: 3%;
-  margin-left: 25%;
-  border-radius: 2%;
+}
+
+.upload-data {
+  border: dotted 1px gray;
+  border-radius: 10px;
+  padding: 2%;
+}
+
+#submit-btn {
+  background-color: #16161C;
+  padding: 2%;
+  border-radius: 20px;
+}
+
+#submit-btn:hover {
+  background-color: #C1A69F;
+  transition-duration: 0.5s;
 }
