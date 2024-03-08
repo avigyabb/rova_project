@@ -9,22 +9,66 @@ import os
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+import smtplib
+from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import json
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 @csrf_exempt
 @require_POST
 def file_upload(request):
     if request.method == 'POST':
-        files = request.FILES.getlist('file')
-        uploader_name = request.POST.get('uploader_name')
-        uploader_email = request.POST.get('uploader_email')
+        # Email setup
+        fromaddr = "avigyabb@gmail.com"
+        toaddr = "founders@rovaai.com"
+        password = "frpt hqtd fiyj zqrn"  # Be cautious with email passwords
 
-        for file in files:
+        # SMTP server configuration
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(fromaddr, password)
+
+        # Create email
+        msg = MIMEMultipart()
+        msg['From'] = fromaddr
+        msg['To'] = toaddr
+        msg['Subject'] = "Somebody wants their logs analyzed!"
+        body = {
+            "firstName": request.POST.get('firstName'),
+            "lastName": request.POST.get('lastName'),
+            "email": request.POST.get('email'),
+            "company": request.POST.get('company'),
+            "role": request.POST.get('role'),
+            "additionalDetails": request.POST.get('additionalDetails'),
+        }
+        msg.attach(MIMEText(json.dumps(body), 'plain'))
+        
+        for file in request.FILES.getlist('files'):
+            # Read the file content into a variable
+            # file_content = file.read()
+            
+            # Create a MIME part for the file attachment
+            part = MIMEBase('application', "octet-stream")
+            part.set_payload(file.read())  # Use the read file content
+            encoders.encode_base64(part)  # Encode the attachment in base64
+            part.add_header('Content-Disposition', f"attachment; filename= {file.name}")
+
+            msg.attach(part)
+
             UploadedFile.objects.create(
                 file=file,
                 title=file.name,
-                uploader_name=uploader_name,
-                uploader_email=uploader_email
+                uploader_email=request.POST.get('email')
             )
+
+        # Send email
+        server.send_message(msg)
+        server.quit()
         
         return JsonResponse({"message": "Files uploaded successfully"}, status=200)
     else:

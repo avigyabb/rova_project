@@ -13,6 +13,7 @@ const MiniProjects = () => {
       </div>
       <div className='signup-form'>
           <FileUpload />
+          <p className='mt-5'>Not working? Email us at <a href="mailto:founders@rovaai.com" style={{color: '#FF8263'}}>founders@rovaai.com</a></p>
       </div>
     </div>
   )
