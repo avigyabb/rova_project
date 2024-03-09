@@ -80,11 +80,10 @@ const FileUpload = () => {
           onSubmit={handleSubmit}
       >
           <Typography variant="h3" gutterBottom style={{ color: 'black' }}>
-              Get In Touch
+              Submit Your Chat Logs
           </Typography>
-          <p className='text-gray-500 mb-8'> 
-            Fill out the form below to schedule a call with us. For a limited number of spots 
-            we will analyze your chat logs and generate a report for you.
+          <p className='text-gray-500 mb-8 text-sm'> 
+            Provide a Google Drive / Dropbox / OneDrive / SharePoint / etc. link for us to look at -OR- upload your files. We will analyze your chat logs and send back a report in 24 hours.
           </p>
           <div className='flex mb-3 justify-between gap-3'>
               <TextField className="flex-grow" required id="firstName" name="firstName" label="First Name" variant="outlined"/>
@@ -124,7 +123,7 @@ const FileUpload = () => {
               variant="outlined"
           />
           <div className='upload-data flex-col mt-5 mb-5'>
-            <h1 className='mb-3 text-gray-500 text-sm'> (Optional) Provide a Google Drive / Dropbox / OneDrive / SharePoint / etc. link for us to look at -OR- upload your files. </h1>
+            <h1 className='mb-3 text-gray-500 text-sm'> (Optional) Provide a link (preferred for larger files) or upload your csv/json/etc. </h1>
             <TextField id="filesLink" name="filesLink" label="File Link" variant="outlined" className='flex-grow'/>
             <input name="files" className="text-gray-500 ml-5" type="file" multiple onChange={handleFileChange} />
           </div>
