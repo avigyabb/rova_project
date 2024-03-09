@@ -48,7 +48,7 @@ const WebNavbar = () => {
                 </div>
                 <ul className={click ? "nav-menu active" : "nav-menu"}>
                     <li className='nav-item'>
-                        <Link to={`/mini-projects`}>
+                        <Link to={`/analyze-logs`}>
                             <span class="label-down">Contact Us</span>
                             <span class="label-down">Contact Us</span>
                         </Link>

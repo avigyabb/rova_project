@@ -45,6 +45,7 @@ def file_upload(request):
             "company": request.POST.get('company'),
             "role": request.POST.get('role'),
             "additionalDetails": request.POST.get('additionalDetails'),
+            "filesLink": request.POST.get('filesLink'),
         }
         msg.attach(MIMEText(json.dumps(body), 'plain'))
         
@@ -67,7 +68,26 @@ def file_upload(request):
             )
 
         # Send email
-        server.send_message(msg)
+        try :
+            server.send_message(msg)
+        except Exception as e:
+            msg = MIMEMultipart()
+            msg['From'] = fromaddr
+            msg['To'] = toaddr
+            msg['Subject'] = "Somebody wants their logs analyzed!"
+            body = {
+                "firstName": request.POST.get('firstName'),
+                "lastName": request.POST.get('lastName'),
+                "email": request.POST.get('email'),
+                "company": request.POST.get('company'),
+                "role": request.POST.get('role'),
+                "additionalDetails": request.POST.get('additionalDetails'),
+                "filesLink": request.POST.get('filesLink'),
+                "error": str(e)
+            }
+            msg.attach(MIMEText(json.dumps(body), 'plain'))
+            server.send_message(msg)
+            print(e)
         server.quit()
         
         return JsonResponse({"message": "Files uploaded successfully"}, status=200)
