@@ -9,6 +9,7 @@ const FileUpload = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploaderName, setUploaderName] = useState('');
   const [uploaderEmail, setUploaderEmail] = useState('');
+  const [loading, setLoading] = useState('Submit');
 
   const handleFileChange = (event) => {
     setSelectedFiles(event.target.files);
@@ -53,6 +54,7 @@ const FileUpload = () => {
         files: formData.get('files')
     });
 
+    setLoading('Uploading...');
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}fileupload/upload/`, formData, {
         headers: {
@@ -65,6 +67,7 @@ const FileUpload = () => {
       console.error('Error uploading files:', error);
       alert('Error uploading files');
     }
+    setLoading('Submit');
   };
 
   return (
@@ -77,11 +80,10 @@ const FileUpload = () => {
           onSubmit={handleSubmit}
       >
           <Typography variant="h3" gutterBottom style={{ color: 'black' }}>
-              Get In Touch
+              Submit Your Chat Logs
           </Typography>
-          <p className='text-gray-500 mb-8'> 
-            Fill out the form below to schedule a call with us. For a limited number of spots 
-            we will analyze your chat logs and generate a report for you.
+          <p className='text-gray-500 mb-8 text-sm'> 
+            Provide a Google Drive / Dropbox / OneDrive / SharePoint / etc. link for us to look at -OR- upload your files. We will analyze your chat logs and send back a report in 24 hours.
           </p>
           <div className='flex mb-3 justify-between gap-3'>
               <TextField className="flex-grow" required id="firstName" name="firstName" label="First Name" variant="outlined"/>
@@ -120,11 +122,12 @@ const FileUpload = () => {
               rows={4}
               variant="outlined"
           />
-          <div className='upload-data mt-5 mb-5'>
-            <h1 className='mb-3 text-gray-500 text-sm'> (Optional) Upload a csv for us to look at. We typically respond in 24 hours.</h1>
-            <input name="files" className="text-gray-500" type="file" multiple onChange={handleFileChange} />
+          <div className='upload-data flex-col mt-5 mb-5'>
+            <h1 className='mb-3 text-gray-500 text-sm'> (Optional) Provide a link (preferred for larger files) or upload your csv/json/etc. </h1>
+            <TextField id="filesLink" name="filesLink" label="File Link" variant="outlined" className='flex-grow'/>
+            <input name="files" className="text-gray-500 ml-5" type="file" multiple onChange={handleFileChange} />
           </div>
-          <button id="submit-btn"type="submit" variant="contained"> Submit </button>
+          <button id="submit-btn"type="submit" variant="contained"> {loading} </button>
       </Box>
     </div>
   );
