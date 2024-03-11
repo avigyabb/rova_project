@@ -61,11 +61,11 @@ def file_upload(request):
 
             msg.attach(part)
 
-            UploadedFile.objects.create(
-                file=file,
-                title=file.name,
-                uploader_email=request.POST.get('email')
-            )
+            # UploadedFile.objects.create(
+            #     file=file,
+            #     title=file.name,
+            #     uploader_email=request.POST.get('email')
+            # )
 
         # Send email
         try :
