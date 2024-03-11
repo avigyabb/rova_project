@@ -9,7 +9,7 @@ import Sessions from "./Components/Sessions";
 import Paths from './Components/Paths';
 import Hero from './Components/Website/Hero';
 import Login from './Components/Website/Login';
-import MiniProjects from "./Components/MiniProjects";
+import MiniProjects from "./Components/Website/MiniProjects";
 import axios from 'axios';
 
 const customTheme = createTheme({

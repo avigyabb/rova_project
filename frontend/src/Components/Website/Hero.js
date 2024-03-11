@@ -3,6 +3,7 @@ import './Hero.css'
 import WebNavbar from './WebNavbar'
 import yc from './images/yc_logo.webp'
 import rovaDemo from './rova_demo.mp4'
+import { Link } from 'react-router-dom'
 
 
 const Hero = () => {
@@ -21,17 +22,19 @@ const Hero = () => {
                             <h1 style={{marginRight: '1%'}}>Backed By</h1>
                             <img src={yc} alt='yc' style={{ width: '180px', height: '50px' }}/>
                         </div>
-                        <p> AI Apps That Learn From Your Users ✨</p>
+                        <p> AI Apps That Learn From Your Users ✨ </p>
                         <p>We analyze and surface chat topics/sessions that influence product KPIs (retention, conversion, churn, etc.), optimize prompts, and automatically curate evaluation & fine-tuning data.</p>
                         <div className='buttons'>
                             <div class="container">
-                                <a class="button2" href={`mailto:${email}?subject=${subject}&body=${body}`}>
+                                {/* <a class="button2" href={`mailto:${email}?subject=${subject}&body=${body}`}> */}
+                                <Link class="button2" to={'/analyze-logs'}>
                                     <span class="label-up">Join The Waitlist 🎉</span>
                                     <span class="label-up">Join the Waitlist 🎉</span>
-                                </a>
+                                </Link>
                             </div>
                         </div>
-                        <p style={{marginTop: '10%'}}> Watch Our Demo! 🤩</p>
+                        <p style={{fontSize: '14px', marginTop: '1%'}}> or email us at <a href="mailto:founders@rovaai.com" style={{color: '#FF8263'}}>founders@rovaai.com</a></p>
+                        <p style={{marginTop: '8%', marginBottom: '2%'}}> Watch Our Demo! 🤩</p>
                         <video style={{marginBottom: '10%'}}controls>
                             <source src={rovaDemo} type="video/mp4"/>
                             Your browser does not support the video tag.

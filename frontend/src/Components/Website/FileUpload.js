@@ -1,58 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 const FileUpload = () => {
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [uploaderName, setUploaderName] = useState('');
-  const [uploaderEmail, setUploaderEmail] = useState('');
   const [loading, setLoading] = useState('Submit');
-
-  const handleFileChange = (event) => {
-    setSelectedFiles(event.target.files);
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFiles.length) {
-      alert('Please select at least one file!');
-      return;
-    }
-
-    const formData = new FormData();
-    Array.from(selectedFiles).forEach(file => {
-      formData.append('file', file);
-    });
-
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/fileupload/upload/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      alert(response.data.message);
-    } catch (error) {
-      console.error('Error uploading files:', error);
-      alert('Error uploading files');
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-
-    console.log({
-        email: formData.get('email'),
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-        company: formData.get('company'),
-        role: formData.get('role'),
-        additionalDetails: formData.get('additionalDetails'),
-        files: formData.get('files')
-    });
 
     setLoading('Uploading...');
     try {
@@ -125,7 +82,7 @@ const FileUpload = () => {
           <div className='upload-data flex-col mt-5 mb-5'>
             <h1 className='mb-3 text-gray-500 text-sm'> (Optional) Provide a link (preferred for larger files) or upload your csv/json/etc. </h1>
             <TextField id="filesLink" name="filesLink" label="File Link" variant="outlined" className='flex-grow'/>
-            <input name="files" className="text-gray-500 ml-5" type="file" multiple onChange={handleFileChange} />
+            <input name="files" className="text-gray-500 ml-5" type="file" multiple />
           </div>
           <button id="submit-btn"type="submit" variant="contained"> {loading} </button>
       </Box>
