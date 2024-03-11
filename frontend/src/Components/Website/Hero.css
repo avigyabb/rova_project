@@ -3,10 +3,7 @@
     width: 100%;
     position: relative;
     padding-top: 85px;
-    height: 100%;
 }
-
-/* Deleted hero before code */
 
 .hero .content {
     display: flex;
@@ -63,8 +60,6 @@
 .hero p {
     font-size: 1.25rem;
     color: white;
-    margin-top: 25px;
-    margin-bottom: 25px;
     align-items: center; /* Center items horizontally */
     justify-content: center; /* Center items vertically */
     text-align: center; /* Center text within the container */
@@ -75,6 +70,7 @@
     align-items: center; /* Center items horizontally */
     justify-content: center; /* Center items vertically */
     text-align: center; /* Center text within the container */
+    margin-top: 5%;
 }
 
 .backedby {
@@ -89,9 +85,8 @@
 /* Deleted some mobile media stuff */
 
 .container {
-    width:100%;
-    text-align:center;
-    margin:30px 0;
+    width: 100%;
+    text-align: center;
 }
   
 .button2 {
