@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "myapi",
-    "keymetrics",  # why do you need to do .apps.MYapiConfig - Avi
+    "keymetrics",
     "accounts",
     "categories",
     "data_sets",
