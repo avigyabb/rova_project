@@ -10,9 +10,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from sklearn.impute import KNNImputer
-from pgmpy.models import BayesianNetwork
-from pgmpy.estimators import BayesianEstimator
-from pgmpy.inference import VariableElimination
+# from pgmpy.models import BayesianNetwork
+# from pgmpy.estimators import BayesianEstimator
+# from pgmpy.inference import VariableElimination
 import hdbscan
 import json
 
@@ -190,11 +190,11 @@ def bayes_scoring(sessions_df, max_indx):
         model_structure.append(('custom_score_'+str(i+1), 'cluster_label'))
         model_structure.append(('user_score', 'custom_score_'+str(i+1)))
     # Initialize and fit the model
-    model = BayesianNetwork(model_structure)
-    model.fit(sessions_df, estimator=BayesianEstimator, prior_type="BDeu")  # BDeu can be replaced as needed
+    # model = BayesianNetwork(model_structure)
+    # model.fit(sessions_df, estimator=BayesianEstimator, prior_type="BDeu")  # BDeu can be replaced as needed
     
     # Initialize the inference object
-    infer = VariableElimination(model)
+    # infer = VariableElimination(model)
 
     # Placeholder for results
     results = {}
@@ -210,12 +210,12 @@ def bayes_scoring(sessions_df, max_indx):
 
         # Perform the query only if evidence is not empty
         if evidence:
-            query_result = infer.query(variables=['user_score'], evidence=evidence)
-            state_names = query_result.state_names['user_score']
-            max_prob_index = np.argmax(query_result.values)
-            highest_prob_state = state_names[max_prob_index]
-            results[id] = highest_prob_state
-        else:
+            # query_result = infer.query(variables=['user_score'], evidence=evidence)
+            # state_names = query_result.state_names['user_score']
+            # max_prob_index = np.argmax(query_result.values)
+            # highest_prob_state = state_names[max_prob_index]
+            # results[id] = highest_prob_state
+        # else:
             # Handle case with no evidence
             results[id] = 3
     # Return the results list with the highest probability state for each row
